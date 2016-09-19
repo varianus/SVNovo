@@ -7,7 +7,7 @@ uses
   cthreads,
   {$ENDIF}{$ENDIF}
   Interfaces, // this includes the LCL widgetset
-  Forms, uMain, Config;
+  Forms, uMain, Config, SVNBookMarks, SVNClasses;
 
 {$R *.res}
 

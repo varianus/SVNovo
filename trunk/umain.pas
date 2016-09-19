@@ -80,7 +80,7 @@ begin
   LoadBookmarks;
 
   SVNStatus := nil;
-  SVNStatus := TSVNStatus.Create('C:\source\ovoplayer\trunk', true);
+  SVNStatus := TSVNStatus.Create('/source/ovoplayer/trunk', true);
 
   //ConfigObj.WriteString('SVN/Executable',SVNExecutable);
   //st:= TStringList.Create;
@@ -147,7 +147,7 @@ begin
     //extension
     SubItems.Add(StatusItem.Extension);
     //file status
-    SubItems.Add(StatusItem.ItemStatus);
+//    SubItems.Add(StatusItem.ItemStatus);
     //property status
     SubItems.Add(StatusItem.PropStatus);
     //check if file is versioned
