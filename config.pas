@@ -8,9 +8,8 @@ uses
   Classes, SysUtils, Graphics, jsonConf, DOM;
 
 type
-  { TXMLConfigExtended }
-
   { TConfig }
+
 
   TConfig = class
   private
@@ -105,6 +104,7 @@ begin
     FConfigObj := TConfig.Create;
   Result := FConfigObj;
 end;
+
 
 constructor TConfig.Create;
 begin

@@ -10,24 +10,24 @@ object Form1: TForm1
   Menu = MainMenu1
   OnCreate = FormCreate
   OnDestroy = FormDestroy
+  LCLVersion = '1.7'
   Visible = False
   object Panel1: TPanel
     Left = 0
-    Height = 593
+    Height = 574
     Top = 0
     Width = 258
     Align = alLeft
     Caption = 'Panel1'
-    ClientHeight = 593
+    ClientHeight = 574
     ClientWidth = 258
     TabOrder = 0
     object tvBookMark: TTreeView
       Left = 1
-      Height = 591
+      Height = 572
       Top = 1
       Width = 256
       Align = alClient
-      DefaultItemHeight = 18
       Images = ImageList_22
       TabOrder = 0
       OnClick = tvBookMarkClick
@@ -39,19 +39,19 @@ object Form1: TForm1
   end
   object StatusBar1: TStatusBar
     Left = 0
-    Height = 23
-    Top = 593
+    Height = 21
+    Top = 574
     Width = 1202
     Panels = <>
   end
   object Panel2: TPanel
     Left = 258
-    Height = 593
+    Height = 574
     Top = 0
     Width = 944
     Align = alClient
     Caption = 'Panel2'
-    ClientHeight = 593
+    ClientHeight = 574
     ClientWidth = 944
     TabOrder = 2
     object ToolBar1: TToolBar
@@ -64,7 +64,7 @@ object Form1: TForm1
     end
     object SVNFileListView: TListView
       Left = 1
-      Height = 565
+      Height = 546
       Top = 27
       Width = 942
       Align = alClient
@@ -74,7 +74,7 @@ object Form1: TForm1
         end      
         item
           AutoSize = True
-          Width = 928
+          Width = 8
         end      
         item
           Width = 10
@@ -95,7 +95,7 @@ object Form1: TForm1
           Width = 10
         end      
         item
-          Width = 10
+          Width = 847
         end>
       OwnerData = True
       SmallImages = ImageList_22

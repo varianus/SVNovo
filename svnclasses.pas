@@ -97,19 +97,38 @@ type
   TStatusItemName = (siChecked, siPath, siExtension, siPropStatus, siItemStatus,
                      siRevision, siCommitRevision, siAuthor, siDate);
 
+  TSVNItemStatus = (
+     sisAdded,
+     sisConflicted,
+     sisDeleted,
+     sisExternal,
+     sisIgnored,
+     sisIncomplete,
+     sisMerged,
+     sisMissing,
+     sisModified,
+     sisNone,
+     sisNormal,
+     sisObstructed,
+     sisReplaced,
+     sisUnversioned);
+
 //  PSVNStatusItem = ^TSVNStatusItem;
   TSVNStatusItem = class //record
     Checked: boolean;
     Path: string;
     Extension: string;
     PropStatus: string;
-    ItemStatus: string;
+    ItemStatus: TSVNItemStatus;
     Revision: integer;
     CommitRevision: integer;
     Author: string;
     Date: TDate;
     Kind: integer;
   end;
+
+
+
 
   TSVNStatusList = specialize TFPGObjectList<TSVNStatusItem>;
 
@@ -120,6 +139,7 @@ type
     FRepositoryPath: string;
     FSortDirection: TSortDirection;
     FSortItem: TStatusItemName;
+    Function StatusToItemStatus(sStatus: string): TSVNItemStatus; inline;
   public
     List: TSVNStatusList; // TFPList;
 
@@ -227,7 +247,8 @@ function SVNExecutable: string;
 begin
   //encapsulate with " because of the incompatibility on windows
   //when svn in in "Program Files" directory
-    result := '"C:\Program Files (x86)\RapidSVN-0.13\bin\svn.exe"';
+//    result := '"C:\Program Files (x86)\RapidSVN-0.13\bin\svn.exe"';
+    Result := '"' + FindDefaultExecutablePath('svn') + '"';
 end;
 
 function ReplaceLineEndings(const s, NewLineEnds: string): string;
@@ -303,7 +324,7 @@ end;
 
 function SortItemStatusAscending(const Item1, Item2: TSVNStatusItem): Integer;
 begin
-   Result := CompareText(Item1.ItemStatus, Item2.ItemStatus);
+// Result := Comparext(Item1.ItemStatus, Item2.ItemStatus);
 end;
 
 function SortItemStatusDescending(const Item1, Item2: TSVNStatusItem): Integer;
@@ -434,7 +455,29 @@ end;
 
 { TSVNStatus }
 
-constructor TSVNStatus.Create(const ARepoPath: string; Verbose: Boolean);
+function TSVNStatus.StatusToItemStatus(sStatus: string): TSVNItemStatus;
+begin
+  Case sStatus of
+    'added'      :  Result :=  sisAdded;
+    'conflicted' :  Result :=  sisConflicted;
+    'deleted'    :  Result :=  sisDeleted;
+    'external'   :  Result :=  sisExternal;
+    'ignored'    :  Result :=  sisIgnored;
+    'incomplete' :  Result :=  sisIncomplete;
+    'merged'     :  Result :=  sisMerged;
+    'missing'    :  Result :=  sisMissing;
+    'modified'   :  Result :=  sisModified;
+    'none'       :  Result :=  sisNone;
+    'normal'     :  Result :=  sisNormal;
+    'obstructed' :  Result :=  sisObstructed;
+    'replaced'   :  Result :=  sisReplaced;
+    'unversioned':  Result :=  sisUnversioned;
+  else
+    Result := sisNone;
+  end;
+end;
+
+constructor TSVNStatus.Create(const ARepoPath: string; verbose: Boolean);
 var
   ActNode: TDOMNode;
   Doc: TXMLDocument;
@@ -477,7 +520,7 @@ begin
       //Extension
       ListItem.Extension:=ExtractFileExt(Path);
       //get the wc-status attributes
-      ListItem.ItemStatus:='';
+      ListItem.ItemStatus:=sisNone;
       ListItem.Checked:=False;
       ListItem.PropStatus:='';
       if (F and faDirectory)=0 then
@@ -491,7 +534,7 @@ begin
         if NodeName = 'item' then
         begin
           //ItemStatus
-          ListItem.ItemStatus := LowerCase(NodeValue);
+          ListItem.ItemStatus := StatusToItemStatus(NodeValue);
           //Checked
           ListItem.Checked:=(NodeValue<>'unversioned') and (NodeValue<>'normal');
         end;
