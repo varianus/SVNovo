@@ -108,6 +108,7 @@ type
     CommitRevision: integer;
     Author: string;
     Date: TDate;
+    Kind: integer;
   end;
 
   TSVNStatusList = specialize TFPGObjectList<TSVNStatusItem>;
@@ -466,7 +467,7 @@ begin
     Path := SubNode.Attributes.Item[0].NodeValue;
     debugln('TSVNStatus.Create ' + Path);
     F:=FileGetAttr(Path);
-    If (F<>-1) and ((F and faDirectory)=0) then
+    If (F<>-1) {and ((F and faDirectory)=0)} then
     begin
       ListItem := TSVNStatusItem.Create;
       //initialize author (anonymous repositories)
@@ -479,6 +480,10 @@ begin
       ListItem.ItemStatus:='';
       ListItem.Checked:=False;
       ListItem.PropStatus:='';
+      if (F and faDirectory)=0 then
+        ListItem.Kind:= 1
+      else
+        ListItem.Kind:= 2;
       for i := 0 to SubNode.ChildNodes.Item[0].Attributes.Length -1 do
       begin
         NodeName := SubNode.ChildNodes.Item[0].Attributes.Item[i].NodeName;

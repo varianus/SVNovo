@@ -27,6 +27,7 @@ type
     procedure FormDestroy(Sender: TObject);
     procedure SVNFileListViewColumnClick(Sender: TObject; Column: TListColumn);
     procedure SVNFileListViewData(Sender: TObject; Item: TListItem);
+    procedure tvBookMarkClick(Sender: TObject);
   private
     SVNStatus : TSVNStatus;
     RepositoryPath: string;
@@ -49,20 +50,47 @@ procedure TForm1.UpdateFilesListView;
 var
   i: integer;
 begin
+  SVNFileListView.Clear;
   SVNFileListView.Items.Count:= SVNStatus.List.Count;
 end;
 
 procedure TForm1.LoadBookmarks;
+var
+  st: TStringList;
+  i: integer;
+  item: TTreeNode;
 begin
-
+  st := TStringList.Create;
+  tvBookMark.Items[0].DeleteChildren;
+  ConfigObj.ReadStrings('Repositories/Path', St);
+  for i := 0 to st.Count -1 do
+    begin
+      item := tvBookMark.Items.AddChild(tvBookMark.Items[0], st[i]);
+      item.ImageIndex:= 5;
+      item.HasChildren:=true;
+    end;
+  tvBookMark.FullExpand;
+  st.free;
 end;
 
 procedure TForm1.FormCreate(Sender: TObject);
 var
   st: TStringList;
 begin
+  LoadBookmarks;
 
   SVNStatus := nil;
+  SVNStatus := TSVNStatus.Create('C:\source\ovoplayer\trunk', true);
+
+  //ConfigObj.WriteString('SVN/Executable',SVNExecutable);
+  //st:= TStringList.Create;
+  //st.Add(SVNStatus.RepositoryPath);
+  //st.Add(SVNStatus.RepositoryPath+'!!');
+  //ConfigObj.WriteStrings('Repositories/Path', st);
+  //st.free;
+
+  RepositoryPath:= SVNStatus.RepositoryPath;
+  UpdateFilesListView;
   SetColumn(SVNFileListView, 0, 25, '', False);
   SetColumn(SVNFileListView, 1, 300, rsPath, true);
   SetColumn(SVNFileListView, 2, 75, rsExtension, True);
@@ -73,18 +101,6 @@ begin
   SetColumn(SVNFileListView, 7, 75, rsAuthor, True);
   SetColumn(SVNFileListView, 8, 75, rsDate, True);
 
-  SVNStatus := TSVNStatus.Create('C:\source\ovoplayer\trunk', true);
-
-ConfigObj.WriteString('SVN/Executable',SVNExecutable);
-st:= TStringList.Create;
-st.Add(SVNStatus.RepositoryPath);
-st.Add(SVNStatus.RepositoryPath+'!!');
-ConfigObj.WriteStrings('Repositories/Path', st);
-
-st.free;
-
-  RepositoryPath:= SVNStatus.RepositoryPath;
-  UpdateFilesListView;
   ConfigObj.Flush;
 
 end;
@@ -146,10 +162,17 @@ begin
      'missing'   :  ImageIndex:= 43;
  //    'modified'  :  ImageIndex:= ;
  //    'none'      :  ImageIndex:= ;
-     'normal'    :  ImageIndex:= 56;
+     'normal'    :   if StatusItem.Kind = 01 then
+                     ImageIndex:= 56
+                   else
+                     ImageIndex:= 57;
  //    'obstructed'
  //    'replaced'
-     'unversioned': ImageIndex:= 53;
+     'unversioned': if StatusItem.Kind = 01 then
+                     ImageIndex:= 53
+                   else
+                     ImageIndex:= 54;
+
     end;
 
     if (LowerCase(StatusItem.ItemStatus) <> 'unversioned') and
@@ -165,6 +188,16 @@ begin
       SubItems.Add(DateTimeToStr(StatusItem.Date));
     end;
   end;
+end;
+
+procedure TForm1.tvBookMarkClick(Sender: TObject);
+begin
+  if Assigned(SVNStatus) then
+     begin
+      SVNStatus.Free;
+     end;
+   SVNStatus := TSVNStatus.Create('C:\source\ovoplayer\trunk', true);
+   UpdateFilesListView;
 end;
 
 end.
