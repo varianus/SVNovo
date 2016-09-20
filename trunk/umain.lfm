@@ -10,27 +10,29 @@ object Form1: TForm1
   Menu = MainMenu1
   OnCreate = FormCreate
   OnDestroy = FormDestroy
-  LCLVersion = '1.7'
   Visible = False
   object Panel1: TPanel
     Left = 0
-    Height = 574
+    Height = 593
     Top = 0
     Width = 258
     Align = alLeft
     Caption = 'Panel1'
-    ClientHeight = 574
+    ClientHeight = 593
     ClientWidth = 258
     TabOrder = 0
     object tvBookMark: TTreeView
       Left = 1
-      Height = 572
+      Height = 591
       Top = 1
       Width = 256
       Align = alClient
+      DefaultItemHeight = 18
       Images = ImageList_22
+      ReadOnly = True
       TabOrder = 0
       OnClick = tvBookMarkClick
+      Options = [tvoAutoItemHeight, tvoHideSelection, tvoKeepCollapsedNodes, tvoReadOnly, tvoShowButtons, tvoShowLines, tvoShowRoot, tvoToolTips, tvoThemedDraw]
       Items.Data = {
         F9FFFFFF020001000000080000000800000008000000FFFFFFFF000000000000
         00000009000000426F6F6B6D61726B73
@@ -39,19 +41,19 @@ object Form1: TForm1
   end
   object StatusBar1: TStatusBar
     Left = 0
-    Height = 21
-    Top = 574
+    Height = 23
+    Top = 593
     Width = 1202
     Panels = <>
   end
   object Panel2: TPanel
     Left = 258
-    Height = 574
+    Height = 593
     Top = 0
     Width = 944
     Align = alClient
     Caption = 'Panel2'
-    ClientHeight = 574
+    ClientHeight = 593
     ClientWidth = 944
     TabOrder = 2
     object ToolBar1: TToolBar
@@ -60,11 +62,46 @@ object Form1: TForm1
       Top = 1
       Width = 942
       Caption = 'ToolBar1'
+      Images = ImageList_22
       TabOrder = 0
+      object ToolButton1: TToolButton
+        Left = 1
+        Top = 2
+        Action = actUpdate
+      end
+      object ToolButton2: TToolButton
+        Left = 24
+        Top = 2
+        Action = actCommit
+      end
+      object ToolButton3: TToolButton
+        Left = 47
+        Top = 2
+        Action = actShowUnversioned
+        Style = tbsCheck
+      end
+      object ToolButton4: TToolButton
+        Left = 70
+        Top = 2
+        Caption = 'ToolButton4'
+        Style = tbsCheck
+      end
+      object ToolButton5: TToolButton
+        Left = 93
+        Top = 2
+        Caption = 'ToolButton5'
+        Style = tbsCheck
+      end
+      object ToolButton6: TToolButton
+        Left = 116
+        Top = 2
+        Caption = 'ToolButton6'
+        Style = tbsCheck
+      end
     end
     object SVNFileListView: TListView
       Left = 1
-      Height = 546
+      Height = 565
       Top = 27
       Width = 942
       Align = alClient
@@ -74,7 +111,7 @@ object Form1: TForm1
         end      
         item
           AutoSize = True
-          Width = 8
+          Width = 928
         end      
         item
           Width = 10
@@ -97,8 +134,13 @@ object Form1: TForm1
         item
           Width = 847
         end>
+      HideSelection = False
+      MultiSelect = True
       OwnerData = True
+      ReadOnly = True
+      RowSelect = True
       SmallImages = ImageList_22
+      SortColumn = 0
       TabOrder = 1
       ViewStyle = vsReport
       OnColumnClick = SVNFileListViewColumnClick
@@ -113,8 +155,45 @@ object Form1: TForm1
     end
   end
   object ActionList1: TActionList
+    Images = ImageList_22
     left = 128
     top = 328
+    object actUpdate: TAction
+      Caption = 'Update'
+      Enabled = False
+      ImageIndex = 81
+      OnExecute = actUpdateExecute
+    end
+    object actCommit: TAction
+      Category = 'Commit'
+      Caption = 'Commit'
+      Enabled = False
+      ImageIndex = 7
+      OnExecute = actCommitExecute
+    end
+    object actShowUnversioned: TAction
+      Category = 'Filter'
+      Caption = 'Show Unversioned'
+      Checked = True
+      Enabled = False
+      ImageIndex = 53
+    end
+    object Action2: TAction
+      Category = 'Filter'
+      Caption = 'Action2'
+    end
+    object Action3: TAction
+      Category = 'Filter'
+      Caption = 'Action3'
+    end
+    object Action4: TAction
+      Category = 'Filter'
+      Caption = 'Action4'
+    end
+    object Action5: TAction
+      Category = 'Filter'
+      Caption = 'Action5'
+    end
   end
   object ImageList_22: TImageList
     left = 118
