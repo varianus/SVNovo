@@ -23,7 +23,7 @@ unit SVNClasses;
 interface
 
 uses
-  Classes, SysUtils, ComCtrls, FileUtil, UTF8Process, LCLProc, Controls,
+  Classes, SysUtils, ComCtrls, LazFileUtils, UTF8Process, LCLProc, Controls,
   XMLRead, DOM, Process, StdCtrls, Forms, fgl;
 
 resourcestring
@@ -114,6 +114,9 @@ type
      sisUnversioned);
 
 //  PSVNStatusItem = ^TSVNStatusItem;
+
+  { TSVNStatusItem }
+
   TSVNStatusItem = class //record
     Checked: boolean;
     Path: string;
@@ -125,9 +128,8 @@ type
     Author: string;
     Date: TDate;
     Kind: integer;
+    Function IsFolder : boolean;
   end;
-
-
 
 
   TSVNStatusList = specialize TFPGObjectList<TSVNStatusItem>;
@@ -139,10 +141,10 @@ type
     FRepositoryPath: string;
     FSortDirection: TSortDirection;
     FSortItem: TStatusItemName;
-    Function StatusToItemStatus(sStatus: string): TSVNItemStatus; inline;
   public
     List: TSVNStatusList; // TFPList;
-
+    Class Function StatusToItemStatus(sStatus: string): TSVNItemStatus; inline;
+    Class Function ItemStatusToStatus(Status: TSVNItemStatus): string; inline;
     constructor Create(const ARepoPath: string; verbose: Boolean);
     destructor Destroy; override;
 
@@ -162,7 +164,15 @@ function ISO8601ToDateTime(ADateTime: string): TDateTime;
 
 implementation
 
+uses math;
 
+
+function CompareBoolean (Const A, B: Boolean): Integer;
+const
+   BoolOrder: Array [False..True] Of Integer = (0,1); // o 1,0 se si desidera ordinare il contrario
+Begin
+   result := BoolOrder [A] - BoolOrder [B];
+End ;
 
 procedure CmdLineToMemo(CmdLine: string; Memo: TMemo);
 var
@@ -247,8 +257,8 @@ function SVNExecutable: string;
 begin
   //encapsulate with " because of the incompatibility on windows
   //when svn in in "Program Files" directory
-//    result := '"C:\Program Files (x86)\RapidSVN-0.13\bin\svn.exe"';
-    Result := '"' + FindDefaultExecutablePath('svn') + '"';
+    result := '"C:\Program Files (x86)\RapidSVN-0.13\bin\svn.exe"';
+//    Result := '"' + FindDefaultExecutablePath('svn') + '"';
 end;
 
 function ReplaceLineEndings(const s, NewLineEnds: string): string;
@@ -288,12 +298,17 @@ end;
 
 function SortPathAscending(const Item1, Item2: TSVNStatusItem): Integer;
 begin
-   Result := CompareText(Item1.Path, Item2.Path);
+   Result := -CompareBoolean(Item1.IsFolder, Item2.IsFolder);
+   if Result = 0 then
+      Result := CompareText(Item1.Path, Item2.Path);
 end;
 
 function SortPathDescending(const Item1, Item2: TSVNStatusItem): Integer;
 begin
-  Result := -SortPathAscending(Item1, Item2);
+  Result := -CompareBoolean(Item1.IsFolder, Item2.IsFolder);
+  if Result = 0 then
+     Result := -CompareText(Item1.Path, Item2.Path);
+
 end;
 
 function SortSelectedAscending(const Item1, Item2: TSVNStatusItem): Integer;
@@ -354,13 +369,7 @@ end;
 
 function SortPropertyRevisionAscending(const Item1, Item2: TSVNStatusItem): Integer;
 begin
-   if Item1.Revision > Item2.Revision then
-     Result := 1
-   else
-     if Item1.Revision = Item2.Revision then
-       Result := 0
-     else
-       Result := -1;
+  Result := CompareValue(Item1.Revision, Item2.Revision);
 end;
 
 function SortPropertyRevisionDescending(const Item1, Item2: TSVNStatusItem): Integer;
@@ -370,13 +379,7 @@ end;
 
 function SortPropertyCommitRevisionAscending(const Item1, Item2: TSVNStatusItem): Integer;
 begin
-   if Item1.CommitRevision > Item2.CommitRevision then
-     Result := 1
-   else
-     if Item1.CommitRevision = Item2.CommitRevision then
-       Result := 0
-     else
-       Result := -1;
+   Result := CompareValue(Item1.CommitRevision, Item2.CommitRevision);
 end;
 
 function SortPropertyCommitRevisionDescending(const Item1, Item2: TSVNStatusItem): Integer;
@@ -386,13 +389,7 @@ end;
 
 function SortPropertyDateAscending(const Item1, Item2: TSVNStatusItem): Integer;
 begin
-   if Item1.Date > Item2.Date then
-     Result := 1
-   else
-     if Item1.Date = Item2.Date then
-       Result := 0
-     else
-       Result := -1;
+  Result := CompareValue(Item1.Date, Item2.Date);
 end;
 
 function SortPropertyDateDescending(const Item1, Item2: TSVNStatusItem): Integer;
@@ -453,9 +450,16 @@ begin
   AProcess.Free;
 end;
 
+{ TSVNStatusItem }
+
+function TSVNStatusItem.IsFolder: boolean;
+begin
+  Result := Kind = 2;
+end;
+
 { TSVNStatus }
 
-function TSVNStatus.StatusToItemStatus(sStatus: string): TSVNItemStatus;
+class function TSVNStatus.StatusToItemStatus(sStatus: string): TSVNItemStatus;
 begin
   Case sStatus of
     'added'      :  Result :=  sisAdded;
@@ -475,6 +479,29 @@ begin
   else
     Result := sisNone;
   end;
+end;
+
+class function TSVNStatus.ItemStatusToStatus(Status: TSVNItemStatus): string;
+begin
+  Case Status of
+    sisAdded:       Result := 'added';
+    sisConflicted:  Result := 'conflicted';
+    sisDeleted:     Result := 'deleted';
+    sisExternal:    Result := 'external';
+    sisIgnored:     Result := 'ignored';
+    sisIncomplete:  Result := 'incomplete';
+    sisMerged:      Result := 'merged';
+    sisMissing:     Result := 'missing';
+    sisModified:    Result := 'modified';
+    sisNone:        Result := 'none';
+    sisNormal:      Result := 'normal';
+    sisObstructed:  Result := 'obstructed';
+    sisReplaced:    Result := 'replaced';
+    sisUnversioned: Result := 'unversioned';
+  else
+    Result := '';
+  end;
+
 end;
 
 constructor TSVNStatus.Create(const ARepoPath: string; verbose: Boolean);
@@ -523,10 +550,10 @@ begin
       ListItem.ItemStatus:=sisNone;
       ListItem.Checked:=False;
       ListItem.PropStatus:='';
-      if (F and faDirectory)=0 then
-        ListItem.Kind:= 1
+      if (F and faDirectory)=faDirectory then
+        ListItem.Kind:= 2
       else
-        ListItem.Kind:= 2;
+        ListItem.Kind:= 1;
       for i := 0 to SubNode.ChildNodes.Item[0].Attributes.Length -1 do
       begin
         NodeName := SubNode.ChildNodes.Item[0].Attributes.Item[i].NodeName;
