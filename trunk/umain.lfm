@@ -29,10 +29,14 @@ object Form1: TForm1
       Align = alClient
       DefaultItemHeight = 18
       Images = ImageList_22
+      MultiSelect = True
       ReadOnly = True
+      RightClickSelect = True
+      RowSelect = True
+      ScrollBars = ssAutoBoth
       TabOrder = 0
       OnClick = tvBookMarkClick
-      Options = [tvoAutoItemHeight, tvoHideSelection, tvoKeepCollapsedNodes, tvoReadOnly, tvoShowButtons, tvoShowLines, tvoShowRoot, tvoToolTips, tvoThemedDraw]
+      Options = [tvoAllowMultiselect, tvoAutoItemHeight, tvoHideSelection, tvoKeepCollapsedNodes, tvoReadOnly, tvoRightClickSelect, tvoRowSelect, tvoShowButtons, tvoShowLines, tvoShowRoot, tvoToolTips, tvoThemedDraw]
       Items.Data = {
         F9FFFFFF020001000000080000000800000008000000FFFFFFFF000000000000
         00000009000000426F6F6B6D61726B73
@@ -75,25 +79,27 @@ object Form1: TForm1
         Action = actCommit
       end
       object ToolButton3: TToolButton
-        Left = 47
+        Left = 55
         Top = 2
         Action = actShowUnversioned
         Style = tbsCheck
       end
       object ToolButton4: TToolButton
-        Left = 70
+        Left = 47
+        Height = 22
         Top = 2
+        Width = 8
         Caption = 'ToolButton4'
-        Style = tbsCheck
+        Style = tbsSeparator
       end
       object ToolButton5: TToolButton
-        Left = 93
+        Left = 78
         Top = 2
         Caption = 'ToolButton5'
         Style = tbsCheck
       end
       object ToolButton6: TToolButton
-        Left = 116
+        Left = 101
         Top = 2
         Caption = 'ToolButton6'
         Style = tbsCheck
