@@ -81,7 +81,7 @@ object Form1: TForm1
       object ToolButton3: TToolButton
         Left = 55
         Top = 2
-        Action = actShowUnversioned
+        Action = actFlatMode
         Style = tbsCheck
       end
       object ToolButton4: TToolButton
@@ -184,9 +184,13 @@ object Form1: TForm1
       Enabled = False
       ImageIndex = 53
     end
-    object Action2: TAction
+    object actFlatMode: TAction
       Category = 'Filter'
-      Caption = 'Action2'
+      AutoCheck = True
+      Caption = 'Flat Mode'
+      DisableIfNoHandler = False
+      ImageIndex = 17
+      OnExecute = actFlatModeExecute
     end
     object Action3: TAction
       Category = 'Filter'

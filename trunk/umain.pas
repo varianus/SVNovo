@@ -15,7 +15,7 @@ type
   TForm1 = class(TForm)
     actCommit: TAction;
     actShowUnversioned: TAction;
-    Action2: TAction;
+    actFlatMode: TAction;
     Action3: TAction;
     Action4: TAction;
     Action5: TAction;
@@ -37,6 +37,7 @@ type
     ToolButton6: TToolButton;
     tvBookMark: TTreeView;
     procedure actCommitExecute(Sender: TObject);
+    procedure actFlatModeExecute(Sender: TObject);
     procedure actUpdateExecute(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
@@ -95,7 +96,7 @@ var
 begin
   LoadBookmarks;
 
-  SVNStatus := nil;
+  SVNStatus := TSVNStatus.Create();
 
   //ConfigObj.WriteString('SVN/Executable',SVNExecutable);
   //st:= TStringList.Create;
@@ -127,6 +128,12 @@ end;
 procedure TForm1.actCommitExecute(Sender: TObject);
 begin
 //
+end;
+
+procedure TForm1.actFlatModeExecute(Sender: TObject);
+begin
+  SVNStatus.FlatMode:= actFlatMode.Checked;
+  UpdateFilesListView;
 end;
 
 procedure TForm1.FormDestroy(Sender: TObject);
@@ -227,11 +234,8 @@ end;
 
 procedure TForm1.tvBookMarkClick(Sender: TObject);
 begin
-  if Assigned(SVNStatus) then
-     begin
-      SVNStatus.Free;
-     end;
-   SVNStatus := TSVNStatus.Create(tvBookMark.Selected.Text, true);
+
+   SVNStatus.RepositoryPath := tvBookMark.Selected.Text;
 
    UpdateFilesListView;
 end;
