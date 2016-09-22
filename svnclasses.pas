@@ -138,21 +138,29 @@ type
 
   TSVNStatus = class(TObject)
   private
+    FFlatMode: boolean;
     FRepositoryPath: string;
     FSortDirection: TSortDirection;
     FSortItem: TStatusItemName;
+    Verbose: boolean;
+    procedure LoadRepository;
+    procedure SetFlatMode(AValue: boolean);
+    procedure SetRepositoryPath(AValue: string);
   public
     List: TSVNStatusList; // TFPList;
     Class Function StatusToItemStatus(sStatus: string): TSVNItemStatus; inline;
     Class Function ItemStatusToStatus(Status: TSVNItemStatus): string; inline;
-    constructor Create(const ARepoPath: string; verbose: Boolean);
+    constructor Create(const ARepoPath: string='');
     destructor Destroy; override;
 
-    property RepositoryPath: string read FRepositoryPath write FrepositoryPath;
-    procedure Sort(ASortItem: TStatusItemName; ADirection: TSortDirection);
+    procedure Sort(ASortItem: TStatusItemName; ADirection: TSortDirection);  overload;
+    procedure Sort;  overload;
     procedure ReverseSort(ASortItem: TStatusItemName);
+
+    property RepositoryPath: string read FRepositoryPath write SetRepositoryPath;
     property SortDirection: TSortDirection read FSortDirection write FSortDirection;
     property SortItem: TStatusItemName read FSortItem write FSortItem;
+    Property FlatMode: boolean read FFlatMode write SetFlatMode;
   end;
 
 procedure CmdLineToMemo(CmdLine: string; Memo: TMemo);
@@ -339,7 +347,8 @@ end;
 
 function SortItemStatusAscending(const Item1, Item2: TSVNStatusItem): Integer;
 begin
-// Result := Comparext(Item1.ItemStatus, Item2.ItemStatus);
+  Result:=0;
+// Result := CompareValue(Item1.ItemStatus, Item2.ItemStatus);
 end;
 
 function SortItemStatusDescending(const Item1, Item2: TSVNStatusItem): Integer;
@@ -504,7 +513,20 @@ begin
 
 end;
 
-constructor TSVNStatus.Create(const ARepoPath: string; verbose: Boolean);
+constructor TSVNStatus.Create(const ARepoPath: string);
+begin
+  Verbose := true;
+  FFlatMode:= false;
+  List := TSVNStatusList.Create;
+  if ARepoPath <> EmptyStr then
+     begin
+       FRepositoryPath:=ARepoPath;
+       LoadRepository;
+     end;
+
+end;
+
+procedure TSVNStatus.LoadRepository;
 var
   ActNode: TDOMNode;
   Doc: TXMLDocument;
@@ -516,15 +538,25 @@ var
   NodeValue: string;
   Path: string;
   SubNode: TDOMNode;
+  Command : string;
 begin
-  List := TSVNStatusList.Create;
-  RepositoryPath := ARepoPath;
+  List.Clear;
+
+  if FRepositoryPath = EmptyStr then
+    exit;
 
   if Verbose then
-    Doc := ExecuteSvnReturnXml('stat --verbose --xml "' + RepositoryPath  + '" --non-interactive')
+    Command := ('stat --verbose --xml "' + RepositoryPath  + '" --non-interactive')
   else
-    Doc := ExecuteSvnReturnXml('stat --xml "' + RepositoryPath  + '" --non-interactive');
+    Command := ('stat --xml "' + RepositoryPath  + '" --non-interactive');
 
+  if fFlatMode then
+    Command := Command + ' --depth=infinity'
+  else
+    Command := Command + ' --depth=immediates';
+
+
+  Doc := ExecuteSvnReturnXml(Command);
   Node := Doc.DocumentElement.FirstChild.FirstChild;
   if Node = nil then begin
     // no <entry> node found, list is empty.
@@ -534,7 +566,7 @@ begin
 
   repeat
     SubNode := Node;
-    Path := SubNode.Attributes.Item[0].NodeValue;
+    Path := UTF8Encode(SubNode.Attributes.Item[0].NodeValue);
     debugln('TSVNStatus.Create ' + Path);
     F:=FileGetAttr(Path);
     If (F<>-1) {and ((F and faDirectory)=0)} then
@@ -598,6 +630,21 @@ begin
     Node := Node.NextSibling;
   until not Assigned(Node);
   Doc.Free;
+  Sort;
+end;
+
+procedure TSVNStatus.SetFlatMode(AValue: boolean);
+begin
+  if FFlatMode=AValue then Exit;
+  FFlatMode:=AValue;
+  LoadRepository;
+end;
+
+procedure TSVNStatus.SetRepositoryPath(AValue: string);
+begin
+  if FRepositoryPath=AValue then Exit;
+  FRepositoryPath:=AValue;
+  LoadRepository;
 end;
 
 destructor TSVNStatus.Destroy;
@@ -635,6 +682,11 @@ begin
       siCommitRevision: List.Sort(@SortPropertyCommitRevisionDescending);
       siDate:           List.Sort(@SortPropertyDateDescending);
     end;
+end;
+
+procedure TSVNStatus.Sort;
+begin
+  Sort(SortItem, SortDirection);
 end;
 
 procedure TSVNStatus.ReverseSort(ASortItem: TStatusItemName);
