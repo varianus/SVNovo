@@ -23,7 +23,7 @@ unit SVNClasses;
 interface
 
 uses
-  Classes, SysUtils, ComCtrls, LazFileUtils, UTF8Process, LCLProc, Controls,
+  Classes, SysUtils, ComCtrls, fileutil, LazFileUtils, UTF8Process, LCLProc, Controls,
   XMLRead, DOM, Process, StdCtrls, Forms, fgl;
 
 resourcestring
@@ -132,41 +132,47 @@ type
   end;
 
 
-  TSVNStatusList = specialize TFPGObjectList<TSVNStatusItem>;
+  TSVNStatusList = class (specialize TFPGObjectList<TSVNStatusItem>)
+  private
+    FSortDirection: TSortDirection;
+    FSortItem: TStatusItemName;
+  public
+    procedure Sort(ASortItem: TStatusItemName; ADirection: TSortDirection);  overload;
+    procedure Sort;  overload;
+    procedure ReverseSort(ASortItem: TStatusItemName);
+    property SortDirection: TSortDirection read FSortDirection write FSortDirection;
+    property SortItem: TStatusItemName read FSortItem write FSortItem;
+  end;
 
-  { TSVNStatus }
+  { TSVNClient }
 
-  TSVNStatus = class(TObject)
+  TSVNClient = class(TObject)
   private
     FFlatMode: boolean;
     FRepositoryPath: string;
-    FSortDirection: TSortDirection;
-    FSortItem: TStatusItemName;
+    fSvnExecutable: string;
     Verbose: boolean;
-    procedure LoadRepository;
+    function ExecuteSvnReturnXml(ACommand: string): TXMLDocument;
+    function FindSvnExecutable: string;
+    function GetSvnExecutable: string;
     procedure SetFlatMode(AValue: boolean);
     procedure SetRepositoryPath(AValue: string);
   public
     List: TSVNStatusList; // TFPList;
     Class Function StatusToItemStatus(sStatus: string): TSVNItemStatus; inline;
     Class Function ItemStatusToStatus(Status: TSVNItemStatus): string; inline;
+    //
     constructor Create(const ARepoPath: string='');
     destructor Destroy; override;
-
-    procedure Sort(ASortItem: TStatusItemName; ADirection: TSortDirection);  overload;
-    procedure Sort;  overload;
-    procedure ReverseSort(ASortItem: TStatusItemName);
-
+    //
+    Property SVNExecutable: string read GetSvnExecutable write fSvnExecutable;
+    procedure UpdateStatus;
     property RepositoryPath: string read FRepositoryPath write SetRepositoryPath;
-    property SortDirection: TSortDirection read FSortDirection write FSortDirection;
-    property SortItem: TStatusItemName read FSortItem write FSortItem;
     Property FlatMode: boolean read FFlatMode write SetFlatMode;
   end;
 
 procedure CmdLineToMemo(CmdLine: string; Memo: TMemo);
-function ExecuteSvnReturnXml(ACommand: string): TXMLDocument;
 procedure SetColumn(ListView: TListView; ColNo, DefaultWidth: integer; AName: string; AutoSize: boolean = true);
-function SVNExecutable: string;
 function ReplaceLineEndings(const s, NewLineEnds: string): string;
 function ISO8601ToDateTime(ADateTime: string): TDateTime;
 
@@ -261,13 +267,6 @@ begin
   ListView.Column[ColNo].Width:=DefaultWidth;
 end;
 
-function SVNExecutable: string;
-begin
-  //encapsulate with " because of the incompatibility on windows
-  //when svn in in "Program Files" directory
-    result := '"C:\Program Files (x86)\RapidSVN-0.13\bin\svn.exe"';
-//    Result := '"' + FindDefaultExecutablePath('svn') + '"';
-end;
 
 function ReplaceLineEndings(const s, NewLineEnds: string): string;
 var
@@ -406,7 +405,7 @@ begin
   Result := -SortPropertyDateAscending(Item1, Item2);
 end;
 
-function ExecuteSvnReturnXml(ACommand: string): TXMLDocument;
+function TSVNClient.ExecuteSvnReturnXml(ACommand: string): TXMLDocument;
 var
   AProcess: TProcessUTF8;
   M: TMemoryStream;
@@ -466,9 +465,9 @@ begin
   Result := Kind = 2;
 end;
 
-{ TSVNStatus }
+{ TSVNClient }
 
-class function TSVNStatus.StatusToItemStatus(sStatus: string): TSVNItemStatus;
+class function TSVNClient.StatusToItemStatus(sStatus: string): TSVNItemStatus;
 begin
   Case sStatus of
     'added'      :  Result :=  sisAdded;
@@ -490,7 +489,7 @@ begin
   end;
 end;
 
-class function TSVNStatus.ItemStatusToStatus(Status: TSVNItemStatus): string;
+class function TSVNClient.ItemStatusToStatus(Status: TSVNItemStatus): string;
 begin
   Case Status of
     sisAdded:       Result := 'added';
@@ -513,7 +512,7 @@ begin
 
 end;
 
-constructor TSVNStatus.Create(const ARepoPath: string);
+constructor TSVNClient.Create(const ARepoPath: string);
 begin
   Verbose := true;
   FFlatMode:= false;
@@ -521,12 +520,12 @@ begin
   if ARepoPath <> EmptyStr then
      begin
        FRepositoryPath:=ARepoPath;
-       LoadRepository;
+       UpdateStatus;
      end;
 
 end;
 
-procedure TSVNStatus.LoadRepository;
+procedure TSVNClient.UpdateStatus;
 var
   ActNode: TDOMNode;
   Doc: TXMLDocument;
@@ -630,66 +629,123 @@ begin
     Node := Node.NextSibling;
   until not Assigned(Node);
   Doc.Free;
-  Sort;
+  List.Sort;
 end;
 
-procedure TSVNStatus.SetFlatMode(AValue: boolean);
+procedure TSVNClient.SetFlatMode(AValue: boolean);
 begin
   if FFlatMode=AValue then Exit;
   FFlatMode:=AValue;
-  LoadRepository;
+  UpdateStatus;
 end;
 
-procedure TSVNStatus.SetRepositoryPath(AValue: string);
+function TSVNClient.GetSvnExecutable: string;
+begin
+  if fSvnExecutable = EmptyStr then
+    fSvnExecutable := FindSvnExecutable;
+  Result :=  fSvnExecutable;
+
+end;
+
+function TSVNClient.FindSvnExecutable: string;
+var
+  //Output: string;
+  rv:integer;
+begin
+  while True do
+  begin
+    Result := FindDefaultExecutablePath('svn') ;
+    if FileExists(Result)
+       then break;
+
+    {$IFDEF MSWINDOWS}
+    // Some popular locations for SlikSVN, Subversion, and TortoiseSVN:
+    // Covers both 32 bit and 64 bit Windows.
+    if not FileExists(Result)
+       then Result := GetEnvironmentVariable('ProgramFiles\Subversion\bin\svn.exe')
+       else break;
+    if not FileExists(Result)
+       then Result := GetEnvironmentVariable('ProgramFiles(x86)\Subversion\bin\svn.exe')
+       else break;
+    if not FileExists(Result)
+       then Result := GetEnvironmentVariable('ProgramFiles\SlikSvn\bin\svn.exe')
+       else break;
+    if not FileExists(Result)
+       then Result := GetEnvironmentVariable('ProgramFiles(x86)\SlikSvn\bin\svn.exe')
+       else break;
+    if not FileExists(Result)
+       then Result := GetEnvironmentVariable('ProgramFiles\TorToiseSVN\bin\svn.exe')
+       else break;
+    if not FileExists(Result)
+       then Result := GetEnvironmentVariable('ProgramFiles(x86)\TorToiseSVN\bin\svn.exe')
+       else break;
+    //Directory where current executable is:
+   {$ENDIF MSWINDOWS}
+    break;
+  end;
+
+  if not FileExists(Result) then
+  begin
+    //current directory. Note: potential for misuse by malicious program.
+    {$ifdef mswindows}
+    if FileExists(Result + '.exe') then
+      Result := Result + '.exe';
+    {$endif mswindows}
+  end;
+
+
+end;
+
+procedure TSVNClient.SetRepositoryPath(AValue: string);
 begin
   if FRepositoryPath=AValue then Exit;
   FRepositoryPath:=AValue;
-  LoadRepository;
+  UpdateStatus;
 end;
 
-destructor TSVNStatus.Destroy;
+destructor TSVNClient.Destroy;
 begin
   List.Free;
   inherited Destroy;
 end;
 
-procedure TSVNStatus.Sort(ASortItem: TStatusItemName; ADirection: TSortDirection);
+procedure TSVNStatusList.Sort(ASortItem: TStatusItemName; ADirection: TSortDirection);
 begin
   SortDirection := ADirection;
   SortItem := ASortItem;
 
   if ADirection = sdDescending then
     case ASortItem of
-      siChecked:        List.Sort(@SortSelectedAscending);
-      siPath:           List.Sort(@SortPathAscending);
-      siExtension:      List.Sort(@SortExtensionAscending);
-      siItemStatus:     List.Sort(@SortItemStatusAscending);
-      siPropStatus:     List.Sort(@SortPropStatusAscending);
-      siAuthor:         List.Sort(@SortPropertyAuthorAscending);
-      siRevision:       List.Sort(@SortPropertyRevisionAscending);
-      siCommitRevision: List.Sort(@SortPropertyCommitRevisionAscending);
-      siDate:           List.Sort(@SortPropertyDateAscending);
+      siChecked:        Sort(@SortSelectedAscending);
+      siPath:           Sort(@SortPathAscending);
+      siExtension:      Sort(@SortExtensionAscending);
+      siItemStatus:     Sort(@SortItemStatusAscending);
+      siPropStatus:     Sort(@SortPropStatusAscending);
+      siAuthor:         Sort(@SortPropertyAuthorAscending);
+      siRevision:       Sort(@SortPropertyRevisionAscending);
+      siCommitRevision: Sort(@SortPropertyCommitRevisionAscending);
+      siDate:           Sort(@SortPropertyDateAscending);
     end
   else
     case ASortItem of
-      siChecked:        List.Sort(@SortSelectedDescending);
-      siPath:           List.Sort(@SortPathDescending);
-      siExtension:      List.Sort(@SortExtensionDescending);
-      siItemStatus:     List.Sort(@SortItemStatusDescending);
-      siPropStatus:     List.Sort(@SortPropStatusDescending);
-      siAuthor:         List.Sort(@SortPropertyAuthorDescending);
-      siRevision:       List.Sort(@SortPropertyRevisionDescending);
-      siCommitRevision: List.Sort(@SortPropertyCommitRevisionDescending);
-      siDate:           List.Sort(@SortPropertyDateDescending);
+      siChecked:        Sort(@SortSelectedDescending);
+      siPath:           Sort(@SortPathDescending);
+      siExtension:      Sort(@SortExtensionDescending);
+      siItemStatus:     Sort(@SortItemStatusDescending);
+      siPropStatus:     Sort(@SortPropStatusDescending);
+      siAuthor:         Sort(@SortPropertyAuthorDescending);
+      siRevision:       Sort(@SortPropertyRevisionDescending);
+      siCommitRevision: Sort(@SortPropertyCommitRevisionDescending);
+      siDate:           Sort(@SortPropertyDateDescending);
     end;
 end;
 
-procedure TSVNStatus.Sort;
+procedure TSVNStatusList.Sort;
 begin
   Sort(SortItem, SortDirection);
 end;
 
-procedure TSVNStatus.ReverseSort(ASortItem: TStatusItemName);
+procedure TSVNStatusList.ReverseSort(ASortItem: TStatusItemName);
 begin
   if SortItem = ASortItem then
   begin

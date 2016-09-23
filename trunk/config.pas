@@ -166,7 +166,7 @@ end;
 function TConfig.ReadString(APath: string; ADefault: String
   ): string;
 begin
-  fConfigHolder.GetValue(APath, ADefault);
+  Result := fConfigHolder.GetValue(APath, ADefault);
 end;
 
 
