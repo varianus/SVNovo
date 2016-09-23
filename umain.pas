@@ -45,7 +45,7 @@ type
     procedure SVNFileListViewData(Sender: TObject; Item: TListItem);
     procedure tvBookMarkClick(Sender: TObject);
   private
-    SVNStatus : TSVNStatus;
+    SVNStatus : TSVNClient;
     RepositoryPath: string;
     procedure LoadBookmarks;
     procedure UpdateFilesListView;
@@ -96,7 +96,8 @@ var
 begin
   LoadBookmarks;
 
-  SVNStatus := TSVNStatus.Create();
+  SVNStatus := TSVNClient.Create();
+  SVNStatus.SVNExecutable:= ConfigObj.ReadString('SVN/Executable', SVNStatus.SVNExecutable);
 
   //ConfigObj.WriteString('SVN/Executable',SVNExecutable);
   //st:= TStringList.Create;
@@ -145,15 +146,15 @@ procedure TForm1.SVNFileListViewColumnClick(Sender: TObject; Column: TListColumn
   );
 begin
   case Column.Index of
-    0: SVNStatus.ReverseSort(siChecked);
-    1: SVNStatus.ReverseSort(siPath);
-    2: SVNStatus.ReverseSort(siExtension);
-    3: SVNStatus.ReverseSort(siItemStatus);
-    4: SVNStatus.ReverseSort(siPropStatus);
-    5: SVNStatus.ReverseSort(siAuthor);
-    6: SVNStatus.ReverseSort(siRevision);
-    7: SVNStatus.ReverseSort(siCommitRevision);
-    8: SVNStatus.ReverseSort(siDate);
+    0: SVNStatus.List.ReverseSort(siChecked);
+    1: SVNStatus.List.ReverseSort(siPath);
+    2: SVNStatus.List.ReverseSort(siExtension);
+    3: SVNStatus.List.ReverseSort(siItemStatus);
+    4: SVNStatus.List.ReverseSort(siPropStatus);
+    5: SVNStatus.List.ReverseSort(siAuthor);
+    6: SVNStatus.List.ReverseSort(siRevision);
+    7: SVNStatus.List.ReverseSort(siCommitRevision);
+    8: SVNStatus.List.ReverseSort(siDate);
   end;
 
   UpdateFilesListView;
@@ -204,7 +205,7 @@ begin
     //extension
     SubItems.Add(StatusItem.Extension);
     //file status
-    SubItems.Add(TSVNStatus.ItemStatusToStatus(StatusItem.ItemStatus));
+    SubItems.Add(TSVNClient.ItemStatusToStatus(StatusItem.ItemStatus));
     //property status
     SubItems.Add(StatusItem.PropStatus);
     //check if file is versioned
