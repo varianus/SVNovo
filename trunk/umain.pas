@@ -47,6 +47,7 @@ type
   private
     SVNStatus : TSVNClient;
     RepositoryPath: string;
+    Filter: TSVNItemStatusSet;
     procedure LoadBookmarks;
     procedure UpdateFilesListView;
   public
@@ -65,10 +66,89 @@ uses LazFileUtils, Config;
 procedure TForm1.UpdateFilesListView;
 var
   i: integer;
+  Item: TListItem;
+  SVNItem: TSVNStatusItem;
+  Path: string;
+  imgIdx: integer;
+
 begin
   SVNFileListView.Clear;
-  if Assigned(SVNStatus) then
-     SVNFileListView.Items.Count:= SVNStatus.List.Count;
+  for i := 0 to SVNStatus.List.Count -1 do
+    begin
+      SVNItem := SVNStatus.List[i];
+      if not (SVNItem.ItemStatus in Filter) then
+        Continue;
+      Item := SVNFileListView.Items.Add;
+
+      with item do
+         begin
+       //checkboxes
+         Caption := '';
+         Checked := SVNItem.Checked;
+         //path
+         Path := SVNItem.Path;
+         if pos(SVNStatus.RepositoryPath, Path) = 1 then
+           path := CreateRelativePath(path, SVNStatus.RepositoryPath, false);
+         SubItems.Add(Path);
+
+         if (SVNItem.ItemStatus <> sisUnversioned) and
+            (SVNItem.ItemStatus <> sisAdded) then
+         begin
+           //revision
+           SubItems.Add(IntToStr(SVNItem.Revision));
+           //commit revision
+           SubItems.Add(IntToStr(SVNItem.CommitRevision));
+           //author
+           SubItems.Add(SVNItem.Author);
+           //date
+           SubItems.Add(DateTimeToStr(SVNItem.Date));
+         end
+         else
+         begin
+           //revision
+           SubItems.Add('');
+           //commit revision
+           SubItems.Add('');
+           //author
+           SubItems.Add('');
+           //date
+           SubItems.Add('');
+         end;
+
+         //extension
+         SubItems.Add(SVNItem.Extension);
+         //file status
+         SubItems.Add(TSVNClient.ItemStatusToStatus(SVNItem.ItemStatus));
+         //property status
+         SubItems.Add(SVNItem.PropStatus);
+         //check if file is versioned
+         Case SVNItem.ItemStatus of
+          sisAdded:       if SVNItem.IsFolder then imgidx :=  2 else imgidx :=  1;
+          sisConflicted:  if SVNItem.IsFolder then imgidx := -1 else imgidx :=  9;
+          sisDeleted:     if SVNItem.IsFolder then imgidx := 13 else imgidx := 12;
+          sisExternal:    if SVNItem.IsFolder then imgidx := 15 else imgidx := -1;
+          sisIgnored:     if SVNItem.IsFolder then imgidx := -1 else imgidx := -1;
+          sisIncomplete:  if SVNItem.IsFolder then imgidx := -1 else imgidx := -1;
+          sisMerged:      if SVNItem.IsFolder then imgidx := -1 else imgidx := 42;
+          sisMissing:     if SVNItem.IsFolder then imgidx := 44 else imgidx := 43;
+          sisModified:    if SVNItem.IsFolder then imgidx := 46 else imgidx := 45;
+          sisNone:        if SVNItem.IsFolder then imgidx := -1 else imgidx := -1;
+          sisNormal:      if SVNItem.IsFolder then imgidx := 18 else imgidx := 56;
+          sisObstructed:  if SVNItem.IsFolder then imgidx := -1 else imgidx := -1;
+          sisReplaced:    if SVNItem.IsFolder then imgidx := 63 else imgidx := 62;
+          sisUnversioned: if SVNItem.IsFolder then imgidx := 54 else imgidx := 53;
+        else
+          imgidx := -1;
+        end;
+        ImageIndex:= imgidx;
+        StateIndex:= imgidx;
+
+       end;
+
+    end;
+
+  //if Assigned(SVNStatus) then
+  //   SVNFileListView.Items.Count:= SVNStatus.List.Count;
 end;
 
 procedure TForm1.LoadBookmarks;
@@ -115,6 +195,21 @@ begin
   SetColumn(SVNFileListView, 6, 75, rsExtension, True);
   SetColumn(SVNFileListView, 7, 100, rsFileStatus, True);
   SetColumn(SVNFileListView, 8, 125, rsPropertyStatus, True);
+
+  Filter:=[sisAdded,
+           sisConflicted,
+           sisDeleted,
+           sisExternal,
+           sisIgnored,
+           sisIncomplete,
+           sisMerged,
+           sisMissing,
+           sisModified,
+           sisNone,
+           sisNormal,
+           sisObstructed,
+           sisReplaced,
+           sisUnversioned];
   UpdateFilesListView;
 
   ConfigObj.Flush;
@@ -167,75 +262,14 @@ var
   imgidx: integer;
 begin
   StatusItem := SVNStatus.List.Items[item.index];
-  with item do
-    begin
-  //checkboxes
-    Caption := '';
-    Checked := StatusItem.Checked;
-    //path
-    Path := StatusItem.Path;
-    if pos(SVNStatus.RepositoryPath, Path) = 1 then
-      path := CreateRelativePath(path, SVNStatus.RepositoryPath, false);
-    SubItems.Add(Path);
 
-    if (StatusItem.ItemStatus <> sisUnversioned) and
-       (StatusItem.ItemStatus <> sisAdded) then
-    begin
-      //revision
-      SubItems.Add(IntToStr(StatusItem.Revision));
-      //commit revision
-      SubItems.Add(IntToStr(StatusItem.CommitRevision));
-      //author
-      SubItems.Add(StatusItem.Author);
-      //date
-      SubItems.Add(DateTimeToStr(StatusItem.Date));
-    end
-    else
-    begin
-      //revision
-      SubItems.Add('');
-      //commit revision
-      SubItems.Add('');
-      //author
-      SubItems.Add('');
-      //date
-      SubItems.Add('');
-    end;
 
-    //extension
-    SubItems.Add(StatusItem.Extension);
-    //file status
-    SubItems.Add(TSVNClient.ItemStatusToStatus(StatusItem.ItemStatus));
-    //property status
-    SubItems.Add(StatusItem.PropStatus);
-    //check if file is versioned
-    Case StatusItem.ItemStatus of
-     sisAdded:       if StatusItem.IsFolder then imgidx :=  2 else imgidx :=  1;
-     sisConflicted:  if StatusItem.IsFolder then imgidx := -1 else imgidx :=  9;
-     sisDeleted:     if StatusItem.IsFolder then imgidx := 13 else imgidx := 12;
-     sisExternal:    if StatusItem.IsFolder then imgidx := 15 else imgidx := -1;
-     sisIgnored:     if StatusItem.IsFolder then imgidx := -1 else imgidx := -1;
-     sisIncomplete:  if StatusItem.IsFolder then imgidx := -1 else imgidx := -1;
-     sisMerged:      if StatusItem.IsFolder then imgidx := -1 else imgidx := 42;
-     sisMissing:     if StatusItem.IsFolder then imgidx := 44 else imgidx := 43;
-     sisModified:    if StatusItem.IsFolder then imgidx := 46 else imgidx := 45;
-     sisNone:        if StatusItem.IsFolder then imgidx := -1 else imgidx := -1;
-     sisNormal:      if StatusItem.IsFolder then imgidx := 18 else imgidx := 56;
-     sisObstructed:  if StatusItem.IsFolder then imgidx := -1 else imgidx := -1;
-     sisReplaced:    if StatusItem.IsFolder then imgidx := 63 else imgidx := 62;
-     sisUnversioned: if StatusItem.IsFolder then imgidx := 54 else imgidx := 53;
-   else
-     imgidx := -1;
-   end;
-   ImageIndex:= imgidx;
-   StateIndex:= imgidx;
-
-  end;
 end;
 
 procedure TForm1.tvBookMarkClick(Sender: TObject);
 begin
-
+   if not Assigned(tvBookMark.Selected) then
+      exit;
    SVNStatus.RepositoryPath := tvBookMark.Selected.Text;
 
    UpdateFilesListView;
