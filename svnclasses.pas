@@ -113,6 +113,8 @@ type
      sisReplaced,
      sisUnversioned);
 
+ TSVNItemStatusSet = set of TSVNItemStatus;
+
 //  PSVNStatusItem = ^TSVNStatusItem;
 
   { TSVNStatusItem }
