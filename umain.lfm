@@ -1,35 +1,35 @@
-object Form1: TForm1
+object fMain: TfMain
   Left = 0
   Height = 616
   Top = 0
   Width = 1202
   ActiveControl = tvBookMark
-  BorderIcons = []
-  BorderStyle = bsNone
-  Caption = 'Form1'
+  Caption = 'fMain'
   ClientHeight = 616
   ClientWidth = 1202
-  Menu = MainMenu1
+  Menu = MainMenu
   OnCreate = FormCreate
   OnDestroy = FormDestroy
+  ShowHint = True
   Visible = False
   object Panel1: TPanel
     Left = 0
-    Height = 595
+    Height = 593
     Top = 0
     Width = 258
     Align = alLeft
     Caption = 'Panel1'
-    ClientHeight = 595
+    ClientHeight = 593
     ClientWidth = 258
     TabOrder = 0
     object tvBookMark: TTreeView
       Left = 1
-      Height = 593
+      Height = 591
       Top = 1
       Width = 256
       Align = alClient
-      Images = ImageList_22
+      DefaultItemHeight = 18
+      Images = ImageList_22x22
       MultiSelect = True
       ReadOnly = True
       RightClickSelect = True
@@ -46,19 +46,19 @@ object Form1: TForm1
   end
   object StatusBar1: TStatusBar
     Left = 0
-    Height = 21
-    Top = 595
+    Height = 23
+    Top = 593
     Width = 1202
     Panels = <>
   end
   object Panel2: TPanel
     Left = 258
-    Height = 595
+    Height = 593
     Top = 0
     Width = 944
     Align = alClient
     Caption = 'Panel2'
-    ClientHeight = 595
+    ClientHeight = 593
     ClientWidth = 944
     TabOrder = 2
     object ToolBar1: TToolBar
@@ -67,7 +67,7 @@ object Form1: TForm1
       Top = 1
       Width = 942
       Caption = 'ToolBar1'
-      Images = ImageList_22
+      Images = ImageList_22x22
       TabOrder = 0
       object ToolButton1: TToolButton
         Left = 1
@@ -95,20 +95,40 @@ object Form1: TForm1
       end
       object ToolButton5: TToolButton
         Left = 78
+        Height = 22
         Top = 2
+        Width = 8
         Caption = 'ToolButton5'
-        Style = tbsCheck
+        Style = tbsSeparator
       end
       object ToolButton6: TToolButton
-        Left = 101
+        Left = 86
         Top = 2
-        Caption = 'ToolButton6'
+        Action = actShowUnversioned
+        Style = tbsCheck
+      end
+      object ToolButton7: TToolButton
+        Left = 109
+        Top = 2
+        Action = actShowUnmodified
+        Style = tbsCheck
+      end
+      object ToolButton8: TToolButton
+        Left = 132
+        Top = 2
+        Action = actShowModified
+        Style = tbsCheck
+      end
+      object ToolButton9: TToolButton
+        Left = 155
+        Top = 2
+        Action = actShowConflict
         Style = tbsCheck
       end
     end
     object SVNFileListView: TListView
       Left = 1
-      Height = 567
+      Height = 565
       Top = 27
       Width = 942
       Align = alClient
@@ -118,7 +138,7 @@ object Form1: TForm1
         end      
         item
           AutoSize = True
-          Width = 8
+          Width = 928
         end      
         item
           Width = 10
@@ -145,7 +165,7 @@ object Form1: TForm1
       MultiSelect = True
       ReadOnly = True
       RowSelect = True
-      SmallImages = ImageList_22
+      SmallImages = ImageList_22x22
       SortColumn = 0
       TabOrder = 1
       ViewStyle = vsReport
@@ -153,15 +173,15 @@ object Form1: TForm1
       OnData = SVNFileListViewData
     end
   end
-  object MainMenu1: TMainMenu
+  object MainMenu: TMainMenu
     left = 128
     top = 392
     object MenuItem1: TMenuItem
       Caption = 'File'
     end
   end
-  object ActionList1: TActionList
-    Images = ImageList_22
+  object ActionList: TActionList
+    Images = ImageList_22x22
     left = 128
     top = 328
     object actUpdate: TAction
@@ -181,7 +201,9 @@ object Form1: TForm1
       Category = 'Filter'
       Caption = 'Show Unversioned'
       Checked = True
+      DisableIfNoHandler = False
       ImageIndex = 53
+      OnExecute = actShowUnversionedExecute
     end
     object actFlatMode: TAction
       Category = 'Filter'
@@ -191,20 +213,32 @@ object Form1: TForm1
       ImageIndex = 17
       OnExecute = actFlatModeExecute
     end
-    object Action3: TAction
+    object actShowModified: TAction
       Category = 'Filter'
-      Caption = 'Action3'
+      Caption = 'Show Modified'
+      Checked = True
+      DisableIfNoHandler = False
+      ImageIndex = 45
+      OnExecute = actShowModifiedExecute
     end
-    object Action4: TAction
+    object actShowUnmodified: TAction
       Category = 'Filter'
-      Caption = 'Action4'
+      Caption = 'Show Unmodified'
+      Checked = True
+      DisableIfNoHandler = False
+      ImageIndex = 56
+      OnExecute = actShowUnmodifiedExecute
     end
-    object Action5: TAction
+    object actShowConflict: TAction
       Category = 'Filter'
-      Caption = 'Action5'
+      Caption = 'Show Conflict'
+      Checked = True
+      DisableIfNoHandler = False
+      ImageIndex = 9
+      OnExecute = actShowConflictExecute
     end
   end
-  object ImageList_22: TImageList
+  object ImageList_22x22: TImageList
     left = 118
     top = 192
     Bitmap = {

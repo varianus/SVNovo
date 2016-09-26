@@ -10,19 +10,19 @@ uses
 
 type
 
-  { TForm1 }
+  { TfMain }
 
-  TForm1 = class(TForm)
+  TfMain = class(TForm)
     actCommit: TAction;
     actShowUnversioned: TAction;
     actFlatMode: TAction;
-    Action3: TAction;
-    Action4: TAction;
-    Action5: TAction;
+    actShowModified: TAction;
+    actShowUnmodified: TAction;
+    actShowConflict: TAction;
     actUpdate: TAction;
-    ActionList1: TActionList;
-    ImageList_22: TImageList;
-    MainMenu1: TMainMenu;
+    ActionList: TActionList;
+    ImageList_22x22: TImageList;
+    MainMenu: TMainMenu;
     MenuItem1: TMenuItem;
     Panel1: TPanel;
     Panel2: TPanel;
@@ -35,9 +35,16 @@ type
     ToolButton4: TToolButton;
     ToolButton5: TToolButton;
     ToolButton6: TToolButton;
+    ToolButton7: TToolButton;
+    ToolButton8: TToolButton;
+    ToolButton9: TToolButton;
     tvBookMark: TTreeView;
     procedure actCommitExecute(Sender: TObject);
     procedure actFlatModeExecute(Sender: TObject);
+    procedure actShowConflictExecute(Sender: TObject);
+    procedure actShowModifiedExecute(Sender: TObject);
+    procedure actShowUnmodifiedExecute(Sender: TObject);
+    procedure actShowUnversionedExecute(Sender: TObject);
     procedure actUpdateExecute(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
@@ -55,15 +62,15 @@ type
   end;
 
 var
-  Form1: TForm1;
+  fMain: TfMain;
 
 implementation
 uses LazFileUtils, Config;
 {$R *.lfm}
 
-{ TForm1 }
+{ TfMain }
 
-procedure TForm1.UpdateFilesListView;
+procedure TfMain.UpdateFilesListView;
 var
   i: integer;
   Item: TListItem;
@@ -151,7 +158,7 @@ begin
   //   SVNFileListView.Items.Count:= SVNStatus.List.Count;
 end;
 
-procedure TForm1.LoadBookmarks;
+procedure TfMain.LoadBookmarks;
 var
   st: TStringList;
   i: integer;
@@ -170,7 +177,7 @@ begin
   st.free;
 end;
 
-procedure TForm1.FormCreate(Sender: TObject);
+procedure TfMain.FormCreate(Sender: TObject);
 var
   st: TStringList;
 begin
@@ -216,28 +223,69 @@ begin
 
 end;
 
-procedure TForm1.actUpdateExecute(Sender: TObject);
+procedure TfMain.actUpdateExecute(Sender: TObject);
 begin
   //
 end;
 
-procedure TForm1.actCommitExecute(Sender: TObject);
+procedure TfMain.actCommitExecute(Sender: TObject);
 begin
 //
 end;
 
-procedure TForm1.actFlatModeExecute(Sender: TObject);
+procedure TfMain.actFlatModeExecute(Sender: TObject);
 begin
   SVNStatus.FlatMode:= actFlatMode.Checked;
   UpdateFilesListView;
 end;
 
-procedure TForm1.FormDestroy(Sender: TObject);
+procedure TfMain.actShowConflictExecute(Sender: TObject);
+begin
+  actShowConflict.Checked := not actShowConflict.Checked;
+  if actShowConflict.Checked then
+    Filter:=Filter + [sisConflicted]
+  else
+    Filter:=Filter - [sisConflicted];
+
+  UpdateFilesListView;
+end;
+
+procedure TfMain.actShowModifiedExecute(Sender: TObject);
+begin
+  actShowUnmodified.Checked := not actShowUnmodified.Checked;
+  if actShowUnmodified.Checked then
+    Filter:=Filter + [sisAdded, sisDeleted, sisConflicted, sisModified]
+  else
+    Filter:=Filter - [sisAdded, sisDeleted, sisConflicted, sisModified];
+  UpdateFilesListView;
+end;
+
+procedure TfMain.actShowUnmodifiedExecute(Sender: TObject);
+begin
+  actShowUnmodified.Checked := not actShowUnmodified.Checked;
+  if actShowUnmodified.Checked then
+    Filter:=Filter + [sisNormal]
+  else
+    Filter:=Filter - [sisNormal];
+  UpdateFilesListView;
+end;
+
+procedure TfMain.actShowUnversionedExecute(Sender: TObject);
+begin
+  actShowUnversioned.Checked := not actShowUnversioned.Checked;
+  if actShowUnversioned.Checked then
+    Filter:=Filter + [sisUnversioned]
+  else
+    Filter:=Filter - [sisUnversioned];
+  UpdateFilesListView;
+end;
+
+procedure TfMain.FormDestroy(Sender: TObject);
 begin
   SVNStatus.Free;
 end;
 
-procedure TForm1.SVNFileListViewColumnClick(Sender: TObject; Column: TListColumn
+procedure TfMain.SVNFileListViewColumnClick(Sender: TObject; Column: TListColumn
   );
 begin
   case Column.Index of
@@ -255,7 +303,7 @@ begin
   UpdateFilesListView;
 end;
 
-procedure TForm1.SVNFileListViewData(Sender: TObject; Item: TListItem);
+procedure TfMain.SVNFileListViewData(Sender: TObject; Item: TListItem);
 var
   StatusItem : TSVNStatusItem;
   Path: string;
@@ -266,7 +314,7 @@ begin
 
 end;
 
-procedure TForm1.tvBookMarkClick(Sender: TObject);
+procedure TfMain.tvBookMarkClick(Sender: TObject);
 begin
    if not Assigned(tvBookMark.Selected) then
       exit;
