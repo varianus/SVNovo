@@ -57,7 +57,7 @@
         <PackageName Value="LCL"/>
       </Item1>
     </RequiredPackages>
-    <Units Count="4">
+    <Units Count="5">
       <Unit0>
         <Filename Value="ovorepo.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -80,6 +80,11 @@
         <IsPartOfProject Value="True"/>
         <UnitName Value="SVNClasses"/>
       </Unit3>
+      <Unit4>
+        <Filename Value="filessupport.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="FilesSupport"/>
+      </Unit4>
     </Units>
   </ProjectOptions>
   <CompilerOptions>
