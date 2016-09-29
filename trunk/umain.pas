@@ -1,3 +1,23 @@
+{
+This file is part of OvoRepo
+Copyright (C) 2011 Marco Caselli
+
+OvoPlayer is free software; you can redistribute it and/or
+modify it under the terms of the GNU General Public License
+as published by the Free Software Foundation; either version 2
+of the License, or (at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program; if not, write to the Free Software
+Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+
+}
+
 unit uMain;
 
 {$mode objfpc}{$H+}
@@ -6,14 +26,20 @@ interface
 
 uses
   Classes, SysUtils, FileUtil, Forms, Controls, Graphics, Dialogs, StdCtrls,
-  ComCtrls, Menus, ExtCtrls, ActnList, SVNClasses;
+  ComCtrls, Menus, ExtCtrls, ActnList, ShellCtrls, SVNClasses;
 
 type
 
   { TfMain }
 
+  TFileTreeNode = class ( TTreeNode)
+    public
+      FullPath: string;
+    end;
+
   TfMain = class(TForm)
     actCommit: TAction;
+    actRefresh: TAction;
     actShowUnversioned: TAction;
     actFlatMode: TAction;
     actShowModified: TAction;
@@ -23,13 +49,18 @@ type
     ActionList: TActionList;
     ImageList_22x22: TImageList;
     MainMenu: TMainMenu;
+    Memo1: TMemo;
     MenuItem1: TMenuItem;
     Panel1: TPanel;
     Panel2: TPanel;
+    Splitter1: TSplitter;
+    Splitter2: TSplitter;
     StatusBar1: TStatusBar;
     SVNFileListView: TListView;
     ToolBar1: TToolBar;
     ToolButton1: TToolButton;
+    ToolButton10: TToolButton;
+    ToolButton11: TToolButton;
     ToolButton2: TToolButton;
     ToolButton3: TToolButton;
     ToolButton4: TToolButton;
@@ -41,6 +72,7 @@ type
     tvBookMark: TTreeView;
     procedure actCommitExecute(Sender: TObject);
     procedure actFlatModeExecute(Sender: TObject);
+    procedure actRefreshExecute(Sender: TObject);
     procedure actShowConflictExecute(Sender: TObject);
     procedure actShowModifiedExecute(Sender: TObject);
     procedure actShowUnmodifiedExecute(Sender: TObject);
@@ -50,12 +82,17 @@ type
     procedure FormDestroy(Sender: TObject);
     procedure SVNFileListViewColumnClick(Sender: TObject; Column: TListColumn);
     procedure SVNFileListViewData(Sender: TObject; Item: TListItem);
+    procedure SVNFileListViewSelectItem(Sender: TObject; Item: TListItem;
+      Selected: Boolean);
     procedure tvBookMarkClick(Sender: TObject);
+    procedure tvBookMarkCreateNodeClass(Sender: TCustomTreeView;
+      var NodeClass: TTreeNodeClass);
   private
     SVNStatus : TSVNClient;
     RepositoryPath: string;
     Filter: TSVNItemStatusSet;
     procedure LoadBookmarks;
+    procedure LoadTree(Node: TTreeNode; BasePath: string);
     procedure UpdateFilesListView;
   public
 
@@ -65,7 +102,7 @@ var
   fMain: TfMain;
 
 implementation
-uses LazFileUtils, Config;
+uses LazFileUtils, Config, FilesSupport;
 {$R *.lfm}
 
 { TfMain }
@@ -79,6 +116,8 @@ var
   imgIdx: integer;
 
 begin
+  SVNFileListView.BeginUpdate;
+  try
   SVNFileListView.Clear;
   for i := 0 to SVNStatus.List.Count -1 do
     begin
@@ -86,6 +125,7 @@ begin
       if not (SVNItem.ItemStatus in Filter) then
         Continue;
       Item := SVNFileListView.Items.Add;
+      Item.Data:=SVNItem;
 
       with item do
          begin
@@ -154,6 +194,10 @@ begin
 
     end;
 
+  finally
+    SVNFileListView.EndUpdate;
+  end;
+
   //if Assigned(SVNStatus) then
   //   SVNFileListView.Items.Count:= SVNStatus.List.Count;
 end;
@@ -162,14 +206,15 @@ procedure TfMain.LoadBookmarks;
 var
   st: TStringList;
   i: integer;
-  item: TTreeNode;
+  item: TFileTreeNode;
 begin
   st := TStringList.Create;
   tvBookMark.Items[0].DeleteChildren;
   ConfigObj.ReadStrings('Repositories/Path', St);
   for i := 0 to st.Count -1 do
     begin
-      item := tvBookMark.Items.AddChild(tvBookMark.Items[0], st[i]);
+      item := TFileTreeNode(tvBookMark.Items.AddChild(tvBookMark.Items[0], st[i]));
+      item.FullPath:= st[i];
       item.ImageIndex:= 5;
       item.HasChildren:=true;
     end;
@@ -239,6 +284,12 @@ begin
   UpdateFilesListView;
 end;
 
+procedure TfMain.actRefreshExecute(Sender: TObject);
+begin
+  SVNStatus.GetStatus;
+  UpdateFilesListView;
+end;
+
 procedure TfMain.actShowConflictExecute(Sender: TObject);
 begin
   actShowConflict.Checked := not actShowConflict.Checked;
@@ -252,8 +303,8 @@ end;
 
 procedure TfMain.actShowModifiedExecute(Sender: TObject);
 begin
-  actShowUnmodified.Checked := not actShowUnmodified.Checked;
-  if actShowUnmodified.Checked then
+  actShowModified.Checked := not actShowModified.Checked;
+  if actShowModified.Checked then
     Filter:=Filter + [sisAdded, sisDeleted, sisConflicted, sisModified]
   else
     Filter:=Filter - [sisAdded, sisDeleted, sisConflicted, sisModified];
@@ -314,13 +365,61 @@ begin
 
 end;
 
-procedure TfMain.tvBookMarkClick(Sender: TObject);
+procedure TfMain.SVNFileListViewSelectItem(Sender: TObject; Item: TListItem;
+  Selected: Boolean);
 begin
-   if not Assigned(tvBookMark.Selected) then
-      exit;
-   SVNStatus.RepositoryPath := tvBookMark.Selected.Text;
+  if Assigned(Item.Data) then
+    TSVNStatusItem(Item.Data).Selected:=Selected;
 
-   UpdateFilesListView;
+end;
+
+procedure TfMain.LoadTree(Node: TTreeNode; BasePath: string);
+var
+  St:TstringList;
+  i: integer;
+  NewNode: TTreeNode;
+begin
+  St:= TStringList.Create;
+  BuildFolderList(IncludeTrailingPathDelimiter(BasePath) , St, false);
+  For i := 0 to St.Count-1 do
+    begin
+      NewNode := Node.Owner.AddChild(Node, CreateRelativePath(St[i], BasePath, false));
+      TFileTreeNode(NewNode).FullPath:= St[i];
+      NewNode.ImageIndex:= 18;
+      NewNode.StateIndex:= 18;
+      NewNode.SelectedIndex:= 57;
+      LoadTree(NewNode, St[i]);
+    end;
+  st.free;
+
+end;
+
+procedure TfMain.tvBookMarkClick(Sender: TObject);
+Var
+  BookMark: TFileTreeNode;
+  i: integer;
+begin
+  if not Assigned(tvBookMark.Selected) then
+      exit;
+
+  BookMark := TFileTreeNode(tvBookMark.Selected);
+  if BookMark.AbsoluteIndex = 0 then  exit;
+
+  if (BookMark.Level = 1) and (BookMark.Count = 0) then
+    begin
+      BookMark.DeleteChildren;
+      LoadTree(BookMark, BookMark.Text);
+    end;
+
+  SVNStatus.RepositoryPath := BookMark.FullPath;
+  UpdateFilesListView;
+
+end;
+
+procedure TfMain.tvBookMarkCreateNodeClass(Sender: TCustomTreeView;
+  var NodeClass: TTreeNodeClass);
+begin
+  NodeClass := TFileTreeNode;
 end;
 
 end.
