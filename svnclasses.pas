@@ -93,7 +93,7 @@ const
    SVN_ACTIVE = 'SVN active';
 
 type
-  TSortDirection  = (sdAscending, sdDescending);
+  TSortDirection  = (sdAscending=1, sdDescending=-1);
 
   TStatusItemName = (siChecked, siPath, siExtension, siPropStatus, siItemStatus,
                      siRevision, siCommitRevision, siAuthor, siDate);
@@ -139,11 +139,23 @@ type
   end;
 
 
+  { TSVNStatusList }
+
   TSVNStatusList = class (specialize TObjectList<TSVNStatusItem>)
   private
     FSortDirection: TSortDirection;
     FSortItem: TStatusItemName;
+    function SortExtension(constref Item1, Item2: TSVNStatusItem): Integer;
+    function SortItemStatus(constref Item1, Item2: TSVNStatusItem): Integer;
+    function SortPath(constref Item1, Item2: TSVNStatusItem): Integer;
+    function SortPropertyAuthor(constref Item1, Item2: TSVNStatusItem): Integer;
+    function SortPropertyCommitRevision(constref Item1, Item2: TSVNStatusItem): Integer;
+    function SortPropertyDate(constref Item1, Item2: TSVNStatusItem): Integer;
+    function SortPropertyRevision(constref Item1, Item2: TSVNStatusItem): Integer;
+    function SortPropStatus(constref Item1, Item2: TSVNStatusItem): Integer;
+    function SortSelected(constref Item1, Item2: TSVNStatusItem): Integer;
   public
+    function LocateByPath(FullPath: string): TSVNStatusItem;
     procedure Sort(ASortItem: TStatusItemName; ADirection: TSortDirection);  overload;
     procedure Sort;  overload;
     procedure ReverseSort(ASortItem: TStatusItemName);
@@ -181,7 +193,7 @@ type
   end;
 
 procedure CmdLineToMemo(CmdLine: string; Memo: TMemo);
-procedure SetColumn(ListView: TListView; ColNo, DefaultWidth: integer; AName: string; AutoSize: boolean = true);
+procedure SetColumn(ListView: TListView; ColNo, DefaultWidth: integer; AName: string; AutoSize: boolean; Alignment: TAlignment);
 function ReplaceLineEndings(const s, NewLineEnds: string): string;
 function ISO8601ToDateTime(ADateTime: string): TDateTime;
 
@@ -269,11 +281,12 @@ begin
   Memo.Cursor:=crDefault;
 end;
 
-procedure SetColumn(ListView: TListView; ColNo, DefaultWidth: integer; AName: string; AutoSize: boolean = true);
+procedure SetColumn(ListView: TListView; ColNo, DefaultWidth: integer; AName: string; AutoSize: boolean; Alignment: TAlignment);
 begin
   ListView.Column[ColNo].Caption:=AName;
   ListView.Column[ColNo].AutoSize:=AutoSize;
   ListView.Column[ColNo].Width:=DefaultWidth;
+  ListView.Column[ColNo].Alignment:=Alignment;
 end;
 
 
@@ -312,106 +325,81 @@ begin
   Result := ComposeDateTime( EncodeDate(y,m,d), EncodeTime(h,n,s,0));
 end;
 
-function SortPathAscending(constref Item1, Item2: TSVNStatusItem): Integer;
+function TSVNStatusList.SortPath(constref Item1, Item2: TSVNStatusItem): Integer;
 begin
    Result := -CompareBoolean(Item1.IsFolder, Item2.IsFolder);
-   if Result = 0 then
-      Result := CompareText(Item1.Path, Item2.Path);
+   if Result <> 0 then exit;
+
+   Result := CompareText(Item1.Path, Item2.Path) * longint(SortDirection);
 end;
 
-function SortPathDescending(constref Item1, Item2: TSVNStatusItem): Integer;
+function TSVNStatusList.SortSelected(constref Item1, Item2: TSVNStatusItem): Integer;
 begin
   Result := -CompareBoolean(Item1.IsFolder, Item2.IsFolder);
-  if Result = 0 then
-     Result := -CompareText(Item1.Path, Item2.Path);
+  if Result <> 0 then exit;
 
+  if Item1.Checked > Item2.Checked then
+    Result := 1
+  else
+    if Item1.Checked = Item2.Checked then
+      Result :=  SortPath(Item1, Item2) * -1
+    else
+      Result := -1;
 end;
 
-function SortSelectedAscending(constref Item1, Item2: TSVNStatusItem): Integer;
+function TSVNStatusList.SortExtension(constref Item1, Item2: TSVNStatusItem): Integer;
 begin
-   if Item1.Checked > Item2.Checked then
-     Result := 1
-   else
-     if Item1.Checked = Item2.Checked then
-       Result := SortPathDescending(Item1, Item2)
-     else
-       Result := -1;
+  Result := -CompareBoolean(Item1.IsFolder, Item2.IsFolder);
+  if Result <> 0 then exit;
+
+  Result := CompareText(Item1.Extension, Item2.Extension) * longint(SortDirection);
 end;
 
-function SortSelectedDescending(constref Item1, Item2: TSVNStatusItem): Integer;
-begin
-  Result := -SortSelectedAscending(Item1, Item2);
-end;
-
-function SortExtensionAscending(constref Item1, Item2: TSVNStatusItem): Integer;
-begin
-   Result := CompareText(Item1.Extension, Item2.Extension);
-end;
-
-function SortExtensionDescending(constref Item1, Item2: TSVNStatusItem): Integer;
-begin
-  Result := -SortExtensionAscending(Item1, Item2);
-end;
-
-function SortItemStatusAscending(constref Item1, Item2: TSVNStatusItem): Integer;
+function TSVNStatusList.SortItemStatus(constref Item1, Item2: TSVNStatusItem): Integer;
 begin
   Result:=0;
 // Result := CompareValue(Item1.ItemStatus, Item2.ItemStatus);
 end;
 
-function SortItemStatusDescending(constref Item1, Item2: TSVNStatusItem): Integer;
+function TSVNStatusList.SortPropStatus(constref Item1, Item2: TSVNStatusItem): Integer;
 begin
-  Result := -SortItemStatusAscending(Item1, Item2);
+  Result := -CompareBoolean(Item1.IsFolder, Item2.IsFolder);
+  if Result <> 0 then exit;
+
+  Result := CompareText(Item1.PropStatus, Item2.PropStatus) * longint(SortDirection);
 end;
 
-function SortPropStatusAscending(constref Item1, Item2: TSVNStatusItem): Integer;
+
+function TSVNStatusList.SortPropertyAuthor(constref Item1, Item2: TSVNStatusItem): Integer;
 begin
-   Result := CompareText(Item1.PropStatus, Item2.PropStatus);
+  Result := -CompareBoolean(Item1.IsFolder, Item2.IsFolder);
+  if Result <> 0 then exit;
+
+  Result := CompareText(Item1.Author, Item2.Author) * longint(SortDirection);
 end;
 
-function SortPropStatusDescending(constref Item1, Item2: TSVNStatusItem): Integer;
+function TSVNStatusList.SortPropertyRevision(constref Item1, Item2: TSVNStatusItem): Integer;
 begin
-  Result := -SortPropStatusAscending(Item1, Item2);
+  Result := -CompareBoolean(Item1.IsFolder, Item2.IsFolder);
+  if Result <> 0 then exit;
+
+  Result := CompareValue(Item1.Revision, Item2.Revision) * longint(SortDirection);
 end;
 
-function SortPropertyAuthorAscending(constref Item1, Item2: TSVNStatusItem): Integer;
+function TSVNStatusList.SortPropertyCommitRevision(constref Item1, Item2: TSVNStatusItem): Integer;
 begin
-   Result := CompareText(Item1.Author, Item2.Author);
+  Result := -CompareBoolean(Item1.IsFolder, Item2.IsFolder);
+  if Result <> 0 then exit;
+
+  Result := CompareValue(Item1.CommitRevision, Item2.CommitRevision) * longint(SortDirection);
 end;
 
-function SortPropertyAuthorDescending(constref Item1, Item2: TSVNStatusItem): Integer;
+function TSVNStatusList.SortPropertyDate(constref Item1, Item2: TSVNStatusItem): Integer;
 begin
-  Result := -SortPropertyAuthorAscending(Item1, Item2);
-end;
+  Result := -CompareBoolean(Item1.IsFolder, Item2.IsFolder);
+  if Result <> 0 then exit;
 
-function SortPropertyRevisionAscending(constref Item1, Item2: TSVNStatusItem): Integer;
-begin
-  Result := CompareValue(Item1.Revision, Item2.Revision);
-end;
-
-function SortPropertyRevisionDescending(constref Item1, Item2: TSVNStatusItem): Integer;
-begin
-  Result := -SortPropertyRevisionAscending(Item1, Item2);
-end;
-
-function SortPropertyCommitRevisionAscending(constref Item1, Item2: TSVNStatusItem): Integer;
-begin
-   Result := CompareValue(Item1.CommitRevision, Item2.CommitRevision);
-end;
-
-function SortPropertyCommitRevisionDescending(constref Item1, Item2: TSVNStatusItem): Integer;
-begin
-  Result := -SortPropertyCommitRevisionAscending(Item1, Item2);
-end;
-
-function SortPropertyDateAscending(constref Item1, Item2: TSVNStatusItem): Integer;
-begin
-  Result := CompareValue(Item1.Date, Item2.Date);
-end;
-
-function SortPropertyDateDescending(constref Item1, Item2: TSVNStatusItem): Integer;
-begin
-  Result := -SortPropertyDateAscending(Item1, Item2);
+  Result := CompareValue(Item1.Date, Item2.Date)  * longint(SortDirection);
 end;
 
 function TSVNClient.ExecuteSvnReturnXml(ACommand: string): TXMLDocument;
@@ -723,34 +711,31 @@ begin
   inherited Destroy;
 end;
 
+function TSVNStatusList.LocateByPath(FullPath: string): TSVNStatusItem;
+begin
+  for result in self do
+    begin
+       if Result.Path = FullPath then
+         exit;
+    end;
+  Result:= nil;
+end;
+
 procedure TSVNStatusList.Sort(ASortItem: TStatusItemName; ADirection: TSortDirection);
 begin
   SortDirection := ADirection;
   SortItem := ASortItem;
 
-  if ADirection = sdDescending then
-    case ASortItem of
-      siChecked:        Sort(specialize TComparer<TSVNStatusItem>.Construct(@SortSelectedAscending));
-      siPath:           Sort(specialize TComparer<TSVNStatusItem>.Construct(@SortPathAscending));
-      siExtension:      Sort(specialize TComparer<TSVNStatusItem>.Construct(@SortExtensionAscending));
-      siItemStatus:     Sort(specialize TComparer<TSVNStatusItem>.Construct(@SortItemStatusAscending));
-      siPropStatus:     Sort(specialize TComparer<TSVNStatusItem>.Construct(@SortPropStatusAscending));
-      siAuthor:         Sort(specialize TComparer<TSVNStatusItem>.Construct(@SortPropertyAuthorAscending));
-      siRevision:       Sort(specialize TComparer<TSVNStatusItem>.Construct(@SortPropertyRevisionAscending));
-      siCommitRevision: Sort(specialize TComparer<TSVNStatusItem>.Construct(@SortPropertyCommitRevisionAscending));
-      siDate:           Sort(specialize TComparer<TSVNStatusItem>.Construct(@SortPropertyDateAscending));
-    end
-  else
-    case ASortItem of
-      siChecked:        Sort(specialize TComparer<TSVNStatusItem>.Construct(@SortSelectedDescending));
-      siPath:           Sort(specialize TComparer<TSVNStatusItem>.Construct(@SortPathDescending));
-      siExtension:      Sort(specialize TComparer<TSVNStatusItem>.Construct(@SortExtensionDescending));
-      siItemStatus:     Sort(specialize TComparer<TSVNStatusItem>.Construct(@SortItemStatusDescending));
-      siPropStatus:     Sort(specialize TComparer<TSVNStatusItem>.Construct(@SortPropStatusDescending));
-      siAuthor:         Sort(specialize TComparer<TSVNStatusItem>.Construct(@SortPropertyAuthorDescending));
-      siRevision:       Sort(specialize TComparer<TSVNStatusItem>.Construct(@SortPropertyRevisionDescending));
-      siCommitRevision: Sort(specialize TComparer<TSVNStatusItem>.Construct(@SortPropertyCommitRevisionDescending));
-      siDate:           Sort(specialize TComparer<TSVNStatusItem>.Construct(@SortPropertyDateDescending));
+  case ASortItem of
+      siChecked:        Sort(specialize TComparer<TSVNStatusItem>.Construct(@SortSelected));
+      siPath:           Sort(specialize TComparer<TSVNStatusItem>.Construct(@SortPath));
+      siExtension:      Sort(specialize TComparer<TSVNStatusItem>.Construct(@SortExtension));
+      siItemStatus:     Sort(specialize TComparer<TSVNStatusItem>.Construct(@SortItemStatus));
+      siPropStatus:     Sort(specialize TComparer<TSVNStatusItem>.Construct(@SortPropStatus));
+      siAuthor:         Sort(specialize TComparer<TSVNStatusItem>.Construct(@SortPropertyAuthor));
+      siRevision:       Sort(specialize TComparer<TSVNStatusItem>.Construct(@SortPropertyRevision));
+      siCommitRevision: Sort(specialize TComparer<TSVNStatusItem>.Construct(@SortPropertyCommitRevision));
+      siDate:           Sort(specialize TComparer<TSVNStatusItem>.Construct(@SortPropertyDate));
     end;
 end;
 
