@@ -152,7 +152,7 @@ object fMain: TfMain
         end      
         item
           AutoSize = True
-          Width = 928
+          Width = 923
         end      
         item
           Width = 10

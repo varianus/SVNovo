@@ -238,15 +238,15 @@ begin
   //ConfigObj.WriteStrings('Repositories/Path', st);
   //st.free;
 
-  SetColumn(SVNFileListView, 0, 25, '', False);
-  SetColumn(SVNFileListView, 1, 200, rsPath, true);
-  SetColumn(SVNFileListView, 2, 75, rsRevision, True);
-  SetColumn(SVNFileListView, 3, 75, rsCommitRevision, True);
-  SetColumn(SVNFileListView, 4, 75, rsAuthor, True);
-  SetColumn(SVNFileListView, 5, 75, rsDate, True);
-  SetColumn(SVNFileListView, 6, 75, rsExtension, True);
-  SetColumn(SVNFileListView, 7, 100, rsFileStatus, True);
-  SetColumn(SVNFileListView, 8, 125, rsPropertyStatus, True);
+  SetColumn(SVNFileListView, 0, 25, '', False, taLeftJustify);
+  SetColumn(SVNFileListView, 1, 200, rsPath, true, taLeftJustify);
+  SetColumn(SVNFileListView, 2, 75, rsRevision, True, taRightJustify);
+  SetColumn(SVNFileListView, 3, 75, rsCommitRevision, True, taRightJustify);
+  SetColumn(SVNFileListView, 4, 75, rsAuthor, True, taLeftJustify);
+  SetColumn(SVNFileListView, 5, 75, rsDate, True, taRightJustify);
+  SetColumn(SVNFileListView, 6, 75, rsExtension, True, taLeftJustify);
+  SetColumn(SVNFileListView, 7, 100, rsFileStatus, True, taLeftJustify);
+  SetColumn(SVNFileListView, 8, 125, rsPropertyStatus, True, taLeftJustify);
 
   Filter:=[sisAdded,
            sisConflicted,
@@ -342,13 +342,13 @@ begin
   case Column.Index of
     0: SVNStatus.List.ReverseSort(siChecked);
     1: SVNStatus.List.ReverseSort(siPath);
-    2: SVNStatus.List.ReverseSort(siExtension);
-    3: SVNStatus.List.ReverseSort(siItemStatus);
-    4: SVNStatus.List.ReverseSort(siPropStatus);
-    5: SVNStatus.List.ReverseSort(siAuthor);
-    6: SVNStatus.List.ReverseSort(siRevision);
-    7: SVNStatus.List.ReverseSort(siCommitRevision);
-    8: SVNStatus.List.ReverseSort(siDate);
+    2: SVNStatus.List.ReverseSort(siRevision);
+    3: SVNStatus.List.ReverseSort(siCommitRevision);
+    4: SVNStatus.List.ReverseSort(siAuthor);
+    5: SVNStatus.List.ReverseSort(siDate);
+    6: SVNStatus.List.ReverseSort(siExtension);
+    7: SVNStatus.List.ReverseSort(siItemStatus);
+    8: SVNStatus.List.ReverseSort(siPropStatus);
   end;
 
   UpdateFilesListView;
@@ -384,11 +384,14 @@ begin
   For i := 0 to St.Count-1 do
     begin
       NewNode := Node.Owner.AddChild(Node, CreateRelativePath(St[i], BasePath, false));
+      if NewNode.Text = '' then
+        NewNode.Text:= '.';
       TFileTreeNode(NewNode).FullPath:= St[i];
       NewNode.ImageIndex:= 18;
       NewNode.StateIndex:= 18;
       NewNode.SelectedIndex:= 57;
-      LoadTree(NewNode, St[i]);
+      if Assigned(SVNStatus.List.LocateByPath(St[i])) then
+        LoadTree(NewNode, St[i]);
     end;
   st.free;
 
@@ -407,11 +410,13 @@ begin
 
   if (BookMark.Level = 1) and (BookMark.Count = 0) then
     begin
+      SVNStatus.RepositoryPath := BookMark.FullPath;
       BookMark.DeleteChildren;
       LoadTree(BookMark, BookMark.Text);
-    end;
+    end
+  else
+   SVNStatus.RepositoryPath := BookMark.FullPath;
 
-  SVNStatus.RepositoryPath := BookMark.FullPath;
   UpdateFilesListView;
 
 end;
