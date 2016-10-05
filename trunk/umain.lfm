@@ -227,7 +227,7 @@ object fMain: TfMain
     top = 328
     object actUpdate: TAction
       Caption = 'Update'
-      Enabled = False
+      DisableIfNoHandler = False
       ImageIndex = 81
       OnExecute = actUpdateExecute
     end
