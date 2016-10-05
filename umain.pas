@@ -88,11 +88,13 @@ type
     procedure tvBookMarkCreateNodeClass(Sender: TCustomTreeView;
       var NodeClass: TTreeNodeClass);
   private
-    SVNStatus : TSVNClient;
+    SVNClient : TSVNClient;
     RepositoryPath: string;
     Filter: TSVNItemStatusSet;
     procedure LoadBookmarks;
     procedure LoadTree(Node: TTreeNode; BasePath: string);
+    procedure Log(Sender: TObject; const Status: TSVNItemStatus;
+      const fileName: TFileName);
     procedure UpdateFilesListView;
   public
 
@@ -119,9 +121,9 @@ begin
   SVNFileListView.BeginUpdate;
   try
   SVNFileListView.Clear;
-  for i := 0 to SVNStatus.List.Count -1 do
+  for i := 0 to SVNClient.List.Count -1 do
     begin
-      SVNItem := SVNStatus.List[i];
+      SVNItem := SVNClient.List[i];
       if not (SVNItem.ItemStatus in Filter) then
         Continue;
       Item := SVNFileListView.Items.Add;
@@ -134,8 +136,8 @@ begin
          Checked := SVNItem.Checked;
          //path
          Path := SVNItem.Path;
-         if pos(SVNStatus.RepositoryPath, Path) = 1 then
-           path := CreateRelativePath(path, SVNStatus.RepositoryPath, false);
+         if pos(SVNClient.RepositoryPath, Path) = 1 then
+           path := CreateRelativePath(path, SVNClient.RepositoryPath, false);
          SubItems.Add(Path);
 
          if (SVNItem.ItemStatus <> sisUnversioned) and
@@ -198,8 +200,8 @@ begin
     SVNFileListView.EndUpdate;
   end;
 
-  //if Assigned(SVNStatus) then
-  //   SVNFileListView.Items.Count:= SVNStatus.List.Count;
+  //if Assigned(SVNClient) then
+  //   SVNFileListView.Items.Count:= SVNClient.List.Count;
 end;
 
 procedure TfMain.LoadBookmarks;
@@ -228,13 +230,13 @@ var
 begin
   LoadBookmarks;
 
-  SVNStatus := TSVNClient.Create();
-  SVNStatus.SVNExecutable:= ConfigObj.ReadString('SVN/Executable', SVNStatus.SVNExecutable);
+  SVNClient := TSVNClient.Create();
+  SVNClient.SVNExecutable:= ConfigObj.ReadString('SVN/Executable', SVNClient.SVNExecutable);
 
   //ConfigObj.WriteString('SVN/Executable',SVNExecutable);
   //st:= TStringList.Create;
-  //st.Add(SVNStatus.RepositoryPath);
-  //st.Add(SVNStatus.RepositoryPath+'!!');
+  //st.Add(SVNClient.RepositoryPath);
+  //st.Add(SVNClient.RepositoryPath+'!!');
   //ConfigObj.WriteStrings('Repositories/Path', st);
   //st.free;
 
@@ -268,9 +270,15 @@ begin
 
 end;
 
+procedure TfMain.Log (Sender: TObject; const Status: TSVNItemStatus; const fileName: TFileName);
+begin
+  Memo1.Lines.Add(fileName);
+end;
+
 procedure TfMain.actUpdateExecute(Sender: TObject);
 begin
-  //
+  SVNClient.OnUpdate:=@log ;
+  SVNClient.Update();
 end;
 
 procedure TfMain.actCommitExecute(Sender: TObject);
@@ -280,13 +288,13 @@ end;
 
 procedure TfMain.actFlatModeExecute(Sender: TObject);
 begin
-  SVNStatus.FlatMode:= actFlatMode.Checked;
+  SVNClient.FlatMode:= actFlatMode.Checked;
   UpdateFilesListView;
 end;
 
 procedure TfMain.actRefreshExecute(Sender: TObject);
 begin
-  SVNStatus.GetStatus;
+  SVNClient.LoadStatus;
   UpdateFilesListView;
 end;
 
@@ -333,22 +341,22 @@ end;
 
 procedure TfMain.FormDestroy(Sender: TObject);
 begin
-  SVNStatus.Free;
+  SVNClient.Free;
 end;
 
 procedure TfMain.SVNFileListViewColumnClick(Sender: TObject; Column: TListColumn
   );
 begin
   case Column.Index of
-    0: SVNStatus.List.ReverseSort(siChecked);
-    1: SVNStatus.List.ReverseSort(siPath);
-    2: SVNStatus.List.ReverseSort(siRevision);
-    3: SVNStatus.List.ReverseSort(siCommitRevision);
-    4: SVNStatus.List.ReverseSort(siAuthor);
-    5: SVNStatus.List.ReverseSort(siDate);
-    6: SVNStatus.List.ReverseSort(siExtension);
-    7: SVNStatus.List.ReverseSort(siItemStatus);
-    8: SVNStatus.List.ReverseSort(siPropStatus);
+    0: SVNClient.List.ReverseSort(siChecked);
+    1: SVNClient.List.ReverseSort(siPath);
+    2: SVNClient.List.ReverseSort(siRevision);
+    3: SVNClient.List.ReverseSort(siCommitRevision);
+    4: SVNClient.List.ReverseSort(siAuthor);
+    5: SVNClient.List.ReverseSort(siDate);
+    6: SVNClient.List.ReverseSort(siExtension);
+    7: SVNClient.List.ReverseSort(siItemStatus);
+    8: SVNClient.List.ReverseSort(siPropStatus);
   end;
 
   UpdateFilesListView;
@@ -360,7 +368,7 @@ var
   Path: string;
   imgidx: integer;
 begin
-  StatusItem := SVNStatus.List.Items[item.index];
+  StatusItem := SVNClient.List.Items[item.index];
 
 
 end;
@@ -390,7 +398,7 @@ begin
       NewNode.ImageIndex:= 18;
       NewNode.StateIndex:= 18;
       NewNode.SelectedIndex:= 57;
-      if Assigned(SVNStatus.List.LocateByPath(St[i])) then
+      if Assigned(SVNClient.List.LocateByPath(St[i])) then
         LoadTree(NewNode, St[i]);
     end;
   st.free;
@@ -410,12 +418,12 @@ begin
 
   if (BookMark.Level = 1) and (BookMark.Count = 0) then
     begin
-      SVNStatus.RepositoryPath := BookMark.FullPath;
+      SVNClient.RepositoryPath := BookMark.FullPath;
       BookMark.DeleteChildren;
       LoadTree(BookMark, BookMark.Text);
     end
   else
-   SVNStatus.RepositoryPath := BookMark.FullPath;
+   SVNClient.RepositoryPath := BookMark.FullPath;
 
   UpdateFilesListView;
 

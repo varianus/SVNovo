@@ -112,7 +112,8 @@ type
      sisNormal,
      sisObstructed,
      sisReplaced,
-     sisUnversioned);
+     sisUnversioned,
+     sisUpdated);
 
  TSVNItemStatusSet = set of TSVNItemStatus;
 
@@ -138,6 +139,7 @@ type
     Constructor Create;
   end;
 
+  TFileEvent = procedure (Sender: TObject; const Status: TSVNItemStatus; const fileName: TFileName) of object;
 
   { TSVNStatusList }
 
@@ -168,14 +170,18 @@ type
   TSVNClient = class(TObject)
   private
     FFlatMode: boolean;
+    FOnUpdate: TFileEvent;
     FRepositoryPath: string;
     fSvnExecutable: string;
     Verbose: boolean;
-    function ExecuteSvnReturnXml(ACommand: string): TXMLDocument;
+    procedure ExecuteSvn(ACommand: TStrings; CallBack: TFileEvent);
+    function ExecuteSvnReturnXml(ACommand: TStrings): TXMLDocument;
     function FindSvnExecutable: string;
     function GetSvnExecutable: string;
     procedure SetFlatMode(AValue: boolean);
+    procedure SetOnUpdate(AValue: TFileEvent);
     procedure SetRepositoryPath(AValue: string);
+    procedure ProcessSVNUpdateOutput(var MemStream: TMemoryStream; var BytesRead: LongInt; CallBack: TFileEvent);
   public
     List: TSVNStatusList; // TFPList;
     Class Function StatusToItemStatus(sStatus: string): TSVNItemStatus; inline;
@@ -184,10 +190,11 @@ type
     constructor Create(const ARepoPath: string='');
     destructor Destroy; override;
     //
+    procedure LoadStatus;
+    Procedure Update(Revision:string = '');
+    //
+    Property OnUpdate: TFileEvent read FOnUpdate write SetOnUpdate;
     Property SVNExecutable: string read GetSvnExecutable write fSvnExecutable;
-    procedure GetStatus;
-
-
     property RepositoryPath: string read FRepositoryPath write SetRepositoryPath;
     Property FlatMode: boolean read FFlatMode write SetFlatMode;
   end;
@@ -402,14 +409,104 @@ begin
   Result := CompareValue(Item1.Date, Item2.Date)  * longint(SortDirection);
 end;
 
-function TSVNClient.ExecuteSvnReturnXml(ACommand: string): TXMLDocument;
+procedure TSVNClient.ProcessSVNUpdateOutput(var MemStream: TMemoryStream; var BytesRead: LongInt; CallBack: TFileEvent);
+var
+  S: TStringList;
+  n: LongInt;
+  i: integer;
+  str: string;
+  sts: TSVNItemStatus;
+begin
+  Memstream.SetSize(BytesRead);
+  S := TStringList.Create;
+  S.LoadFromStream(MemStream);
+
+  for n := 0 to S.Count - 1 do
+    begin
+      //find position of first space character
+      i := pos(' ', S[n]);
+      str := Copy(S[n],1, i - 1);
+      Case str of
+       'A': sts := sisAdded;
+       'D': sts := sisDeleted;
+       'U': sts := sisUpdated;
+       'C': sts := sisConflicted;
+       'G': sts := sisMerged;
+      else
+        Sts:= sisNone;
+      end;
+
+      if Assigned(CallBack) then
+         CallBack(Self, sts, Trim(Copy(S[n],i, Length(S[n])-i+1)));
+
+    end;
+
+  S.Free;
+  BytesRead := 0;
+  MemStream.Clear;
+
+end;
+
+Procedure TSVNClient.ExecuteSvn(ACommand: TStrings; CallBack:TFileEvent);
+var
+  AProcess: TProcessUTF8;
+  MemStream: TMemoryStream;
+  n, BytesRead: Integer;
+begin
+  AProcess := TProcessUTF8.Create(nil);
+  AProcess.Executable := SVNExecutable;
+  AProcess.Parameters.Assign(ACommand);
+  debugln('TSVNLogFrm.ExecuteSvn CommandLine ' + AProcess.CommandLine);
+  AProcess.Options := AProcess.Options + [poUsePipes, poStdErrToOutput];
+//  AProcess.ShowWindow := swoHIDE;
+  AProcess.Execute;
+
+  MemStream := TMemoryStream.Create;
+  BytesRead := 0;
+
+  while AProcess.Running do
+  begin
+    // make sure we have room
+    MemStream.SetSize(BytesRead + READ_BYTES);
+
+    // try reading it
+    n := AProcess.Output.Read((MemStream.Memory + BytesRead)^, READ_BYTES);
+    if n > 0
+    then begin
+      Inc(BytesRead, n);
+      ProcessSVNUpdateOutput(MemStream, BytesRead, CallBack);
+    end
+    else
+      // no data, wait 100 ms
+      Sleep(100);
+  end;
+  // read last part
+  repeat
+    // make sure we have room
+    MemStream.SetSize(BytesRead + READ_BYTES);
+    // try reading it
+    n := AProcess.Output.Read((MemStream.Memory + BytesRead)^, READ_BYTES);
+    if n > 0
+    then begin
+      Inc(BytesRead, n);
+      ProcessSVNUpdateOutput(MemStream, BytesRead, CallBack);
+    end;
+  until n <= 0;
+
+  AProcess.Free;
+  MemStream.Free;
+end;
+
+
+function TSVNClient.ExecuteSvnReturnXml(ACommand: TStrings): TXMLDocument;
 var
   AProcess: TProcessUTF8;
   M: TMemoryStream;
   n, BytesRead: Integer;
 begin
   AProcess := TProcessUTF8.Create(nil);
-  AProcess.CommandLine := SVNExecutable + ' ' + ACommand;
+  AProcess.Executable := SVNExecutable;
+  AProcess.Parameters.Assign(ACommand);
   debugln('TSVNLogFrm.ExecuteSvnReturnXml CommandLine ' + AProcess.CommandLine);
   AProcess.Options := AProcess.Options + [poUsePipes, poStdErrToOutput];
   AProcess.ShowWindow := swoHIDE;
@@ -522,12 +619,12 @@ begin
   if ARepoPath <> EmptyStr then
      begin
        FRepositoryPath:=ARepoPath;
-       GetStatus;
+       LoadStatus;
      end;
 
 end;
 
-procedure TSVNClient.GetStatus;
+procedure TSVNClient.LoadStatus;
 var
   ActNode: TDOMNode;
   Doc: TXMLDocument;
@@ -539,22 +636,26 @@ var
   NodeValue: string;
   Path: string;
   SubNode: TDOMNode;
-  Command : string;
+  Command : TStringList;
 begin
   List.Clear;
 
   if FRepositoryPath = EmptyStr then
     exit;
 
+  Command := TStringList.Create;
+  Command.AddStrings(['stat','--xml']);
+
   if Verbose then
-    Command := ('stat --verbose --xml "' + RepositoryPath  + '" --non-interactive')
-  else
-    Command := ('stat --xml "' + RepositoryPath  + '" --non-interactive');
+    Command.Add('--verbose');
+
+  Command.Add(RepositoryPath);
+  Command.Add('--non-interactive');
 
   if fFlatMode then
-    Command := Command + ' --depth=infinity'
+    Command.Add('--depth=infinity')
   else
-    Command := Command + ' --depth=immediates';
+    Command.Add('--depth=immediates');
 
 
   Doc := ExecuteSvnReturnXml(Command);
@@ -634,11 +735,37 @@ begin
   List.Sort;
 end;
 
+procedure TSVNClient.Update(Revision:string = '');
+var
+  Commands: TStringList;
+begin
+  Commands := TstringList.Create;
+  Commands.AddStrings(['update','--non-interactive', '--trust-server-cert']);
+
+  try
+  if (Revision <> '') and (trim(Revision) <> 'HEAD') then
+    Commands.Add('-r ' + Revision);
+
+  Commands.Add(FRepositoryPath);  ;
+
+  ExecuteSvn(Commands, FOnUpdate);
+
+  finally
+    Commands.Free;
+  end;
+end;
+
 procedure TSVNClient.SetFlatMode(AValue: boolean);
 begin
   if FFlatMode=AValue then Exit;
   FFlatMode:=AValue;
-  GetStatus;
+  LoadStatus;
+end;
+
+procedure TSVNClient.SetOnUpdate(AValue: TFileEvent);
+begin
+  if FOnUpdate=AValue then Exit;
+  FOnUpdate:=AValue;
 end;
 
 function TSVNClient.GetSvnExecutable: string;
@@ -702,7 +829,7 @@ procedure TSVNClient.SetRepositoryPath(AValue: string);
 begin
   if FRepositoryPath=AValue then Exit;
   FRepositoryPath:=AValue;
-  GetStatus;
+  LoadStatus;
 end;
 
 destructor TSVNClient.Destroy;
