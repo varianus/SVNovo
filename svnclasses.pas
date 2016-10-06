@@ -37,7 +37,8 @@ resourcestring
   rsConflict = 'Conflict';
   rsCopyFromPath = 'Copy from path';
   rsCreatePatchFile = 'Create patch file';
-  rsDate = 'Date';
+  rsDateSVN = 'Date';
+  rsDateModified = 'Last Changed';
   rsDelete = 'Delete';
   rsDeleted = 'Deleted';
   rsDiffActiveFile = 'Diff active file';
@@ -96,7 +97,7 @@ type
   TSortDirection  = (sdAscending=1, sdDescending=-1);
 
   TStatusItemName = (siChecked, siPath, siExtension, siPropStatus, siItemStatus,
-                     siRevision, siCommitRevision, siAuthor, siDate);
+                     siRevision, siCommitRevision, siAuthor, siDateSVN, siDateModified);
 
   TSVNItemStatus = (
      sisAdded,
@@ -131,7 +132,8 @@ type
     Revision: integer;
     CommitRevision: integer;
     Author: string;
-    Date: TDate;
+    DateSVN: TDateTime;
+    DateModified: TDateTime;
     Kind: integer;
     Selected: boolean;
 
@@ -152,7 +154,8 @@ type
     function SortPath(constref Item1, Item2: TSVNStatusItem): Integer;
     function SortPropertyAuthor(constref Item1, Item2: TSVNStatusItem): Integer;
     function SortPropertyCommitRevision(constref Item1, Item2: TSVNStatusItem): Integer;
-    function SortPropertyDate(constref Item1, Item2: TSVNStatusItem): Integer;
+    function SortPropertyDateSVN(constref Item1, Item2: TSVNStatusItem): Integer;
+    function SortPropertyDateModified(constref Item1, Item2: TSVNStatusItem): Integer;
     function SortPropertyRevision(constref Item1, Item2: TSVNStatusItem): Integer;
     function SortPropStatus(constref Item1, Item2: TSVNStatusItem): Integer;
     function SortSelected(constref Item1, Item2: TSVNStatusItem): Integer;
@@ -401,12 +404,22 @@ begin
   Result := CompareValue(Item1.CommitRevision, Item2.CommitRevision) * longint(SortDirection);
 end;
 
-function TSVNStatusList.SortPropertyDate(constref Item1, Item2: TSVNStatusItem): Integer;
+function TSVNStatusList.SortPropertyDateSVN(constref Item1, Item2: TSVNStatusItem): Integer;
 begin
   Result := -CompareBoolean(Item1.IsFolder, Item2.IsFolder);
   if Result <> 0 then exit;
 
-  Result := CompareValue(Item1.Date, Item2.Date)  * longint(SortDirection);
+  Result := CompareValue(Item1.DateSVN, Item2.DateSVN)  * longint(SortDirection);
+end;
+
+function TSVNStatusList.SortPropertyDateModified(constref Item1,
+  Item2: TSVNStatusItem): Integer;
+begin
+  Result := -CompareBoolean(Item1.IsFolder, Item2.IsFolder);
+  if Result <> 0 then exit;
+
+  Result := CompareValue(Item1.DateModified, Item2.DateModified)  * longint(SortDirection);
+
 end;
 
 procedure TSVNClient.ProcessSVNUpdateOutput(var MemStream: TMemoryStream; var BytesRead: LongInt; CallBack: TFileEvent);
@@ -682,12 +695,14 @@ begin
       ListItem.Extension:=ExtractFileExt(Path);
       //get the wc-status attributes
       ListItem.ItemStatus:=sisNone;
+      FileAge(Path, ListItem.DateModified);
       ListItem.Checked:=False;
       ListItem.PropStatus:='';
       if (F and faDirectory)=faDirectory then
         ListItem.Kind:= 2
       else
         ListItem.Kind:= 1;
+
       for i := 0 to SubNode.ChildNodes.Item[0].Attributes.Length -1 do
       begin
         NodeName := SubNode.ChildNodes.Item[0].Attributes.Item[i].NodeName;
@@ -723,7 +738,7 @@ begin
               ListItem.Author := ActNode.FirstChild.NodeValue;
             //Date
             if NodeName = 'date' then
-              ListItem.Date := ISO8601ToDateTime(ActNode.FirstChild.NodeValue);
+              ListItem.DateSVN := ISO8601ToDateTime(ActNode.FirstChild.NodeValue);
           end;
         end;
       end;
@@ -862,7 +877,8 @@ begin
       siAuthor:         Sort(specialize TComparer<TSVNStatusItem>.Construct(@SortPropertyAuthor));
       siRevision:       Sort(specialize TComparer<TSVNStatusItem>.Construct(@SortPropertyRevision));
       siCommitRevision: Sort(specialize TComparer<TSVNStatusItem>.Construct(@SortPropertyCommitRevision));
-      siDate:           Sort(specialize TComparer<TSVNStatusItem>.Construct(@SortPropertyDate));
+      siDateSVN:        Sort(specialize TComparer<TSVNStatusItem>.Construct(@SortPropertyDateSVN));
+      siDateModified:   Sort(specialize TComparer<TSVNStatusItem>.Construct(@SortPropertyDateModified));
     end;
 end;
 

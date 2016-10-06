@@ -142,30 +142,31 @@ begin
 
          if (SVNItem.ItemStatus <> sisUnversioned) and
             (SVNItem.ItemStatus <> sisAdded) then
-         begin
-           //revision
-           SubItems.Add(IntToStr(SVNItem.Revision));
-           //commit revision
-           SubItems.Add(IntToStr(SVNItem.CommitRevision));
-           //author
-           SubItems.Add(SVNItem.Author);
-           //date
-           SubItems.Add(DateTimeToStr(SVNItem.Date));
-         end
+           begin
+             SubItems.Add(IntToStr(SVNItem.Revision));
+             SubItems.Add(IntToStr(SVNItem.CommitRevision));
+             SubItems.Add(SVNItem.Author);
+             if (SVNItem.DateModified) <> 0 then
+               SubItems.Add(DateTimeToStr(SVNItem.DateModified))
+             else
+               SubItems.Add('');
+             SubItems.Add(SVNItem.Extension);
+             SubItems.Add(DateTimeToStr(SVNItem.DateSVN));
+           end
          else
-         begin
-           //revision
-           SubItems.Add('');
-           //commit revision
-           SubItems.Add('');
-           //author
-           SubItems.Add('');
-           //date
-           SubItems.Add('');
-         end;
+           begin
+             SubItems.Add('');
+             SubItems.Add('');
+             SubItems.Add('');
+             if (SVNItem.DateModified) <> 0 then
+               SubItems.Add(DateTimeToStr(SVNItem.DateModified))
+             else
+               SubItems.Add('');
 
-         //extension
-         SubItems.Add(SVNItem.Extension);
+             SubItems.Add(SVNItem.Extension);
+             SubItems.Add('');
+           end;
+
          //file status
          SubItems.Add(TSVNClient.ItemStatusToStatus(SVNItem.ItemStatus));
          //property status
@@ -245,10 +246,11 @@ begin
   SetColumn(SVNFileListView, 2, 75, rsRevision, True, taRightJustify);
   SetColumn(SVNFileListView, 3, 75, rsCommitRevision, True, taRightJustify);
   SetColumn(SVNFileListView, 4, 75, rsAuthor, True, taLeftJustify);
-  SetColumn(SVNFileListView, 5, 75, rsDate, True, taRightJustify);
+  SetColumn(SVNFileListView, 5, 75, rsDateModified, True, taRightJustify);
   SetColumn(SVNFileListView, 6, 75, rsExtension, True, taLeftJustify);
-  SetColumn(SVNFileListView, 7, 100, rsFileStatus, True, taLeftJustify);
-  SetColumn(SVNFileListView, 8, 125, rsPropertyStatus, True, taLeftJustify);
+  SetColumn(SVNFileListView, 7, 75, rsDateSVN, True, taRightJustify);
+  SetColumn(SVNFileListView, 8, 100, rsFileStatus, True, taLeftJustify);
+  SetColumn(SVNFileListView, 9, 125, rsPropertyStatus, True, taLeftJustify);
 
   Filter:=[sisAdded,
            sisConflicted,
@@ -353,10 +355,11 @@ begin
     2: SVNClient.List.ReverseSort(siRevision);
     3: SVNClient.List.ReverseSort(siCommitRevision);
     4: SVNClient.List.ReverseSort(siAuthor);
-    5: SVNClient.List.ReverseSort(siDate);
+    5: SVNClient.List.ReverseSort(siDateModified);
     6: SVNClient.List.ReverseSort(siExtension);
-    7: SVNClient.List.ReverseSort(siItemStatus);
-    8: SVNClient.List.ReverseSort(siPropStatus);
+    7: SVNClient.List.ReverseSort(siDateSVN);
+    8: SVNClient.List.ReverseSort(siItemStatus);
+    9: SVNClient.List.ReverseSort(siPropStatus);
   end;
 
   UpdateFilesListView;
