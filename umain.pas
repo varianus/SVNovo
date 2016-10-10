@@ -39,6 +39,8 @@ type
 
   TfMain = class(TForm)
     actCommit: TAction;
+    actAdd: TAction;
+    actAbout: TAction;
     actRefresh: TAction;
     actShowUnversioned: TAction;
     actFlatMode: TAction;
@@ -51,6 +53,8 @@ type
     MainMenu: TMainMenu;
     Memo1: TMemo;
     MenuItem1: TMenuItem;
+    MenuItem2: TMenuItem;
+    MenuItem3: TMenuItem;
     Panel1: TPanel;
     Panel2: TPanel;
     Splitter1: TSplitter;
@@ -61,6 +65,7 @@ type
     ToolButton1: TToolButton;
     ToolButton10: TToolButton;
     ToolButton11: TToolButton;
+    ToolButton12: TToolButton;
     ToolButton2: TToolButton;
     ToolButton3: TToolButton;
     ToolButton4: TToolButton;
@@ -70,6 +75,8 @@ type
     ToolButton8: TToolButton;
     ToolButton9: TToolButton;
     tvBookMark: TTreeView;
+    procedure actAboutExecute(Sender: TObject);
+    procedure actAddExecute(Sender: TObject);
     procedure actCommitExecute(Sender: TObject);
     procedure actFlatModeExecute(Sender: TObject);
     procedure actRefreshExecute(Sender: TObject);
@@ -104,7 +111,7 @@ var
   fMain: TfMain;
 
 implementation
-uses LazFileUtils, Config, FilesSupport;
+uses LazFileUtils, LCLProc, Config, FilesSupport, uabout;
 {$R *.lfm}
 
 { TfMain }
@@ -279,6 +286,7 @@ end;
 
 procedure TfMain.actUpdateExecute(Sender: TObject);
 begin
+
   SVNClient.OnUpdate:=@log ;
   SVNClient.Update();
 end;
@@ -286,6 +294,20 @@ end;
 procedure TfMain.actCommitExecute(Sender: TObject);
 begin
 //
+end;
+
+procedure TfMain.actAddExecute(Sender: TObject);
+begin
+  //
+  //
+end;
+
+procedure TfMain.actAboutExecute(Sender: TObject);
+var
+  theForm : TfAbout;
+begin
+  theForm:= TfAbout.create(application);
+  theForm.ShowModal;
 end;
 
 procedure TfMain.actFlatModeExecute(Sender: TObject);
