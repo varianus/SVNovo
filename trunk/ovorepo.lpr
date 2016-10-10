@@ -26,7 +26,7 @@ uses
   cthreads,
   {$ENDIF}{$ENDIF}
   Interfaces, // this includes the LCL widgetset
-  Forms, uMain, Config, SVNClasses, FilesSupport;
+  Forms, uMain, Config, SVNClasses, FilesSupport, formupdate, ulicense;
 
 {$R *.res}
 
@@ -34,6 +34,7 @@ begin
   RequireDerivedFormResource:=True;
   Application.Initialize;
   Application.CreateForm(TfMain, fMain);
+  Application.CreateForm(TForm1, Form1);
   Application.Run;
 end.
 

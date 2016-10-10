@@ -57,7 +57,7 @@
         <PackageName Value="LCL"/>
       </Item1>
     </RequiredPackages>
-    <Units Count="5">
+    <Units Count="8">
       <Unit0>
         <Filename Value="ovorepo.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -85,6 +85,28 @@
         <IsPartOfProject Value="True"/>
         <UnitName Value="FilesSupport"/>
       </Unit4>
+      <Unit5>
+        <Filename Value="formupdate.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="Form1"/>
+        <ResourceBaseClass Value="Form"/>
+      </Unit5>
+      <Unit6>
+        <Filename Value="uabout.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="fAbout"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+        <UnitName Value="uAbout"/>
+      </Unit6>
+      <Unit7>
+        <Filename Value="ulicense.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="fLicense"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+        <UnitName Value="uLicense"/>
+      </Unit7>
     </Units>
   </ProjectOptions>
   <CompilerOptions>
