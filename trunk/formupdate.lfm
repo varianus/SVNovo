@@ -1,8 +1,9 @@
-object Form1: TForm1
+object fUpdate: TfUpdate
   Left = 0
   Height = 138
   Top = 0
   Width = 266
+  ActiveControl = cbLatest
   Caption = 'Update'
   ClientHeight = 138
   ClientWidth = 266
@@ -50,6 +51,8 @@ object Form1: TForm1
       Top = 8
       Width = 70
       Caption = 'Recursive'
+      Checked = True
+      State = cbChecked
       TabOrder = 0
     end
     object ButtonPanel1: TButtonPanel

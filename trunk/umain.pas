@@ -111,7 +111,7 @@ var
   fMain: TfMain;
 
 implementation
-uses LazFileUtils, LCLProc, Config, FilesSupport, uabout;
+uses LazFileUtils, LCLProc, Config, FilesSupport, uabout, formupdate;
 {$R *.lfm}
 
 { TfMain }
@@ -279,16 +279,30 @@ begin
 
 end;
 
-procedure TfMain.Log (Sender: TObject; const Status: TSVNItemStatus; const fileName: TFileName);
+procedure TfMain.Log (Sender: TObject; const Status: TSVNItemStatus; const FileName: TFileName);
 begin
-  Memo1.Lines.Add(fileName);
+
+  Memo1.Lines.Add( TSVNClient.ItemStatusToStatus(Status)+': '+ FileName);
 end;
 
 procedure TfMain.actUpdateExecute(Sender: TObject);
+var
+  Upd: TfUpdate;
 begin
 
-  SVNClient.OnUpdate:=@log ;
-  SVNClient.Update();
+  Upd := TfUpdate.Create(self);
+  try
+    if Upd.ShowModal = mrOK then
+      begin
+        SVNClient.OnUpdate:=@log ;
+        if not (upd.cbLatest.Checked) and (trim(Upd.eRevision.text) <> EmptyStr) then
+          SVNClient.Update(Upd.eRevision.text)
+        else
+          SVNClient.Update();
+      end;
+  finally
+    Upd.Free;
+  end;
 end;
 
 procedure TfMain.actCommitExecute(Sender: TObject);

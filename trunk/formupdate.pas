@@ -10,9 +10,9 @@ uses
 
 type
 
-  { TForm1 }
+  { TfUpdate }
 
-  TForm1 = class(TForm)
+  TfUpdate = class(TForm)
     ButtonPanel1: TButtonPanel;
     cbLatest: TCheckBox;
     cbRecursive: TCheckBox;
@@ -26,7 +26,7 @@ type
   end;
 
 var
-  Form1: TForm1;
+  fUpdate: TfUpdate;
 
 implementation
 
