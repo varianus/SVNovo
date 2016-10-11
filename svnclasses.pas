@@ -449,7 +449,7 @@ begin
         Sts:= sisNone;
       end;
 
-      if Assigned(CallBack) then
+      if Assigned(CallBack) and (sts <> sisNone)  then
          CallBack(Self, sts, Trim(Copy(S[n],i, Length(S[n])-i+1)));
 
     end;
