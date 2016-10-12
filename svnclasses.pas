@@ -596,6 +596,7 @@ begin
     'obstructed' :  Result :=  sisObstructed;
     'replaced'   :  Result :=  sisReplaced;
     'unversioned':  Result :=  sisUnversioned;
+    'updated'    :  Result :=  sisUnversioned;
   else
     Result := sisNone;
   end;
@@ -604,13 +605,13 @@ end;
 class function TSVNClient.ItemStatusToStatus(Status: TSVNItemStatus): string;
 begin
   Case Status of
-    sisAdded:       Result := 'added';
-    sisConflicted:  Result := 'conflicted';
-    sisDeleted:     Result := 'deleted';
+    sisAdded:       Result := rsAdded;
+    sisConflicted:  Result := 'Conflicted';
+    sisDeleted:     Result := rsDeleted;
     sisExternal:    Result := 'external';
     sisIgnored:     Result := 'ignored';
     sisIncomplete:  Result := 'incomplete';
-    sisMerged:      Result := 'merged';
+    sisMerged:      Result := rsMerged;
     sisMissing:     Result := 'missing';
     sisModified:    Result := 'modified';
     sisNone:        Result := 'none';
@@ -618,6 +619,7 @@ begin
     sisObstructed:  Result := 'obstructed';
     sisReplaced:    Result := 'replaced';
     sisUnversioned: Result := 'unversioned';
+    sisUpdated:     Result := rsUpdated;
   else
     Result := '';
   end;
