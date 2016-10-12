@@ -226,6 +226,7 @@ begin
       item := TFileTreeNode(tvBookMark.Items.AddChild(tvBookMark.Items[0], st[i]));
       item.FullPath:= st[i];
       item.ImageIndex:= 5;
+      item.StateIndex:= 5;
       item.HasChildren:=true;
     end;
   tvBookMark.Items[0].Expand(False);
