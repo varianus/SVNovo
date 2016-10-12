@@ -25,6 +25,7 @@ object fUpdate: TfUpdate
       Width = 70
       Caption = 'Use latest'
       Checked = True
+      OnChange = cbLatestChange
       State = cbChecked
       TabOrder = 0
     end
@@ -33,6 +34,7 @@ object fUpdate: TfUpdate
       Height = 23
       Top = 0
       Width = 144
+      Enabled = False
       TabOrder = 1
     end
   end

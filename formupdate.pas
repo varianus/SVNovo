@@ -19,6 +19,7 @@ type
     eRevision: TEdit;
     GroupBox1: TGroupBox;
     Panel1: TPanel;
+    procedure cbLatestChange(Sender: TObject);
   private
 
   public
@@ -31,6 +32,13 @@ var
 implementation
 
 {$R *.lfm}
+
+{ TfUpdate }
+
+procedure TfUpdate.cbLatestChange(Sender: TObject);
+begin
+  eRevision.Enabled:=  not cbLatest.Checked;
+end;
 
 end.
 
