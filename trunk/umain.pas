@@ -98,6 +98,7 @@ type
     SVNClient : TSVNClient;
     RepositoryPath: string;
     Filter: TSVNItemStatusSet;
+    procedure GetSelectedElements(Elements: Tstrings);
     procedure LoadBookmarks;
     procedure LoadTree(Node: TTreeNode; BasePath: string);
     procedure Log(Sender: TObject; const Status: TSVNItemStatus;
@@ -286,20 +287,44 @@ begin
   Memo1.Lines.Add( TSVNClient.ItemStatusToStatus(Status)+': '+ FileName);
 end;
 
+Procedure TfMain.GetSelectedElements(Elements: Tstrings);
+var
+  i: integer;
+begin
+  Elements.Clear;
+  if ActiveControl = tvBookMark then
+    Elements.Add(TFileTreeNode(tvBookMark.Selected).FullPath);
+
+  if ActiveControl = SVNFileListView then
+    for i := 0 to SVNFileListView.Items.Count -1 do
+       if SVNFileListView.Items[i].Selected then
+         Elements.Add(CreateRelativePath(TSVNStatusItem(SVNFileListView.Items[i].Data).Path,
+                                         SVNClient.RepositoryPath,  false));
+
+end;
+
 procedure TfMain.actUpdateExecute(Sender: TObject);
 var
   Upd: TfUpdate;
+  Elements: TstringList;
 begin
 
   Upd := TfUpdate.Create(self);
   try
     if Upd.ShowModal = mrOK then
       begin
-        SVNClient.OnUpdate:=@log ;
-        if not (upd.cbLatest.Checked) and (trim(Upd.eRevision.text) <> EmptyStr) then
-          SVNClient.Update(Upd.eRevision.text)
-        else
-          SVNClient.Update();
+        Elements := TStringList.Create;
+        try
+          SVNClient.OnUpdate:=@log ;
+          GetSelectedElements(Elements);
+          if not (upd.cbLatest.Checked) and (trim(Upd.eRevision.text) <> EmptyStr) then
+            SVNClient.Update(Elements, Upd.eRevision.text)
+          else
+            SVNClient.Update(Elements);
+
+        finally
+          Elements.free;
+        end;
       end;
   finally
     Upd.Free;
