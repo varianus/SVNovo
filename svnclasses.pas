@@ -194,7 +194,7 @@ type
     destructor Destroy; override;
     //
     procedure LoadStatus;
-    Procedure Update(Revision:string = '');
+    Procedure Update(Elements: TStrings; Revision:string = '');
     //
     Property OnUpdate: TFileEvent read FOnUpdate write SetOnUpdate;
     Property SVNExecutable: string read GetSvnExecutable write fSvnExecutable;
@@ -436,6 +436,7 @@ begin
 
   for n := 0 to S.Count - 1 do
     begin
+      DebugLn(s[N]);
       //find position of first space character
       i := pos(' ', S[n]);
       str := Copy(S[n],1, i - 1);
@@ -469,8 +470,9 @@ begin
   AProcess := TProcessUTF8.Create(nil);
   AProcess.Executable := SVNExecutable;
   AProcess.Parameters.Assign(ACommand);
-  debugln('TSVNLogFrm.ExecuteSvn CommandLine ' + AProcess.CommandLine);
+  AProcess.CurrentDirectory:= RepositoryPath;
   AProcess.Options := AProcess.Options + [poUsePipes, poStdErrToOutput];
+//  AProcess.Options := AProcess.Options + [poRunSuspended];
 //  AProcess.ShowWindow := swoHIDE;
   AProcess.Execute;
 
@@ -752,7 +754,7 @@ begin
   List.Sort;
 end;
 
-procedure TSVNClient.Update(Revision:string = '');
+procedure TSVNClient.Update(Elements: TStrings; Revision:string = '');
 var
   Commands: TStringList;
 begin
@@ -763,7 +765,10 @@ begin
   if (Revision <> '') and (trim(Revision) <> 'HEAD') then
     Commands.Add('-r ' + Revision);
 
-  Commands.Add(FRepositoryPath);  ;
+  if not Assigned(Elements) or (Elements.Count = 0) then
+    Commands.Add(FRepositoryPath)
+  else
+    Commands.AddStrings(Elements);
 
   ExecuteSvn(Commands, FOnUpdate);
 
