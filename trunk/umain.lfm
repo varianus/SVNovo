@@ -81,13 +81,13 @@ object fMain: TfMain
         Action = actCommit
       end
       object ToolButton3: TToolButton
-        Left = 78
+        Left = 109
         Top = 2
         Action = actFlatMode
         Style = tbsCheck
       end
       object ToolButton4: TToolButton
-        Left = 70
+        Left = 47
         Height = 22
         Top = 2
         Width = 8
@@ -95,7 +95,7 @@ object fMain: TfMain
         Style = tbsSeparator
       end
       object ToolButton5: TToolButton
-        Left = 101
+        Left = 132
         Height = 22
         Top = 2
         Width = 8
@@ -103,31 +103,31 @@ object fMain: TfMain
         Style = tbsSeparator
       end
       object ToolButton6: TToolButton
-        Left = 109
+        Left = 140
         Top = 2
         Action = actShowUnversioned
         Style = tbsCheck
       end
       object ToolButton7: TToolButton
-        Left = 132
+        Left = 163
         Top = 2
         Action = actShowUnmodified
         Style = tbsCheck
       end
       object ToolButton8: TToolButton
-        Left = 155
+        Left = 186
         Top = 2
         Action = actShowModified
         Style = tbsCheck
       end
       object ToolButton9: TToolButton
-        Left = 178
+        Left = 209
         Top = 2
         Action = actShowConflict
         Style = tbsCheck
       end
       object ToolButton10: TToolButton
-        Left = 201
+        Left = 232
         Height = 22
         Top = 2
         Width = 8
@@ -135,14 +135,27 @@ object fMain: TfMain
         Style = tbsSeparator
       end
       object ToolButton11: TToolButton
-        Left = 209
+        Left = 240
         Top = 2
         Action = actRefresh
       end
       object ToolButton12: TToolButton
-        Left = 47
+        Left = 55
         Top = 2
         Action = actAdd
+      end
+      object ToolButton13: TToolButton
+        Left = 101
+        Height = 22
+        Top = 2
+        Width = 8
+        Caption = 'ToolButton13'
+        Style = tbsSeparator
+      end
+      object ToolButton14: TToolButton
+        Left = 78
+        Top = 2
+        Action = actRevert
       end
     end
     object SVNFileListView: TListView
@@ -247,7 +260,7 @@ object fMain: TfMain
     object actCommit: TAction
       Category = 'Commit'
       Caption = 'Commit'
-      Enabled = False
+      DisableIfNoHandler = False
       ImageIndex = 7
       OnExecute = actCommitExecute
     end
@@ -300,13 +313,20 @@ object fMain: TfMain
     object actAdd: TAction
       Category = 'Commit'
       Caption = 'Add'
-      Enabled = False
+      DisableIfNoHandler = False
       ImageIndex = 0
       OnExecute = actAddExecute
     end
     object actAbout: TAction
       Caption = 'About...'
+      DisableIfNoHandler = False
       OnExecute = actAboutExecute
+    end
+    object actRevert: TAction
+      Caption = 'Revert'
+      DisableIfNoHandler = False
+      ImageIndex = 77
+      OnExecute = actRevertExecute
     end
   end
   object ImageList_22x22: TImageList
