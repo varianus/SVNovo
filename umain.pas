@@ -41,6 +41,7 @@ type
     actCommit: TAction;
     actAdd: TAction;
     actAbout: TAction;
+    actRevert: TAction;
     actRefresh: TAction;
     actShowUnversioned: TAction;
     actFlatMode: TAction;
@@ -66,6 +67,8 @@ type
     ToolButton10: TToolButton;
     ToolButton11: TToolButton;
     ToolButton12: TToolButton;
+    ToolButton13: TToolButton;
+    ToolButton14: TToolButton;
     ToolButton2: TToolButton;
     ToolButton3: TToolButton;
     ToolButton4: TToolButton;
@@ -80,6 +83,7 @@ type
     procedure actCommitExecute(Sender: TObject);
     procedure actFlatModeExecute(Sender: TObject);
     procedure actRefreshExecute(Sender: TObject);
+    procedure actRevertExecute(Sender: TObject);
     procedure actShowConflictExecute(Sender: TObject);
     procedure actShowModifiedExecute(Sender: TObject);
     procedure actShowUnmodifiedExecute(Sender: TObject);
@@ -329,6 +333,8 @@ begin
   finally
     Upd.Free;
   end;
+  actRefresh.Execute;
+
 end;
 
 procedure TfMain.actCommitExecute(Sender: TObject);
@@ -337,10 +343,24 @@ begin
 end;
 
 procedure TfMain.actAddExecute(Sender: TObject);
+var
+  Elements: TstringList;
 begin
-  //
-  //
+
+  Elements := TStringList.Create;
+  try
+    SVNClient.OnUpdate:=@log ;
+    GetSelectedElements(Elements);
+    SVNClient.Add(Elements);
+  finally
+    Elements.free;
+  end;
+
+  actRefresh.Execute;
+
+
 end;
+
 
 procedure TfMain.actAboutExecute(Sender: TObject);
 var
@@ -360,6 +380,23 @@ procedure TfMain.actRefreshExecute(Sender: TObject);
 begin
   SVNClient.LoadStatus;
   UpdateFilesListView;
+end;
+
+procedure TfMain.actRevertExecute(Sender: TObject);
+var
+  Elements: TstringList;
+begin
+
+  Elements := TStringList.Create;
+  try
+    SVNClient.OnUpdate:=@log ;
+    GetSelectedElements(Elements);
+    SVNClient.Revert(Elements);
+  finally
+    Elements.free;
+  end;
+  actRefresh.Execute;
+
 end;
 
 procedure TfMain.actShowConflictExecute(Sender: TObject);

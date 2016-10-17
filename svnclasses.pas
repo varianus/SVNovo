@@ -195,6 +195,10 @@ type
     //
     procedure LoadStatus;
     Procedure Update(Elements: TStrings; Revision:string = '');
+    procedure Add(Elements: TStrings; Recursive: boolean=false);
+    procedure Revert(Elements: TStrings; Recursive: boolean=false);
+
+
     //
     Property OnUpdate: TFileEvent read FOnUpdate write SetOnUpdate;
     Property SVNExecutable: string read GetSvnExecutable write fSvnExecutable;
@@ -776,6 +780,53 @@ begin
     Commands.Free;
   end;
 end;
+
+procedure TSVNClient.Add(Elements: TStrings; Recursive: boolean= false);
+var
+  Commands: TStringList;
+begin
+  Commands := TstringList.Create;
+  Commands.AddStrings(['add','--non-interactive', '--trust-server-cert']);
+
+  try
+  if Recursive  then
+    Commands.Add('--depth=infinity');
+
+  if not Assigned(Elements) or (Elements.Count = 0) then
+    Commands.Add(FRepositoryPath)
+  else
+    Commands.AddStrings(Elements);
+
+  ExecuteSvn(Commands, FOnUpdate);
+
+  finally
+    Commands.Free;
+  end;
+end;
+
+procedure TSVNClient.Revert(Elements: TStrings; Recursive: boolean= false);
+var
+  Commands: TStringList;
+begin
+  Commands := TstringList.Create;
+  Commands.AddStrings(['revert','--non-interactive', '--trust-server-cert']);
+
+  try
+  if Recursive  then
+    Commands.Add('--depth=infinity');
+
+  if not Assigned(Elements) or (Elements.Count = 0) then
+    Commands.Add(FRepositoryPath)
+  else
+    Commands.AddStrings(Elements);
+
+  ExecuteSvn(Commands, FOnUpdate);
+
+  finally
+    Commands.Free;
+  end;
+end;
+
 
 procedure TSVNClient.SetFlatMode(AValue: boolean);
 begin
