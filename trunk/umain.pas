@@ -51,6 +51,7 @@ type
     actUpdate: TAction;
     ActionList: TActionList;
     ImageList_22x22: TImageList;
+    ImageList_22x22_mask: TImageList;
     MainMenu: TMainMenu;
     Memo1: TMemo;
     MenuItem1: TMenuItem;
@@ -82,6 +83,7 @@ type
     procedure actAddExecute(Sender: TObject);
     procedure actCommitExecute(Sender: TObject);
     procedure actFlatModeExecute(Sender: TObject);
+    procedure ActionListUpdate(AAction: TBasicAction; var Handled: Boolean);
     procedure actRefreshExecute(Sender: TObject);
     procedure actRevertExecute(Sender: TObject);
     procedure actShowConflictExecute(Sender: TObject);
@@ -125,7 +127,7 @@ procedure TfMain.UpdateFilesListView;
 var
   i: integer;
   Item: TListItem;
-  SVNItem: TSVNStatusItem;
+  SVNItem: TSVNItem;
   Path: string;
   imgIdx: integer;
 
@@ -296,14 +298,15 @@ var
   i: integer;
 begin
   Elements.Clear;
-  if ActiveControl = tvBookMark then
+  if (ActiveControl = tvBookMark) and Assigned(tvBookMark.Selected) then
     Elements.Add(TFileTreeNode(tvBookMark.Selected).FullPath);
 
   if ActiveControl = SVNFileListView then
     for i := 0 to SVNFileListView.Items.Count -1 do
        if SVNFileListView.Items[i].Selected then
-         Elements.Add(CreateRelativePath(TSVNStatusItem(SVNFileListView.Items[i].Data).Path,
-                                         SVNClient.RepositoryPath,  false));
+         Elements.AddObject(CreateRelativePath(TSVNItem(SVNFileListView.Items[i].Data).Path,
+                                               SVNClient.RepositoryPath,  false),
+                            TSVNItem(SVNFileListView.Items[i].Data));
 
 end;
 
@@ -374,6 +377,30 @@ procedure TfMain.actFlatModeExecute(Sender: TObject);
 begin
   SVNClient.FlatMode:= actFlatMode.Checked;
   UpdateFilesListView;
+end;
+
+procedure TfMain.ActionListUpdate(AAction: TBasicAction; var Handled: Boolean);
+var
+  Elements: TstringList;
+  i: integer;
+  cnt: array [TSVNItemStatus] of integer;
+begin
+
+  Elements := TStringList.Create;
+  FillByte(Cnt, SizeOf(cnt),0);
+  try
+    GetSelectedElements(Elements);
+    for i := 0 to Elements.Count - 1 do
+      if Assigned(Elements.Objects[i]) then
+        inc(cnt[TSVNItem(Elements.Objects[i]).ItemStatus]);
+
+    actAdd.Enabled:= cnt[sisUnversioned] = Elements.Count;
+
+  finally
+    Elements.free;
+  end;
+
+
 end;
 
 procedure TfMain.actRefreshExecute(Sender: TObject);
@@ -466,7 +493,7 @@ end;
 
 procedure TfMain.SVNFileListViewData(Sender: TObject; Item: TListItem);
 var
-  StatusItem : TSVNStatusItem;
+  StatusItem : TSVNItem;
   Path: string;
   imgidx: integer;
 begin
@@ -479,7 +506,7 @@ procedure TfMain.SVNFileListViewSelectItem(Sender: TObject; Item: TListItem;
   Selected: Boolean);
 begin
   if Assigned(Item.Data) then
-    TSVNStatusItem(Item.Data).Selected:=Selected;
+    TSVNItem(Item.Data).Selected:=Selected;
 
 end;
 
