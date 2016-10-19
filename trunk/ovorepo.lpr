@@ -26,7 +26,8 @@ uses
   cthreads,
   {$ENDIF}{$ENDIF}
   Interfaces, // this includes the LCL widgetset
-  Forms, uMain, Config, SVNClasses, FilesSupport, formupdate, ulicense;
+  Forms, uMain, Config, SVNClasses, FilesSupport, formupdate, ulicense,
+formcommit;
 
 {$R *.res}
 
@@ -35,6 +36,7 @@ begin
   Application.Initialize;
   Application.CreateForm(TfMain, fMain);
   Application.CreateForm(TfUpdate, fUpdate);
+  Application.CreateForm(TForm1, Form1);
   Application.Run;
 end.
 
