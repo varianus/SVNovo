@@ -4,7 +4,7 @@ object fMain: TfMain
   Top = 0
   Width = 1202
   ActiveControl = tvBookMark
-  Caption = 'fMain'
+  Caption = 'OvoRepo'
   ClientHeight = 616
   ClientWidth = 1202
   Menu = MainMenu

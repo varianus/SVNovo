@@ -1,0 +1,65 @@
+object Form1: TForm1
+  Left = 0
+  Height = 483
+  Top = 0
+  Width = 510
+  Caption = 'Commit'
+  ClientHeight = 483
+  ClientWidth = 510
+  Visible = False
+  object GroupBox1: TGroupBox
+    Left = 0
+    Height = 169
+    Top = 0
+    Width = 510
+    Align = alTop
+    Caption = 'Enter log Message'
+    ClientHeight = 149
+    ClientWidth = 506
+    TabOrder = 0
+    object mLogMessage: TMemo
+      Left = 0
+      Height = 149
+      Top = 0
+      Width = 506
+      Align = alClient
+      TabOrder = 0
+    end
+  end
+  object GroupBox2: TGroupBox
+    Left = 0
+    Height = 268
+    Top = 169
+    Width = 510
+    Align = alClient
+    Caption = 'Files to commit'
+    ClientHeight = 248
+    ClientWidth = 506
+    TabOrder = 1
+    object CheckListBox1: TCheckListBox
+      Left = 0
+      Height = 248
+      Top = 0
+      Width = 506
+      Align = alClient
+      ItemHeight = 0
+      TabOrder = 0
+    end
+  end
+  object ButtonPanel1: TButtonPanel
+    Left = 6
+    Height = 34
+    Top = 443
+    Width = 498
+    OKButton.Name = 'OKButton'
+    OKButton.DefaultCaption = True
+    HelpButton.Name = 'HelpButton'
+    HelpButton.DefaultCaption = True
+    CloseButton.Name = 'CloseButton'
+    CloseButton.DefaultCaption = True
+    CancelButton.Name = 'CancelButton'
+    CancelButton.DefaultCaption = True
+    TabOrder = 2
+    ShowButtons = [pbOK, pbCancel]
+  end
+end
