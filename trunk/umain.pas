@@ -118,7 +118,8 @@ var
   fMain: TfMain;
 
 implementation
-uses LazFileUtils, LCLProc, Config, FilesSupport, uabout, formupdate;
+uses LazFileUtils, LCLProc, Config, FilesSupport, uabout, formupdate,
+  formcommit;
 {$R *.lfm}
 
 { TfMain }
@@ -341,8 +342,29 @@ begin
 end;
 
 procedure TfMain.actCommitExecute(Sender: TObject);
+var
+  Cmt: TfCommit;
+  Elements: TstringList;
 begin
-//
+
+  Cmt := TfCommit.Create(self);
+  try
+    Elements := TStringList.Create;
+    GetSelectedElements(Elements);
+    Cmt.CheckListBox1.Items.Assign(Elements);
+    if Cmt.ShowModal = mrOK then
+      begin
+        try
+          SVNClient.OnUpdate:=@log ;
+          SVNClient.Commit(Elements, Cmt.mLogMessage.Text, true);
+        finally
+          Elements.free;
+        end;
+      end;
+  finally
+    Cmt.Free;
+  end;
+  actRefresh.Execute;
 end;
 
 procedure TfMain.actAddExecute(Sender: TObject);

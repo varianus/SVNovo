@@ -1,8 +1,9 @@
-object Form1: TForm1
+object fCommit: TfCommit
   Left = 0
   Height = 483
   Top = 0
   Width = 510
+  ActiveControl = mLogMessage
   Caption = 'Commit'
   ClientHeight = 483
   ClientWidth = 510

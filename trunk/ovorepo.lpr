@@ -36,7 +36,7 @@ begin
   Application.Initialize;
   Application.CreateForm(TfMain, fMain);
   Application.CreateForm(TfUpdate, fUpdate);
-  Application.CreateForm(TForm1, Form1);
+  Application.CreateForm(TfCommit, fCommit);
   Application.Run;
 end.
 
