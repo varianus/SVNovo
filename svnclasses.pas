@@ -197,6 +197,7 @@ type
     Procedure Update(Elements: TStrings; Revision:string = '');
     procedure Add(Elements: TStrings; Recursive: boolean=false);
     procedure Revert(Elements: TStrings; Recursive: boolean=false);
+    procedure Commit(Elements: TStrings; Message: string; Recursive: boolean=false);
 
 
     //
@@ -465,7 +466,7 @@ begin
 
 end;
 
-Procedure TSVNClient.ExecuteSvn(ACommand: TStrings; CallBack:TFileEvent);
+procedure TSVNClient.ExecuteSvn(ACommand: TStrings; CallBack: TFileEvent);
 var
   AProcess: TProcessUTF8;
   MemStream: TMemoryStream;
@@ -826,6 +827,34 @@ begin
     Commands.Free;
   end;
 end;
+
+procedure TSVNClient.Commit(Elements: TStrings; Message: string;
+  Recursive: boolean);
+var
+  Commands: TStringList;
+begin
+  Commands := TstringList.Create;
+  Commands.AddStrings(['commit','--non-interactive', '--trust-server-cert']);
+
+  try
+  if Recursive  then
+    Commands.Add('--depth=infinity');
+
+  if not Assigned(Elements) or (Elements.Count = 0) then
+    Commands.Add(FRepositoryPath)
+  else
+    Commands.AddStrings(Elements);
+
+  Commands.Add('-m');
+  Commands.Add(AnsiQuotedStr(Message, '"'));
+
+  ExecuteSvn(Commands, FOnUpdate);
+
+  finally
+    Commands.Free;
+  end;
+end;
+
 
 
 procedure TSVNClient.SetFlatMode(AValue: boolean);

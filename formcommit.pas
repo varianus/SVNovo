@@ -10,9 +10,9 @@ uses
 
 type
 
-  { TForm1 }
+  { TfCommit }
 
-  TForm1 = class(TForm)
+  TfCommit = class(TForm)
     ButtonPanel1: TButtonPanel;
     CheckListBox1: TCheckListBox;
     GroupBox1: TGroupBox;
@@ -25,7 +25,7 @@ type
   end;
 
 var
-  Form1: TForm1;
+  fCommit: TfCommit;
 
 implementation
 
