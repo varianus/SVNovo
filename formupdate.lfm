@@ -7,6 +7,7 @@ object fUpdate: TfUpdate
   Caption = 'Update'
   ClientHeight = 138
   ClientWidth = 266
+  Position = poMainFormCenter
   Visible = False
   object GroupBox1: TGroupBox
     Left = 0
