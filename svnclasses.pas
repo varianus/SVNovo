@@ -198,8 +198,7 @@ type
     procedure Add(Elements: TStrings; Recursive: boolean=false);
     procedure Revert(Elements: TStrings; Recursive: boolean=false);
     procedure Commit(Elements: TStrings; Message: string; Recursive: boolean=false);
-
-
+    procedure CleanUp;
     //
     Property OnUpdate: TFileEvent read FOnUpdate write SetOnUpdate;
     Property SVNExecutable: string read GetSvnExecutable write fSvnExecutable;
@@ -823,6 +822,21 @@ begin
 
   ExecuteSvn(Commands, FOnUpdate);
 
+  finally
+    Commands.Free;
+  end;
+end;
+
+
+procedure TSVNClient.CleanUp;
+var
+  Commands: TStringList;
+begin
+  Commands := TstringList.Create;
+  Commands.AddStrings(['cleanup','--non-interactive', '--trust-server-cert']);
+
+  try
+    ExecuteSvn(Commands, FOnUpdate);
   finally
     Commands.Free;
   end;

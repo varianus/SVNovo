@@ -41,6 +41,7 @@ type
     actCommit: TAction;
     actAdd: TAction;
     actAbout: TAction;
+    actCleanup: TAction;
     actRevert: TAction;
     actRefresh: TAction;
     actShowUnversioned: TAction;
@@ -57,6 +58,8 @@ type
     MenuItem1: TMenuItem;
     MenuItem2: TMenuItem;
     MenuItem3: TMenuItem;
+    MenuItem4: TMenuItem;
+    MenuItem5: TMenuItem;
     Panel1: TPanel;
     Panel2: TPanel;
     Splitter1: TSplitter;
@@ -81,6 +84,7 @@ type
     tvBookMark: TTreeView;
     procedure actAboutExecute(Sender: TObject);
     procedure actAddExecute(Sender: TObject);
+    procedure actCleanupExecute(Sender: TObject);
     procedure actCommitExecute(Sender: TObject);
     procedure actFlatModeExecute(Sender: TObject);
     procedure ActionListUpdate(AAction: TBasicAction; var Handled: Boolean);
@@ -384,6 +388,11 @@ begin
   actRefresh.Execute;
 
 
+end;
+
+procedure TfMain.actCleanupExecute(Sender: TObject);
+begin
+  SVNClient.CleanUp;
 end;
 
 
