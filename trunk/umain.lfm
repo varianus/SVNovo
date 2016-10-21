@@ -243,6 +243,12 @@ object fMain: TfMain
     object MenuItem1: TMenuItem
       Caption = 'File'
     end
+    object MenuItem4: TMenuItem
+      Caption = 'Extra'
+      object MenuItem5: TMenuItem
+        Action = actCleanup
+      end
+    end
     object MenuItem2: TMenuItem
       Caption = 'Help'
       object MenuItem3: TMenuItem
@@ -256,6 +262,7 @@ object fMain: TfMain
     left = 128
     top = 328
     object actUpdate: TAction
+      Category = 'Commit'
       Caption = 'Update'
       DisableIfNoHandler = False
       ImageIndex = 81
@@ -309,6 +316,7 @@ object fMain: TfMain
       OnExecute = actShowConflictExecute
     end
     object actRefresh: TAction
+      Category = 'Filter'
       Caption = 'actRefresh'
       DisableIfNoHandler = False
       ImageIndex = 58
@@ -322,15 +330,22 @@ object fMain: TfMain
       OnExecute = actAddExecute
     end
     object actAbout: TAction
+      Category = 'Help'
       Caption = 'About...'
       DisableIfNoHandler = False
       OnExecute = actAboutExecute
     end
     object actRevert: TAction
+      Category = 'Commit'
       Caption = 'Revert'
       DisableIfNoHandler = False
       ImageIndex = 77
       OnExecute = actRevertExecute
+    end
+    object actCleanup: TAction
+      Category = 'Tools'
+      Caption = 'Cleanup'
+      OnExecute = actCleanupExecute
     end
   end
   object ImageList_22x22: TImageList
