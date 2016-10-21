@@ -200,6 +200,7 @@ object fMain: TfMain
         end>
       HideSelection = False
       MultiSelect = True
+      PopupMenu = pmElements
       ReadOnly = True
       RowSelect = True
       SmallImages = ImageList_22x22
@@ -5738,5 +5739,22 @@ object fMain: TfMain
       FF00FFFFFF008499A00A4C595D06FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
       FF00FFFFFF00FFFFFF00FFFFFF00
     }
+  end
+  object pmElements: TPopupMenu
+    Images = ImageList_22x22
+    left = 411
+    top = 164
+    object MenuItem7: TMenuItem
+      Action = actUpdate
+    end
+    object MenuItem6: TMenuItem
+      Action = actCommit
+    end
+    object MenuItem8: TMenuItem
+      Caption = '-'
+    end
+    object MenuItem9: TMenuItem
+      Action = actAdd
+    end
   end
 end
