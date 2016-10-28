@@ -42,6 +42,8 @@ type
     actAdd: TAction;
     actAbout: TAction;
     actCleanup: TAction;
+    actBookMarkAdd: TAction;
+    actBookMarkDelete: TAction;
     actRevert: TAction;
     actRefresh: TAction;
     actShowUnversioned: TAction;
@@ -67,6 +69,8 @@ type
     Panel1: TPanel;
     Panel2: TPanel;
     pmElements: TPopupMenu;
+    pmBookmark: TPopupMenu;
+    SelectDirectoryDialog: TSelectDirectoryDialog;
     Splitter1: TSplitter;
     Splitter2: TSplitter;
     StatusBar1: TStatusBar;
@@ -89,6 +93,7 @@ type
     tvBookMark: TTreeView;
     procedure actAboutExecute(Sender: TObject);
     procedure actAddExecute(Sender: TObject);
+    procedure actBookMarkAddExecute(Sender: TObject);
     procedure actCleanupExecute(Sender: TObject);
     procedure actCommitExecute(Sender: TObject);
     procedure actFlatModeExecute(Sender: TObject);
@@ -353,7 +358,8 @@ end;
 procedure TfMain.actCommitExecute(Sender: TObject);
 var
   Cmt: TfCommit;
-  Elements: TstringList;
+  Elements: TStringList;
+  i: integer;
 begin
 
   Cmt := TfCommit.Create(self);
@@ -361,10 +367,18 @@ begin
     Elements := TStringList.Create;
     GetSelectedElements(Elements);
     Cmt.CheckListBox1.Items.Assign(Elements);
+    for i := 0 to Cmt.CheckListBox1.Count -1 do
+       Cmt.CheckListBox1.Checked[i] := True;
+
     if Cmt.ShowModal = mrOK then
       begin
         try
           SVNClient.OnUpdate:=@log ;
+          Elements.Clear;
+          for i := 0 to Cmt.CheckListBox1.Count -1 do
+             if Cmt.CheckListBox1.Checked[i] then
+               Elements.Add(Cmt.CheckListBox1.Items[i]);
+
           SVNClient.Commit(Elements, Cmt.mLogMessage.Text, true);
         finally
           Elements.free;
@@ -391,6 +405,30 @@ begin
   end;
 
   actRefresh.Execute;
+
+
+end;
+
+procedure TfMain.actBookMarkAddExecute(Sender: TObject);
+var
+  path: TFilename;
+  st: TStringList;
+  i: integer;
+begin
+//
+  if not SelectDirectoryDialog.Execute then
+    exit;
+
+  path:= SelectDirectoryDialog.FileName;
+
+  st := TStringList.Create;
+  try
+    ConfigObj.ReadStrings(CFG_BookMark, St);
+    st.Add(path);
+    ConfigObj.WriteStrings(CFG_BookMark, St);
+  finally
+    st.free;
+  end;
 
 
 end;
