@@ -52,6 +52,8 @@ type
     property ConfigFile: string read FConfigFile;
   end;
 
+const
+   CFG_BookMark = 'Repositories/Path';
 
 function ConfigObj: TConfig;
 

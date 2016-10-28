@@ -348,6 +348,15 @@ object fMain: TfMain
       Caption = 'Cleanup'
       OnExecute = actCleanupExecute
     end
+    object actBookMarkAdd: TAction
+      Category = 'Bookmark'
+      Caption = 'Add existing working copy...'
+      OnExecute = actBookMarkAddExecute
+    end
+    object actBookMarkDelete: TAction
+      Category = 'Bookmark'
+      Caption = 'actBookMarkDelete'
+    end
   end
   object ImageList_22x22: TImageList
     left = 118
@@ -5756,5 +5765,15 @@ object fMain: TfMain
     object MenuItem9: TMenuItem
       Action = actAdd
     end
+  end
+  object pmBookmark: TPopupMenu
+    Images = ImageList_22x22
+    left = 136
+    top = 96
+  end
+  object SelectDirectoryDialog: TSelectDirectoryDialog
+    Options = [ofPathMustExist, ofEnableSizing, ofViewDetail]
+    left = 411
+    top = 96
   end
 end
