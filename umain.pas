@@ -58,6 +58,8 @@ type
     MainMenu: TMainMenu;
     Memo1: TMemo;
     MenuItem1: TMenuItem;
+    MenuItem10: TMenuItem;
+    MenuItem11: TMenuItem;
     MenuItem2: TMenuItem;
     MenuItem3: TMenuItem;
     MenuItem4: TMenuItem;
@@ -121,8 +123,7 @@ type
     procedure GetSelectedElements(Elements: Tstrings);
     procedure LoadBookmarks;
     procedure LoadTree(Node: TTreeNode; BasePath: string);
-    procedure Log(Sender: TObject; const Status: TSVNItemStatus;
-      const fileName: TFileName);
+    procedure Log(Sender: TObject; const SVNMessageKind: TSVNMessageKind; const Message: string);
     procedure UpdateFilesListView;
   public
 
@@ -262,6 +263,7 @@ begin
   LoadBookmarks;
 
   SVNClient := TSVNClient.Create();
+  SVNClient.OnSVNMessage:=@log;
   SVNClient.SVNExecutable:= ConfigObj.ReadString('SVN/Executable', SVNClient.SVNExecutable);
 
   //ConfigObj.WriteString('SVN/Executable',SVNExecutable);
@@ -302,10 +304,10 @@ begin
 
 end;
 
-procedure TfMain.Log (Sender: TObject; const Status: TSVNItemStatus; const FileName: TFileName);
+procedure TfMain.Log (Sender: TObject; const SVNMessageKind: TSVNMessageKind; const Message: string);
 begin
 
-  Memo1.Lines.Add( TSVNClient.ItemStatusToStatus(Status)+': '+ FileName);
+  Memo1.Lines.Add(Message);
 end;
 
 Procedure TfMain.GetSelectedElements(Elements: Tstrings);
@@ -337,7 +339,6 @@ begin
       begin
         Elements := TStringList.Create;
         try
-          SVNClient.OnUpdate:=@log ;
           GetSelectedElements(Elements);
           if not (upd.cbLatest.Checked) and (trim(Upd.eRevision.text) <> EmptyStr) then
             SVNClient.Update(Elements, Upd.eRevision.text)
@@ -373,7 +374,6 @@ begin
     if Cmt.ShowModal = mrOK then
       begin
         try
-          SVNClient.OnUpdate:=@log ;
           Elements.Clear;
           for i := 0 to Cmt.CheckListBox1.Count -1 do
              if Cmt.CheckListBox1.Checked[i] then
@@ -397,7 +397,6 @@ begin
 
   Elements := TStringList.Create;
   try
-    SVNClient.OnUpdate:=@log ;
     GetSelectedElements(Elements);
     SVNClient.Add(Elements);
   finally
@@ -430,6 +429,7 @@ begin
     st.free;
   end;
 
+  LoadBookmarks;
 
 end;
 
@@ -490,7 +490,6 @@ begin
 
   Elements := TStringList.Create;
   try
-    SVNClient.OnUpdate:=@log ;
     GetSelectedElements(Elements);
     SVNClient.Revert(Elements);
   finally
