@@ -1,5 +1,5 @@
 {
-This file is part of OvoRepo
+This file is part of SVNovo
 Copyright (C) 2011 Marco Caselli
 
 OvoPlayer is free software; you can redistribute it and/or
