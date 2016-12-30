@@ -26,7 +26,7 @@ interface
 
 uses
   Classes, SysUtils, FileUtil, Forms, Controls, Graphics, Dialogs, StdCtrls,
-  ComCtrls, Menus, ExtCtrls, ActnList, ShellCtrls, SVNClasses;
+  ComCtrls, Menus, ExtCtrls, ActnList, ShellCtrls, SVNClasses, formlog;
 
 type
 
@@ -44,6 +44,7 @@ type
     actCleanup: TAction;
     actBookMarkAdd: TAction;
     actBookMarkDelete: TAction;
+    actLog: TAction;
     actRevert: TAction;
     actRefresh: TAction;
     actShowUnversioned: TAction;
@@ -60,6 +61,8 @@ type
     MenuItem1: TMenuItem;
     MenuItem10: TMenuItem;
     MenuItem11: TMenuItem;
+    MenuItem12: TMenuItem;
+    MenuItem13: TMenuItem;
     MenuItem2: TMenuItem;
     MenuItem3: TMenuItem;
     MenuItem4: TMenuItem;
@@ -100,6 +103,7 @@ type
     procedure actCommitExecute(Sender: TObject);
     procedure actFlatModeExecute(Sender: TObject);
     procedure ActionListUpdate(AAction: TBasicAction; var Handled: Boolean);
+    procedure actLogExecute(Sender: TObject);
     procedure actRefreshExecute(Sender: TObject);
     procedure actRevertExecute(Sender: TObject);
     procedure actShowConflictExecute(Sender: TObject);
@@ -116,10 +120,13 @@ type
     procedure tvBookMarkClick(Sender: TObject);
     procedure tvBookMarkCreateNodeClass(Sender: TCustomTreeView;
       var NodeClass: TTreeNodeClass);
+    procedure tvBookMarkExpanding(Sender: TObject; Node: TTreeNode;
+      var AllowExpansion: Boolean);
   private
     SVNClient : TSVNClient;
     RepositoryPath: string;
     Filter: TSVNItemStatusSet;
+    procedure ExpandNode(Node: TTreeNode);
     procedure GetSelectedElements(Elements: Tstrings);
     procedure LoadBookmarks;
     procedure LoadTree(Node: TTreeNode; BasePath: string);
@@ -230,7 +237,7 @@ begin
   finally
     SVNFileListView.EndUpdate;
   end;
-
+  SVNFileListView.Sort;
   //if Assigned(SVNClient) then
   //   SVNFileListView.Items.Count:= SVNClient.List.Count;
 end;
@@ -477,6 +484,27 @@ begin
 
 end;
 
+procedure TfMain.actLogExecute(Sender: TObject);
+var
+  RList: TSVNLogList;
+  Elements: TstringList;
+  TheLog: TfLog;
+begin
+  Elements := TStringList.Create;
+  try
+    GetSelectedElements(Elements);
+    RList := SVNClient.log(IncludeTrailingPathDelimiter(SVNClient.RepositoryPath) + Elements[0]);
+    if RList.Count = 0 then
+      exit;
+    TheLog := TfLog.Create(self);
+    TheLog.List := RList;
+    TheLog.Show;
+  finally
+    Elements.free;
+  end;
+
+end;
+
 procedure TfMain.actRefreshExecute(Sender: TObject);
 begin
   SVNClient.LoadStatus;
@@ -612,10 +640,19 @@ Var
   BookMark: TFileTreeNode;
   i: integer;
 begin
-  if not Assigned(tvBookMark.Selected) then
+  ExpandNode(tvBookMark.Selected);
+
+end;
+
+procedure TfMain.ExpandNode(Node: TTreeNode);
+Var
+  BookMark: TFileTreeNode;
+  i: integer;
+begin
+  if not Assigned(Node) then
       exit;
 
-  BookMark := TFileTreeNode(tvBookMark.Selected);
+  BookMark := TFileTreeNode(Node);
   if BookMark.AbsoluteIndex = 0 then  exit;
 
   if (BookMark.Level = 1) and (BookMark.Count = 0) then
@@ -635,6 +672,12 @@ procedure TfMain.tvBookMarkCreateNodeClass(Sender: TCustomTreeView;
   var NodeClass: TTreeNodeClass);
 begin
   NodeClass := TFileTreeNode;
+end;
+
+procedure TfMain.tvBookMarkExpanding(Sender: TObject; Node: TTreeNode;
+  var AllowExpansion: Boolean);
+begin
+  ExpandNode(Node);
 end;
 
 end.

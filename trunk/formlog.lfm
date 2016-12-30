@@ -1,0 +1,104 @@
+object fLog: TfLog
+  Left = 431
+  Height = 433
+  Top = 249
+  Width = 774
+  Caption = 'Log'
+  ClientHeight = 433
+  ClientWidth = 774
+  DesignTimePPI = 95
+  OnClose = FormClose
+  OnCreate = FormCreate
+  OnDestroy = FormDestroy
+  LCLVersion = '1.7'
+  object lstREvisions: TListView
+    Left = 8
+    Height = 214
+    Top = 24
+    Width = 650
+    Anchors = [akTop, akLeft, akRight, akBottom]
+    AutoWidthLastColumn = True
+    Columns = <    
+      item
+        AutoSize = True
+        Caption = 'Rev.'
+        Width = 31
+      end    
+      item
+        AutoSize = True
+        Caption = 'User'
+        Width = 35
+      end    
+      item
+        AutoSize = True
+        Caption = 'Date'
+        Width = 35
+      end    
+      item
+        Caption = 'Message'
+        Width = 547
+      end>
+    RowSelect = True
+    ScrollBars = ssAutoBoth
+    TabOrder = 0
+    ViewStyle = vsReport
+    OnSelectItem = lstREvisionsSelectItem
+  end
+  object bClose: TButton
+    Left = 668
+    Height = 25
+    Top = 24
+    Width = 75
+    Anchors = [akTop, akRight]
+    Caption = 'Close'
+    OnClick = bCloseClick
+    TabOrder = 1
+  end
+  object pcInfo: TPageControl
+    Left = 0
+    Height = 200
+    Top = 233
+    Width = 774
+    ActivePage = tsFiles
+    Align = alBottom
+    TabIndex = 1
+    TabOrder = 2
+    object tsMessage: TTabSheet
+      Caption = 'Message'
+      ClientHeight = 165
+      ClientWidth = 768
+      object mMessage: TMemo
+        Left = 0
+        Height = 165
+        Top = 0
+        Width = 768
+        Align = alClient
+        TabOrder = 0
+      end
+    end
+    object tsFiles: TTabSheet
+      Caption = 'Affected Files'
+      ClientHeight = 165
+      ClientWidth = 768
+      object lvAffectedFiles: TListView
+        Left = 0
+        Height = 165
+        Top = 0
+        Width = 768
+        Align = alClient
+        Columns = <        
+          item
+            AutoSize = True
+            Caption = 'Action'
+            Width = 43
+          end        
+          item
+            Caption = 'File'
+            Width = 708
+          end>
+        TabOrder = 0
+        ViewStyle = vsReport
+      end
+    end
+  end
+end

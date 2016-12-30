@@ -25,18 +25,22 @@ uses
   {$IFDEF UNIX}{$IFDEF UseCThreads}
   cthreads,
   {$ENDIF}{$ENDIF}
+  clocale,
   Interfaces, // this includes the LCL widgetset
   Forms, uMain, Config, SVNClasses, FilesSupport, formupdate, ulicense,
-formcommit;
+formcommit, formlog;
 
 {$R *.res}
 
+
 begin
+
   RequireDerivedFormResource:=True;
   Application.Initialize;
   Application.CreateForm(TfMain, fMain);
   Application.CreateForm(TfUpdate, fUpdate);
   Application.CreateForm(TfCommit, fCommit);
+  Application.CreateForm(TfLog, fLog);
   Application.Run;
 end.
 

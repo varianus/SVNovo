@@ -1,35 +1,36 @@
 object fMain: TfMain
-  Left = 0
+  Left = 342
   Height = 616
-  Top = 0
+  Top = 184
   Width = 1202
   ActiveControl = tvBookMark
   Caption = 'OvoRepo'
-  ClientHeight = 616
+  ClientHeight = 595
   ClientWidth = 1202
+  DesignTimePPI = 95
   Menu = MainMenu
   OnCreate = FormCreate
   OnDestroy = FormDestroy
   Position = poDefault
   ShowHint = True
   LCLVersion = '1.7'
-  Visible = False
   object Panel1: TPanel
     Left = 0
-    Height = 464
+    Height = 465
     Top = 0
-    Width = 258
+    Width = 255
     Align = alLeft
     Caption = 'Panel1'
-    ClientHeight = 464
-    ClientWidth = 258
+    ClientHeight = 465
+    ClientWidth = 255
     TabOrder = 0
     object tvBookMark: TTreeView
       Left = 1
-      Height = 462
+      Height = 463
       Top = 1
-      Width = 256
+      Width = 253
       Align = alClient
+      ExpandSignSize = 10
       Images = ImageList_22x22
       MultiSelect = True
       PopupMenu = pmBookmark
@@ -40,6 +41,7 @@ object fMain: TfMain
       TabOrder = 0
       OnClick = tvBookMarkClick
       OnCreateNodeClass = tvBookMarkCreateNodeClass
+      OnExpanding = tvBookMarkExpanding
       Options = [tvoAllowMultiselect, tvoAutoItemHeight, tvoHideSelection, tvoKeepCollapsedNodes, tvoReadOnly, tvoRightClickSelect, tvoRowSelect, tvoShowButtons, tvoShowLines, tvoShowRoot, tvoToolTips, tvoThemedDraw]
       Items.Data = {
         F9FFFFFF020001000000080000000800000008000000FFFFFFFF000000000000
@@ -55,20 +57,20 @@ object fMain: TfMain
     Panels = <>
   end
   object Panel2: TPanel
-    Left = 263
-    Height = 464
+    Left = 260
+    Height = 465
     Top = 0
-    Width = 939
+    Width = 942
     Align = alClient
     Caption = 'Panel2'
-    ClientHeight = 464
-    ClientWidth = 939
+    ClientHeight = 465
+    ClientWidth = 942
     TabOrder = 2
     object ToolBar1: TToolBar
       Left = 1
       Height = 26
       Top = 1
-      Width = 937
+      Width = 940
       Caption = 'ToolBar1'
       DisabledImages = ImageList_22x22_mask
       Images = ImageList_22x22
@@ -164,9 +166,9 @@ object fMain: TfMain
     end
     object SVNFileListView: TListView
       Left = 1
-      Height = 436
+      Height = 437
       Top = 27
-      Width = 937
+      Width = 940
       Align = alClient
       Columns = <      
         item
@@ -195,9 +197,10 @@ object fMain: TfMain
           Width = 10
         end      
         item
-          Width = 847
+          Width = 838
         end      
         item
+          Width = 49
         end>
       HideSelection = False
       MultiSelect = True
@@ -215,15 +218,15 @@ object fMain: TfMain
   end
   object Memo1: TMemo
     Left = 0
-    Height = 105
-    Top = 469
+    Height = 104
+    Top = 470
     Width = 1202
     Align = alBottom
     TabOrder = 3
   end
   object Splitter1: TSplitter
-    Left = 258
-    Height = 464
+    Left = 255
+    Height = 465
     Top = 0
     Width = 5
   end
@@ -231,14 +234,14 @@ object fMain: TfMain
     Cursor = crVSplit
     Left = 0
     Height = 5
-    Top = 464
+    Top = 465
     Width = 1202
     Align = alBottom
     ResizeAnchor = akBottom
   end
   object MainMenu: TMainMenu
-    left = 128
-    top = 392
+    Left = 128
+    Top = 392
     object MenuItem1: TMenuItem
       Caption = 'File'
     end
@@ -258,8 +261,8 @@ object fMain: TfMain
   object ActionList: TActionList
     Images = ImageList_22x22
     OnUpdate = ActionListUpdate
-    left = 128
-    top = 328
+    Left = 128
+    Top = 328
     object actUpdate: TAction
       Category = 'Commit'
       Caption = 'Update'
@@ -355,10 +358,15 @@ object fMain: TfMain
       Category = 'Bookmark'
       Caption = 'actBookMarkDelete'
     end
+    object actLog: TAction
+      Caption = 'Log'
+      ImageIndex = 41
+      OnExecute = actLogExecute
+    end
   end
   object ImageList_22x22: TImageList
-    left = 118
-    top = 192
+    Left = 118
+    Top = 192
     Bitmap = {
       4C69540000001000000010000000FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
       FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
@@ -3053,8 +3061,8 @@ object fMain: TfMain
   end
   object ImageList_22x22_mask: TImageList
     BlendColor = clInactiveCaption
-    left = 118
-    top = 264
+    Left = 118
+    Top = 264
     Bitmap = {
       4C69540000001000000010000000FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
       FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
@@ -5749,8 +5757,8 @@ object fMain: TfMain
   end
   object pmElements: TPopupMenu
     Images = ImageList_22x22
-    left = 411
-    top = 164
+    Left = 411
+    Top = 164
     object MenuItem7: TMenuItem
       Action = actUpdate
     end
@@ -5763,11 +5771,17 @@ object fMain: TfMain
     object MenuItem9: TMenuItem
       Action = actAdd
     end
+    object MenuItem12: TMenuItem
+      Caption = '-'
+    end
+    object MenuItem13: TMenuItem
+      Action = actLog
+    end
   end
   object pmBookmark: TPopupMenu
     Images = ImageList_22x22
-    left = 136
-    top = 96
+    Left = 136
+    Top = 96
     object MenuItem11: TMenuItem
       Action = actBookMarkAdd
     end
@@ -5777,7 +5791,7 @@ object fMain: TfMain
   end
   object SelectDirectoryDialog: TSelectDirectoryDialog
     Options = [ofPathMustExist, ofEnableSizing, ofViewDetail]
-    left = 411
-    top = 96
+    Left = 411
+    Top = 96
   end
 end
