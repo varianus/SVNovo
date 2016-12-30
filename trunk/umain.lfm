@@ -4,7 +4,7 @@ object fMain: TfMain
   Top = 184
   Width = 1202
   ActiveControl = tvBookMark
-  Caption = 'OvoRepo'
+  Caption = 'svnovo'
   ClientHeight = 595
   ClientWidth = 1202
   DesignTimePPI = 95
