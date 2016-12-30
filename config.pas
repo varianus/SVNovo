@@ -24,7 +24,7 @@ unit Config;
 interface
 
 uses
-  Classes, SysUtils, Graphics, jsonConf, DOM;
+  Classes, SysUtils, Graphics, jsonConf;
 
 type
   { TConfig }
