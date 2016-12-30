@@ -25,7 +25,7 @@ interface
 
 uses
   Classes, SysUtils, ComCtrls, fileutil, LazFileUtils, UTF8Process, LCLProc, Controls,
-  XMLRead, DOM, Process, StdCtrls, Forms, Generics.Defaults,  Generics.Collections;
+  Laz2_XMLRead, Laz2_DOM, Process, StdCtrls, Forms, Generics.Defaults,  Generics.Collections;
 
 resourcestring
   rsAction = 'Action';
@@ -61,7 +61,7 @@ resourcestring
   rsOpenPreviousRevisionInEditor = 'Open previous revision in editor';
   rsOnlyModifiedItemsCanBeDiffed = 'Only modified (M) Items can be diffed';
   rsPath = 'Path';
-  rsProjectFilename = 'Project filename';
+ rsProjectFilename = 'Project filename';
   rsProjectIsActive = 'Project is active';
   rsProjectIsNotActiveInSVNSettingsPleaseActivateFirst = 'Project is not '
     +'active in SVN settings, please activate first.';
@@ -121,18 +121,20 @@ type
 //  PSVNStatusItem = ^TSVNStatusItem;
 
   { TSVNItem }
+  TSVNSimpleItem = class //record
+    Revision: integer;
+    Author: string;
+    DateSVN: TDateTime;
+  end;
 
-  TSVNItem = class //record
+  TSVNItem = class(TSVNSimpleItem) //record
   public
     Checked: boolean;
     Path: string;
     Extension: string;
     PropStatus: string;
     ItemStatus: TSVNItemStatus;
-    Revision: integer;
     CommitRevision: integer;
-    Author: string;
-    DateSVN: TDateTime;
     DateModified: TDateTime;
     Kind: integer;
     Selected: boolean;
@@ -140,6 +142,29 @@ type
     Function IsFolder : boolean;
     Constructor Create;
   end;
+
+  TAffectedFile = class
+    Action : String;
+    FileName: String;
+  end;
+
+  TAffectedFiles = class(specialize TObjectList<TAffectedFile>)
+  end;
+
+  { TSVNLogItem }
+
+  TSVNLogItem = class (TSVNSimpleItem)
+    Message: string;
+    AffectedFiles: TAffectedFiles;
+    Constructor Create;
+    Destructor Destroy; override;
+  end;
+
+
+  TSVNLogList = class (specialize TObjectList<TSVNLogItem>)
+
+  end;
+
 
   TSVNMessageKind= (ieInfo, ieCommand, ieError);
 
@@ -201,6 +226,7 @@ type
     procedure Add(Elements: TStrings; Recursive: boolean=false);
     procedure Revert(Elements: TStrings; Recursive: boolean=false);
     procedure Commit(Elements: TStrings; Message: string; Recursive: boolean=false);
+    function Log(FileName: TFileName): TSVNLogList;
     procedure CleanUp;
     //
     property OnSVNMessage : TSvnMessage read FOnSVNMessage write SetOnSVNMessage;
@@ -340,6 +366,19 @@ begin
   s := StrToInt(Copy(ADateTime, 18, 2));
 
   Result := ComposeDateTime( EncodeDate(y,m,d), EncodeTime(h,n,s,0));
+end;
+
+{ TSVNLogItem }
+
+constructor TSVNLogItem.Create;
+begin
+  AffectedFiles := TAffectedFiles.Create();
+end;
+
+destructor TSVNLogItem.Destroy;
+begin
+  AffectedFiles.free;
+  inherited Destroy;
 end;
 
 function TSVNStatusList.SortPath(constref Item1, Item2: TSVNItem): Integer;
@@ -570,8 +609,9 @@ begin
     end;
   until n <= 0;
   M.SetSize(BytesRead);
-
+  m.SaveToFile('/tmp/svn.xml');
   ReadXMLFile(Result, M);
+
 
   M.Free;
   AProcess.Free;
@@ -651,6 +691,95 @@ begin
 
 end;
 
+Function TSVNClient.Log(FileName:TFileName): TSVNLogList;
+var
+  ActNode: TDOMNode;
+  Doc: TXMLDocument;
+  i,j, k: integer;
+  ListItem: TSVNLogItem;
+  PathItem: TAffectedFile;
+  Node: TDOMNode;
+  NodeName: string;
+  NodeValue: string;
+  Path: string;
+  SubNode: TDOMNode;
+  PathNode: TDOMNode;
+  Command : TStringList;
+begin
+  Result := TSVNLogList.Create();
+
+  if FileName = EmptyStr then
+    exit;
+
+  Command := TStringList.Create;
+  Command.AddStrings(['log','--xml','-v']);
+  Command.Add('--non-interactive');
+  Command.Add(FileName);
+
+  Doc := ExecuteSvnReturnXml(Command);
+  Node := Doc.DocumentElement.FirstChild;
+  if Node = nil then begin
+    // no <entry> node found, list is empty.
+    Doc.Free;
+    Exit();
+  end;
+
+  repeat
+    SubNode := Node;
+    begin
+      ListItem := TSVNLogItem.Create;
+      //initialize author (anonymous repositories)
+      ListItem.Author := rsNoAuthor;
+
+      for i := 0 to SubNode.Attributes.Length -1 do
+      begin
+        NodeName := SubNode.Attributes.Item[i].NodeName;
+        NodeValue := SubNode.Attributes.Item[i].NodeValue;
+        if NodeName = 'revision' then
+          //Revision
+          ListItem.Revision := StrToInt(NodeValue);
+      end;
+      for i := 0 to SubNode.ChildNodes.Count - 1 do
+      begin
+        ActNode := SubNode.ChildNodes.Item[i];
+        if Assigned(ActNode) then
+        begin
+          NodeName := ActNode.NodeName;
+          if NodeName = 'author' then
+            ListItem.Author := ActNode.FirstChild.NodeValue;
+          if NodeName = 'date' then
+            ListItem.DateSVN := ISO8601ToDateTime(ActNode.FirstChild.NodeValue);
+          if NodeName = 'msg' then
+            ListItem.Message := ActNode.FirstChild.NodeValue;
+          if NodeName = 'paths' then
+            for j:= 0 to ActNode.ChildNodes.Count -1 do
+             begin
+               PathNode := ActNode.ChildNodes.Item[j];
+               PathItem := TAffectedFile.Create;
+               ListItem.AffectedFiles.Add(PathItem);
+               PathItem.FileName:=PathNode.FirstChild.NodeValue;
+               for k := 0 to PathNode.Attributes.Length -1 do
+               begin
+                 NodeName := PathNode.Attributes.Item[k].NodeName;
+                 NodeValue := PathNode.Attributes.Item[k].NodeValue;
+                 if NodeName = 'action' then
+                   PathItem.Action := NodeValue;
+               end;
+
+             end;
+
+
+        end;
+      end;
+      Result.Add(ListItem);
+    end;
+    Node := Node.NextSibling;
+  until not Assigned(Node);
+  Doc.Free;
+
+end;
+
+
 procedure TSVNClient.LoadStatus;
 var
   ActNode: TDOMNode;
@@ -676,7 +805,7 @@ begin
   if Verbose then
     Command.Add('--verbose');
 
-  Command.Add(RepositoryPath);
+  Command.Add(FRepositoryPath);
   Command.Add('--non-interactive');
 
   if fFlatMode then
@@ -761,6 +890,7 @@ begin
     Node := Node.NextSibling;
   until not Assigned(Node);
   Doc.Free;
+  Command.free;
   List.Sort;
 end;
 
