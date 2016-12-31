@@ -57,10 +57,11 @@
         <PackageName Value="LCL"/>
       </Item1>
     </RequiredPackages>
-    <Units Count="10">
+    <Units Count="11">
       <Unit0>
         <Filename Value="svnovo.lpr"/>
         <IsPartOfProject Value="True"/>
+        <UnitName Value="SVNovo"/>
       </Unit0>
       <Unit1>
         <Filename Value="umain.pas"/>
@@ -122,6 +123,12 @@
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
       </Unit9>
+      <Unit10>
+        <Filename Value="formconfig.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="Form1"/>
+        <ResourceBaseClass Value="Form"/>
+      </Unit10>
     </Units>
   </ProjectOptions>
   <CompilerOptions>
