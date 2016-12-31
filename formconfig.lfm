@@ -1,0 +1,40 @@
+object Form1: TForm1
+  Left = 596
+  Height = 350
+  Top = 335
+  Width = 658
+  Caption = 'Preferences'
+  ClientHeight = 350
+  ClientWidth = 658
+  DesignTimePPI = 95
+  LCLVersion = '1.7'
+  object pcPreferences: TPageControl
+    Left = 0
+    Height = 303
+    Top = 0
+    Width = 658
+    ActivePage = tsGeneral
+    Align = alClient
+    TabIndex = 0
+    TabOrder = 0
+    object tsGeneral: TTabSheet
+      Caption = 'General'
+    end
+  end
+  object ButtonPanel1: TButtonPanel
+    Left = 6
+    Height = 35
+    Top = 309
+    Width = 646
+    OKButton.Name = 'OKButton'
+    OKButton.DefaultCaption = True
+    HelpButton.Name = 'HelpButton'
+    HelpButton.DefaultCaption = True
+    CloseButton.Name = 'CloseButton'
+    CloseButton.DefaultCaption = True
+    CancelButton.Name = 'CancelButton'
+    CancelButton.DefaultCaption = True
+    TabOrder = 1
+    ShowButtons = [pbOK, pbCancel]
+  end
+end
