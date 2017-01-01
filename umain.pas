@@ -44,6 +44,7 @@ type
     actCleanup: TAction;
     actBookMarkAdd: TAction;
     actBookMarkDelete: TAction;
+    Action1: TAction;
     actLog: TAction;
     actRevert: TAction;
     actRefresh: TAction;
@@ -63,6 +64,7 @@ type
     MenuItem11: TMenuItem;
     MenuItem12: TMenuItem;
     MenuItem13: TMenuItem;
+    MenuItem14: TMenuItem;
     MenuItem2: TMenuItem;
     MenuItem3: TMenuItem;
     MenuItem4: TMenuItem;
@@ -102,6 +104,7 @@ type
     procedure actCleanupExecute(Sender: TObject);
     procedure actCommitExecute(Sender: TObject);
     procedure actFlatModeExecute(Sender: TObject);
+    procedure Action1Execute(Sender: TObject);
     procedure ActionListUpdate(AAction: TBasicAction; var Handled: Boolean);
     procedure actLogExecute(Sender: TObject);
     procedure actRefreshExecute(Sender: TObject);
@@ -460,6 +463,20 @@ begin
   UpdateFilesListView;
 end;
 
+procedure TfMain.Action1Execute(Sender: TObject);
+var
+  Elements: TstringList;
+begin
+  Elements := TStringList.Create;
+  GetSelectedElements(Elements);
+  try
+   debugln(SVNClient.Export(IncludeTrailingPathDelimiter(SVNClient.RepositoryPath) + Elements[0], 'HEAD'));
+  finally
+    Elements.free;
+  end;
+
+end;
+
 procedure TfMain.ActionListUpdate(AAction: TBasicAction; var Handled: Boolean);
 var
   Elements: TstringList;
@@ -476,6 +493,7 @@ begin
         inc(cnt[TSVNItem(Elements.Objects[i]).ItemStatus]);
 
     actAdd.Enabled:= cnt[sisUnversioned] = Elements.Count;
+    actLog.Enabled:= Elements.Count = 1;
 
   finally
     Elements.free;

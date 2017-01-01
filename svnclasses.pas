@@ -223,6 +223,7 @@ type
     //
     procedure LoadStatus;
     Procedure Update(Elements: TStrings; Revision:string = '');
+    function Export(Element: string; Revision:string = ''):string;
     procedure Add(Elements: TStrings; Recursive: boolean=false);
     procedure Revert(Elements: TStrings; Recursive: boolean=false);
     procedure Commit(Elements: TStrings; Message: string; Recursive: boolean=false);
@@ -691,7 +692,7 @@ begin
 
 end;
 
-Function TSVNClient.Log(FileName:TFileName): TSVNLogList;
+function TSVNClient.Log(FileName: TFileName): TSVNLogList;
 var
   ActNode: TDOMNode;
   Doc: TXMLDocument;
@@ -909,6 +910,34 @@ begin
     Commands.Add(FRepositoryPath)
   else
     Commands.AddStrings(Elements);
+
+  ExecuteSvn(Commands);
+
+  finally
+    Commands.Free;
+  end;
+end;
+
+function TSVNClient.Export(Element: String; Revision: String):String;
+var
+  Commands: TStringList;
+begin
+  Commands := TstringList.Create;
+  Commands.AddStrings(['export','--non-interactive', '--force', '--trust-server-cert']);
+
+  try
+
+  if (Revision = '') then
+     Revision := 'HEAD';
+
+  if (Revision <> '') and (trim(Revision) <> 'HEAD') then
+    Commands.Add('-r ' + Revision);
+
+  Commands.Add(Element);
+
+  Result := IncludeTrailingPathDelimiter(GetTempDir) + ChangeFileExt(ExtractFileNameOnly(Element),'')+'_'+Revision+ExtractFileExt(Element);
+
+  Commands.Add(Result);
 
   ExecuteSvn(Commands);
 

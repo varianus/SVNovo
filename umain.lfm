@@ -264,14 +264,14 @@ object fMain: TfMain
     Left = 128
     Top = 328
     object actUpdate: TAction
-      Category = 'Commit'
+      Category = 'FileAction'
       Caption = 'Update'
       DisableIfNoHandler = False
       ImageIndex = 81
       OnExecute = actUpdateExecute
     end
     object actCommit: TAction
-      Category = 'Commit'
+      Category = 'FileAction'
       Caption = 'Commit'
       DisableIfNoHandler = False
       ImageIndex = 7
@@ -325,7 +325,7 @@ object fMain: TfMain
       OnExecute = actRefreshExecute
     end
     object actAdd: TAction
-      Category = 'Commit'
+      Category = 'FileAction'
       Caption = 'Add'
       DisableIfNoHandler = False
       ImageIndex = 0
@@ -338,7 +338,7 @@ object fMain: TfMain
       OnExecute = actAboutExecute
     end
     object actRevert: TAction
-      Category = 'Commit'
+      Category = 'FileAction'
       Caption = 'Revert'
       DisableIfNoHandler = False
       ImageIndex = 77
@@ -362,6 +362,11 @@ object fMain: TfMain
       Caption = 'Log'
       ImageIndex = 41
       OnExecute = actLogExecute
+    end
+    object Action1: TAction
+      Category = 'FileAction'
+      Caption = 'Action1'
+      OnExecute = Action1Execute
     end
   end
   object ImageList_22x22: TImageList
@@ -5776,6 +5781,9 @@ object fMain: TfMain
     end
     object MenuItem13: TMenuItem
       Action = actLog
+    end
+    object MenuItem14: TMenuItem
+      Action = Action1
     end
   end
   object pmBookmark: TPopupMenu
