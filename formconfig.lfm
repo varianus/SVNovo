@@ -1,31 +1,60 @@
-object Form1: TForm1
+object fConfig: TfConfig
   Left = 596
-  Height = 350
+  Height = 402
   Top = 335
-  Width = 658
+  Width = 534
+  ActiveControl = pcPreferences
   Caption = 'Preferences'
-  ClientHeight = 350
-  ClientWidth = 658
-  DesignTimePPI = 95
-  LCLVersion = '1.7'
+  ClientHeight = 402
+  ClientWidth = 534
+  Visible = False
   object pcPreferences: TPageControl
     Left = 0
-    Height = 303
+    Height = 356
     Top = 0
-    Width = 658
+    Width = 534
     ActivePage = tsGeneral
     Align = alClient
     TabIndex = 0
     TabOrder = 0
     object tsGeneral: TTabSheet
       Caption = 'General'
+      ClientHeight = 328
+      ClientWidth = 526
+      object leSVNExe: TLabeledEdit
+        Left = 8
+        Height = 23
+        Top = 32
+        Width = 425
+        Anchors = [akTop, akLeft, akRight]
+        EditLabel.AnchorSideLeft.Control = leSVNExe
+        EditLabel.AnchorSideRight.Control = leSVNExe
+        EditLabel.AnchorSideRight.Side = asrBottom
+        EditLabel.AnchorSideBottom.Control = leSVNExe
+        EditLabel.Left = 8
+        EditLabel.Height = 15
+        EditLabel.Top = 14
+        EditLabel.Width = 425
+        EditLabel.Caption = 'SVN executable'
+        EditLabel.ParentColor = False
+        TabOrder = 0
+      end
+      object BitBtn1: TBitBtn
+        Left = 449
+        Height = 23
+        Top = 32
+        Width = 66
+        Anchors = [akTop, akRight]
+        Caption = 'Browse'
+        TabOrder = 1
+      end
     end
   end
   object ButtonPanel1: TButtonPanel
     Left = 6
-    Height = 35
-    Top = 309
-    Width = 646
+    Height = 34
+    Top = 362
+    Width = 522
     OKButton.Name = 'OKButton'
     OKButton.DefaultCaption = True
     HelpButton.Name = 'HelpButton'

@@ -25,28 +25,45 @@ interface
 
 uses
   Classes, SysUtils, FileUtil, Forms, Controls, Graphics, Dialogs, ComCtrls,
-  ButtonPanel;
+  ButtonPanel, StdCtrls, ExtCtrls, Buttons, Config;
 
 type
 
-  { TForm1 }
+  { TfConfig }
 
-  TForm1 = class(TForm)
+  TfConfig = class(TForm)
+    BitBtn1: TBitBtn;
     ButtonPanel1: TButtonPanel;
+    leSVNExe: TLabeledEdit;
     pcPreferences: TPageControl;
     tsGeneral: TTabSheet;
   private
-
+    Procedure ConfigToMap;
+    Procedure MapToConfig;
   public
 
   end;
 
 var
-  Form1: TForm1;
+  fConfig: TfConfig;
 
 implementation
 
 {$R *.lfm}
+
+uses SVNClasses;
+
+{ TfConfig }
+
+procedure TfConfig.ConfigToMap;
+begin
+ leSVNExe.Text:= ConfigObj.ReadString('SVN/Executable',  TSVNClient.FindSvnExecutable);
+end;
+
+procedure TfConfig.MapToConfig;
+begin
+
+end;
 
 end.
 
