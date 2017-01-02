@@ -24,11 +24,12 @@ program SVNovo;
 uses
   {$IFDEF UNIX}{$IFDEF UseCThreads}
   cthreads,
-  {$ENDIF}{$ENDIF}
+  {$ENDIF}
   clocale,
+  {$ENDIF}
   Interfaces, // this includes the LCL widgetset
   Forms, uMain, Config, SVNClasses, FilesSupport, formupdate, ulicense,
-formcommit, formlog, formconfig;
+formcommit, formlog, formconfig, AppConsts;
 
 {$R *.res}
 
@@ -41,7 +42,7 @@ begin
   Application.CreateForm(TfUpdate, fUpdate);
   Application.CreateForm(TfCommit, fCommit);
   Application.CreateForm(TfLog, fLog);
-  Application.CreateForm(TForm1, Form1);
+  Application.CreateForm(TfConfig, fConfig);
   Application.Run;
 end.
 
