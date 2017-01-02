@@ -207,7 +207,6 @@ type
     Verbose: boolean;
     procedure ExecuteSvn(ACommand: TStrings);
     function ExecuteSvnReturnXml(ACommand: TStrings): TXMLDocument;
-    function FindSvnExecutable: string;
     function GetSvnExecutable: string;
     procedure SetFlatMode(AValue: boolean);
     procedure SetOnSVNMessage(AValue: TSvnMessage);
@@ -217,6 +216,8 @@ type
     List: TSVNStatusList; // TFPList;
     Class Function StatusToItemStatus(sStatus: string): TSVNItemStatus; inline;
     Class Function ItemStatusToStatus(Status: TSVNItemStatus): string; inline;
+    Class function FindSvnExecutable: string;
+
     //
     constructor Create(const ARepoPath: string='');
     destructor Destroy; override;
@@ -610,7 +611,7 @@ begin
     end;
   until n <= 0;
   M.SetSize(BytesRead);
-  m.SaveToFile('/tmp/svn.xml');
+//  m.SaveToFile('/tmp/svn.xml');
   ReadXMLFile(Result, M);
 
 
@@ -1057,7 +1058,7 @@ begin
 
 end;
 
-function TSVNClient.FindSvnExecutable: string;
+Class function TSVNClient.FindSvnExecutable: string;
 var
   //Output: string;
   rv:integer;
@@ -1072,24 +1073,28 @@ begin
     // Some popular locations for SlikSVN, Subversion, and TortoiseSVN:
     // Covers both 32 bit and 64 bit Windows.
     if not FileExists(Result)
-       then Result := GetEnvironmentVariable('ProgramFiles\Subversion\bin\svn.exe')
+       then Result := GetEnvironmentVariable('ProgramFiles')+'\Subversion\bin\svn.exe'
        else break;
     if not FileExists(Result)
-       then Result := GetEnvironmentVariable('ProgramFiles(x86)\Subversion\bin\svn.exe')
+       then Result := GetEnvironmentVariable('ProgramFiles(x86)')+'\Subversion\bin\svn.exe'
        else break;
     if not FileExists(Result)
-       then Result := GetEnvironmentVariable('ProgramFiles\SlikSvn\bin\svn.exe')
+       then Result := GetEnvironmentVariable('ProgramFiles')+'\SlikSvn\bin\svn.exe'
        else break;
     if not FileExists(Result)
-       then Result := GetEnvironmentVariable('ProgramFiles(x86)\SlikSvn\bin\svn.exe')
+       then Result := GetEnvironmentVariable('ProgramFiles(x86)')+'\SlikSvn\bin\svn.exe'
        else break;
     if not FileExists(Result)
-       then Result := GetEnvironmentVariable('ProgramFiles\TorToiseSVN\bin\svn.exe')
+       then Result := GetEnvironmentVariable('ProgramFiles\')+'TorToiseSVN\bin\svn.exe'
        else break;
     if not FileExists(Result)
-       then Result := GetEnvironmentVariable('ProgramFiles(x86)\TorToiseSVN\bin\svn.exe')
+       then Result := GetEnvironmentVariable('ProgramFiles(x86)')+'\TorToiseSVN\bin\svn.exe'
+       else break;
+    if not FileExists(Result)
+       then Result := GetEnvironmentVariable('ProgramFiles(x86)')+'\RapidSVN-0.13\bin\svn.exe'
        else break;
     //Directory where current executable is:
+       result := ExtractFileDir(ParamStr(0));
    {$ENDIF MSWINDOWS}
     break;
   end;
