@@ -280,7 +280,7 @@ var
 begin
   AProcess := TProcessUTF8.Create(nil);
   AProcess.CommandLine := CmdLine;
-  debugln('CmdLineToMemo commandline=', AProcess.CommandLine);
+//  debugln('CmdLineToMemo commandline=', AProcess.CommandLine);
   AProcess.Options := AProcess.Options + [poUsePipes, poStdErrToOutput];
   AProcess.ShowWindow := swoHIDE;
   AProcess.Execute;
@@ -485,7 +485,7 @@ begin
 
   for n := 0 to S.Count - 1 do
     begin
-      DebugLn(s[N]);
+//      DebugLn(s[N]);
       //find position of first space character
       i := pos(' ', S[n]);
       str := Copy(S[n],1, i - 1);
@@ -573,7 +573,7 @@ begin
   AProcess := TProcessUTF8.Create(nil);
   AProcess.Executable := SVNExecutable;
   AProcess.Parameters.Assign(ACommand);
-  debugln('TSVNLogFrm.ExecuteSvnReturnXml CommandLine ' + AProcess.CommandLine);
+//  debugln('TSVNLogFrm.ExecuteSvnReturnXml CommandLine ' + AProcess.CommandLine);
   AProcess.Options := AProcess.Options + [poUsePipes, poStdErrToOutput];
   AProcess.ShowWindow := swoHIDE;
   AProcess.Execute;
@@ -827,7 +827,7 @@ begin
   repeat
     SubNode := Node;
     Path := UTF8Encode(SubNode.Attributes.Item[0].NodeValue);
-    debugln('TSVNStatus.Create ' + Path);
+//    debugln('TSVNStatus.Create ' + Path);
     F:=FileGetAttr(Path);
     If (F<>-1) {and ((F and faDirectory)=0)} then
     begin
@@ -1114,7 +1114,7 @@ end;
 procedure TSVNClient.SetRepositoryPath(AValue: string);
 begin
   if FRepositoryPath=AValue then Exit;
-  FRepositoryPath:=AValue;
+  FRepositoryPath:= IncludeTrailingPathDelimiter(AValue);
   LoadStatus;
 end;
 
