@@ -78,7 +78,7 @@ begin
   if Selected then
   begin
     lvAffectedFiles.Clear;
-    mMessage.Lines.Text := Item.SubItems[2];
+    mMessage.Lines.Text := TSVNLogItem(Item.Data).Message;
     svnItem := TSVNLogItem(Item.Data);
     for i := 0 to svnItem.AffectedFiles.Count - 1 do
     begin
@@ -134,7 +134,7 @@ begin
     item.Caption := IntToStr(svnItem.Revision);
     Item.SubItems.Add(svnItem.Author);
     Item.SubItems.Add(DateTimeToStr(svnItem.DateSVN));
-    Item.SubItems.Add(DelChars(DelChars(svnItem.Message, #10), #13));
+    Item.SubItems.Add(ReplaceLineEndings(svnItem.Message, ' '));
   end;
   lstREvisions.EndUpdate;
   lstREvisions.Items[0].Selected := True;
