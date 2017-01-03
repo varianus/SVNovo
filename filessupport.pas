@@ -45,10 +45,12 @@ function strByteSize(Value: Int64): String;
 function EncodeSafeFileName(const s: string): string;
 function DecodeSafeFileName(const s: string): string;
 
+Procedure RunExternalApp(Executable, Arguments: string);
+
 implementation
 
 uses
-  SysUtils, LazUTF8, LazFileUtils;
+  SysUtils, process, LazUTF8, LazFileUtils;
 
 const
 { common computer sizes }
@@ -128,6 +130,29 @@ begin
     Inc(RealLength);
   end;
   SetLength(Result, RealLength);
+end;
+
+procedure RunExternalApp(Executable, Arguments: string);
+var
+  Process: TProcess;
+  I: Integer;
+begin
+  Process := TProcess.Create(nil);
+  try
+    Process.InheritHandles := False;
+    Process.Options := [];
+    Process.ShowWindow := swoShow;
+
+    // Copy default environment variables including DISPLAY variable for GUI application to work
+    for I := 1 to GetEnvironmentVariableCount do
+      Process.Environment.Add(GetEnvironmentString(I));
+
+    Process.Executable := Executable;
+    Process.Parameters.AddText(Arguments);
+    Process.Execute;
+  finally
+    Process.Free;
+  end;
 end;
 
 function strByteSize(Value: int64): String;
