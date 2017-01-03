@@ -65,6 +65,8 @@ type
     MenuItem12: TMenuItem;
     MenuItem13: TMenuItem;
     MenuItem14: TMenuItem;
+    mnuPreferences: TMenuItem;
+    mnuView: TMenuItem;
     MenuItem2: TMenuItem;
     MenuItem3: TMenuItem;
     MenuItem4: TMenuItem;
@@ -116,8 +118,10 @@ type
     procedure actUpdateExecute(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
+    procedure mnuPreferencesClick(Sender: TObject);
     procedure SVNFileListViewColumnClick(Sender: TObject; Column: TListColumn);
     procedure SVNFileListViewData(Sender: TObject; Item: TListItem);
+    procedure SVNFileListViewDblClick(Sender: TObject);
     procedure SVNFileListViewSelectItem(Sender: TObject; Item: TListItem;
       Selected: Boolean);
     procedure tvBookMarkClick(Sender: TObject);
@@ -143,8 +147,8 @@ var
   fMain: TfMain;
 
 implementation
-uses LazFileUtils, LCLProc, Config, FilesSupport, uabout, formupdate,
-  formcommit;
+uses LazFileUtils, LCLProc, AsyncProcess, Config, FilesSupport, uabout,
+  formupdate, formcommit, formconfig, lclintf;
 {$R *.lfm}
 
 { TfMain }
@@ -275,13 +279,6 @@ begin
   SVNClient := TSVNClient.Create();
   SVNClient.OnSVNMessage:=@log;
   SVNClient.SVNExecutable:= ConfigObj.ReadString('SVN/Executable', SVNClient.SVNExecutable);
-
-  //ConfigObj.WriteString('SVN/Executable',SVNExecutable);
-  //st:= TStringList.Create;
-  //st.Add(SVNClient.RepositoryPath);
-  //st.Add(SVNClient.RepositoryPath+'!!');
-  //ConfigObj.WriteStrings('Repositories/Path', st);
-  //st.free;
 
   SetColumn(SVNFileListView, 0, 25, '', False, taLeftJustify);
   SetColumn(SVNFileListView, 1, 200, rsPath, true, taLeftJustify);
@@ -470,7 +467,7 @@ begin
   Elements := TStringList.Create;
   GetSelectedElements(Elements);
   try
-   debugln(SVNClient.Export(IncludeTrailingPathDelimiter(SVNClient.RepositoryPath) + Elements[0], 'HEAD'));
+   debugln(SVNClient.Export(SVNClient.FullFileName(Elements[0]), 'HEAD'));
   finally
     Elements.free;
   end;
@@ -511,7 +508,7 @@ begin
   Elements := TStringList.Create;
   try
     GetSelectedElements(Elements);
-    RList := SVNClient.log(IncludeTrailingPathDelimiter(SVNClient.RepositoryPath) + Elements[0]);
+    RList := SVNClient.log(SVNClient.FullFileName(Elements[0]));
     if RList.Count = 0 then
       exit;
     TheLog := TfLog.Create(self);
@@ -591,6 +588,21 @@ begin
   SVNClient.Free;
 end;
 
+procedure TfMain.mnuPreferencesClick(Sender: TObject);
+var
+  TheForm: TfConfig;
+begin
+  TheForm := TfConfig.Create(Self);
+  try
+    TheForm.ShowModal;
+    if TheForm.ModalResult = mrOK then
+      ConfigObj.Flush;
+  finally
+    TheForm.Free;
+  end;
+
+end;
+
 procedure TfMain.SVNFileListViewColumnClick(Sender: TObject; Column: TListColumn
   );
 begin
@@ -618,6 +630,32 @@ var
 begin
   StatusItem := SVNClient.List.Items[item.index];
 
+end;
+
+procedure TfMain.SVNFileListViewDblClick(Sender: TObject);
+var
+  Elements: TstringList;
+  Editor, CurrentFile: string;
+
+begin
+  Elements := TStringList.Create;
+  try
+    GetSelectedElements(Elements);
+    if (Elements.Count = 1) and
+       (FileExists(SVNClient.FullFileName(Elements[0]))) then
+      begin
+        Editor := ConfigObj.ReadString('Editor/Executable',EmptyStr);
+        CurrentFile:= StringReplace(ConfigObj.ReadString('Editor/Arguments', '%1'), '%1', SVNClient.FullFileName(Elements[0]), [rfReplaceAll]);
+        if Editor <> EmptyStr then
+          RunExternalApp(Editor, CurrentFile)
+        else
+          OpenDocument(CurrentFile);
+      end;
+
+  finally
+    Elements.free;
+  end;
+  actRefresh.Execute;
 
 end;
 
@@ -625,7 +663,7 @@ procedure TfMain.SVNFileListViewSelectItem(Sender: TObject; Item: TListItem;
   Selected: Boolean);
 begin
   if Assigned(Item.Data) then
-    TSVNItem(Item.Data).Selected:=Selected;
+    TSVNItem(Item.Data).Selected := Selected;
 
 end;
 

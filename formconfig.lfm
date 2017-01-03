@@ -8,6 +8,7 @@ object fConfig: TfConfig
   ClientHeight = 402
   ClientWidth = 534
   OnCreate = FormCreate
+  LCLVersion = '1.7'
   Visible = False
   object pcPreferences: TPageControl
     Left = 0

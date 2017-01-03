@@ -77,11 +77,11 @@ end;
 
 procedure TfConfig.ConfigToMap;
 begin
- leSVNExe.Text:= ConfigObj.ReadString('SVN/Executable',  TSVNClient.FindSvnExecutable);
- leExeDiff.Text:= ConfigObj.ReadString('Diff/Executable',  '');
- leArgsDiff.Text:= ConfigObj.ReadString('Diff/Arguments',  '%1 %2');
- leExeEditor.Text:= ConfigObj.ReadString('Editor/Executable',  '');
- leArgsEditor.Text:= ConfigObj.ReadString('Editor/Arguments',  '%1');
+ leSVNExe.Text:= ConfigObj.ReadString('SVN/Executable', TSVNClient.FindSvnExecutable);
+ leExeDiff.Text:= ConfigObj.ReadString('Diff/Executable', '');
+ leArgsDiff.Text:= ConfigObj.ReadString('Diff/Arguments', '%1 %2');
+ leExeEditor.Text:= ConfigObj.ReadString('Editor/Executable', '');
+ leArgsEditor.Text:= ConfigObj.ReadString('Editor/Arguments', '%1');
 
 end;
 

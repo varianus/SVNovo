@@ -214,14 +214,11 @@ type
     procedure ProcessSVNUpdateOutput(var MemStream: TMemoryStream; var BytesRead: LongInt);
   public
     List: TSVNStatusList; // TFPList;
-    Class Function StatusToItemStatus(sStatus: string): TSVNItemStatus; inline;
-    Class Function ItemStatusToStatus(Status: TSVNItemStatus): string; inline;
-    Class function FindSvnExecutable: string;
-
     //
     constructor Create(const ARepoPath: string='');
     destructor Destroy; override;
     //
+    // SVN Commands
     procedure LoadStatus;
     Procedure Update(Elements: TStrings; Revision:string = '');
     function Export(Element: string; Revision:string = ''):string;
@@ -231,6 +228,13 @@ type
     function Log(FileName: TFileName): TSVNLogList;
     procedure CleanUp;
     //
+    // Support funcs
+    Class Function StatusToItemStatus(sStatus: string): TSVNItemStatus; inline;
+    Class Function ItemStatusToStatus(Status: TSVNItemStatus): string; inline;
+    Class function FindSvnExecutable: string;
+    Function FullFileName(FileName: TFilename): TFilename; inline;
+    //
+    // Properties
     property OnSVNMessage : TSvnMessage read FOnSVNMessage write SetOnSVNMessage;
     Property SVNExecutable: string read GetSvnExecutable write fSvnExecutable;
     property RepositoryPath: string read FRepositoryPath write SetRepositoryPath;
@@ -919,7 +923,7 @@ begin
   end;
 end;
 
-function TSVNClient.Export(Element: String; Revision: String):String;
+function TSVNClient.Export(Element: string; Revision: string): string;
 var
   Commands: TStringList;
 begin
@@ -1058,7 +1062,7 @@ begin
 
 end;
 
-Class function TSVNClient.FindSvnExecutable: string;
+class function TSVNClient.FindSvnExecutable: string;
 var
   //Output: string;
   rv:integer;
@@ -1109,6 +1113,11 @@ begin
   end;
 
 
+end;
+
+function TSVNClient.FullFileName(FileName: TFilename): TFilename;
+begin
+  Result := FRepositoryPath + FileName;
 end;
 
 procedure TSVNClient.SetRepositoryPath(AValue: string);
