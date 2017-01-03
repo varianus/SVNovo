@@ -33,10 +33,20 @@ type
 
   TfConfig = class(TForm)
     BitBtn1: TBitBtn;
+    BitBtn2: TBitBtn;
+    BitBtn3: TBitBtn;
     ButtonPanel1: TButtonPanel;
+    leArgsEditor: TLabeledEdit;
+    leExeDiff: TLabeledEdit;
+    leArgsDiff: TLabeledEdit;
     leSVNExe: TLabeledEdit;
+    leExeEditor: TLabeledEdit;
     pcPreferences: TPageControl;
+    tsDiff: TTabSheet;
+    tsEditor: TTabSheet;
     tsGeneral: TTabSheet;
+    procedure FormCreate(Sender: TObject);
+    procedure OKButtonClick(Sender: TObject);
   private
     Procedure ConfigToMap;
     Procedure MapToConfig;
@@ -55,13 +65,33 @@ uses SVNClasses;
 
 { TfConfig }
 
+procedure TfConfig.FormCreate(Sender: TObject);
+begin
+  ConfigToMap;
+end;
+
+procedure TfConfig.OKButtonClick(Sender: TObject);
+begin
+  MaptoConfig;
+end;
+
 procedure TfConfig.ConfigToMap;
 begin
  leSVNExe.Text:= ConfigObj.ReadString('SVN/Executable',  TSVNClient.FindSvnExecutable);
+ leExeDiff.Text:= ConfigObj.ReadString('Diff/Executable',  '');
+ leArgsDiff.Text:= ConfigObj.ReadString('Diff/Arguments',  '%1 %2');
+ leExeEditor.Text:= ConfigObj.ReadString('Editor/Executable',  '');
+ leArgsEditor.Text:= ConfigObj.ReadString('Editor/Arguments',  '%1');
+
 end;
 
 procedure TfConfig.MapToConfig;
 begin
+ ConfigObj.WriteString('SVN/Executable',  leSVNExe.Text);
+ ConfigObj.WriteString('Diff/Executable', leExeDiff.Text);
+ ConfigObj.WriteString('Diff/Arguments', leArgsDiff.Text);
+ ConfigObj.WriteString('Editor/Executable', leExeEditor.Text);
+ ConfigObj.WriteString('Editor/Arguments',  leArgsEditor.Text);
 
 end;
 

@@ -7,15 +7,16 @@ object fConfig: TfConfig
   Caption = 'Preferences'
   ClientHeight = 402
   ClientWidth = 534
+  OnCreate = FormCreate
   Visible = False
   object pcPreferences: TPageControl
     Left = 0
     Height = 356
     Top = 0
     Width = 534
-    ActivePage = tsGeneral
+    ActivePage = tsEditor
     Align = alClient
-    TabIndex = 0
+    TabIndex = 1
     TabOrder = 0
     object tsGeneral: TTabSheet
       Caption = 'General'
@@ -49,6 +50,106 @@ object fConfig: TfConfig
         TabOrder = 1
       end
     end
+    object tsEditor: TTabSheet
+      Caption = 'Editor'
+      ClientHeight = 328
+      ClientWidth = 526
+      object leExeEditor: TLabeledEdit
+        Left = 8
+        Height = 23
+        Top = 32
+        Width = 425
+        Anchors = [akTop, akLeft, akRight]
+        EditLabel.AnchorSideLeft.Control = leExeEditor
+        EditLabel.AnchorSideRight.Control = leExeEditor
+        EditLabel.AnchorSideRight.Side = asrBottom
+        EditLabel.AnchorSideBottom.Control = leExeEditor
+        EditLabel.Left = 8
+        EditLabel.Height = 15
+        EditLabel.Top = 14
+        EditLabel.Width = 425
+        EditLabel.Caption = 'Editor executable'
+        EditLabel.ParentColor = False
+        TabOrder = 0
+      end
+      object BitBtn2: TBitBtn
+        Left = 449
+        Height = 23
+        Top = 32
+        Width = 66
+        Anchors = [akTop, akRight]
+        Caption = 'Browse'
+        TabOrder = 1
+      end
+      object leArgsEditor: TLabeledEdit
+        Left = 8
+        Height = 23
+        Top = 160
+        Width = 425
+        Anchors = [akTop, akLeft, akRight]
+        EditLabel.AnchorSideLeft.Control = leArgsEditor
+        EditLabel.AnchorSideRight.Control = leArgsEditor
+        EditLabel.AnchorSideRight.Side = asrBottom
+        EditLabel.AnchorSideBottom.Control = leArgsEditor
+        EditLabel.Left = 8
+        EditLabel.Height = 15
+        EditLabel.Top = 142
+        EditLabel.Width = 425
+        EditLabel.Caption = 'Program arguments (%1 = selected file);'
+        EditLabel.ParentColor = False
+        TabOrder = 2
+      end
+    end
+    object tsDiff: TTabSheet
+      Caption = 'Diff tool'
+      ClientHeight = 328
+      ClientWidth = 526
+      object leExeDiff: TLabeledEdit
+        Left = 8
+        Height = 23
+        Top = 32
+        Width = 425
+        Anchors = [akTop, akLeft, akRight]
+        EditLabel.AnchorSideLeft.Control = leExeDiff
+        EditLabel.AnchorSideRight.Control = leExeDiff
+        EditLabel.AnchorSideRight.Side = asrBottom
+        EditLabel.AnchorSideBottom.Control = leExeDiff
+        EditLabel.Left = 8
+        EditLabel.Height = 15
+        EditLabel.Top = 14
+        EditLabel.Width = 425
+        EditLabel.Caption = 'Diff executable'
+        EditLabel.ParentColor = False
+        TabOrder = 0
+      end
+      object BitBtn3: TBitBtn
+        Left = 449
+        Height = 23
+        Top = 32
+        Width = 66
+        Anchors = [akTop, akRight]
+        Caption = 'Browse'
+        TabOrder = 1
+      end
+      object leArgsDiff: TLabeledEdit
+        Left = 8
+        Height = 23
+        Top = 160
+        Width = 425
+        Anchors = [akTop, akLeft, akRight]
+        EditLabel.AnchorSideLeft.Control = leArgsDiff
+        EditLabel.AnchorSideRight.Control = leArgsDiff
+        EditLabel.AnchorSideRight.Side = asrBottom
+        EditLabel.AnchorSideBottom.Control = leArgsDiff
+        EditLabel.Left = 8
+        EditLabel.Height = 15
+        EditLabel.Top = 142
+        EditLabel.Width = 425
+        EditLabel.Caption = 'Program arguments (%1=file1, %2=file2 ):'
+        EditLabel.ParentColor = False
+        TabOrder = 2
+      end
+    end
   end
   object ButtonPanel1: TButtonPanel
     Left = 6
@@ -57,6 +158,7 @@ object fConfig: TfConfig
     Width = 522
     OKButton.Name = 'OKButton'
     OKButton.DefaultCaption = True
+    OKButton.OnClick = OKButtonClick
     HelpButton.Name = 'HelpButton'
     HelpButton.DefaultCaption = True
     CloseButton.Name = 'CloseButton'
