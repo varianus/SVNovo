@@ -12,21 +12,20 @@ object fMain: TfMain
   OnDestroy = FormDestroy
   Position = poDefault
   ShowHint = True
-  LCLVersion = '1.7'
   Visible = False
   object Panel1: TPanel
     Left = 0
-    Height = 443
+    Height = 463
     Top = 0
     Width = 255
     Align = alLeft
     Caption = 'Panel1'
-    ClientHeight = 443
+    ClientHeight = 463
     ClientWidth = 255
     TabOrder = 0
     object tvBookMark: TTreeView
       Left = 1
-      Height = 441
+      Height = 461
       Top = 1
       Width = 253
       Align = alClient
@@ -53,18 +52,18 @@ object fMain: TfMain
   object StatusBar1: TStatusBar
     Left = 0
     Height = 23
-    Top = 552
+    Top = 572
     Width = 1202
     Panels = <>
   end
   object Panel2: TPanel
     Left = 260
-    Height = 443
+    Height = 463
     Top = 0
     Width = 942
     Align = alClient
     Caption = 'Panel2'
-    ClientHeight = 443
+    ClientHeight = 463
     ClientWidth = 942
     TabOrder = 2
     object ToolBar1: TToolBar
@@ -167,7 +166,7 @@ object fMain: TfMain
     end
     object SVNFileListView: TListView
       Left = 1
-      Height = 415
+      Height = 435
       Top = 27
       Width = 940
       Align = alClient
@@ -221,14 +220,14 @@ object fMain: TfMain
   object Memo1: TMemo
     Left = 0
     Height = 104
-    Top = 448
+    Top = 468
     Width = 1202
     Align = alBottom
     TabOrder = 3
   end
   object Splitter1: TSplitter
     Left = 255
-    Height = 443
+    Height = 463
     Top = 0
     Width = 5
   end
@@ -236,7 +235,7 @@ object fMain: TfMain
     Cursor = crVSplit
     Left = 0
     Height = 5
-    Top = 443
+    Top = 463
     Width = 1202
     Align = alBottom
     ResizeAnchor = akBottom
@@ -372,10 +371,11 @@ object fMain: TfMain
       ImageIndex = 41
       OnExecute = actLogExecute
     end
-    object Action1: TAction
+    object actDiffHead: TAction
       Category = 'FileAction'
-      Caption = 'Action1'
-      OnExecute = Action1Execute
+      Caption = 'Diff to Head'
+      OnExecute = actDiffHeadExecute
+      ShortCut = 16456
     end
   end
   object ImageList_22x22: TImageList
@@ -5792,7 +5792,7 @@ object fMain: TfMain
       Action = actLog
     end
     object MenuItem14: TMenuItem
-      Action = Action1
+      Action = actDiffHead
     end
   end
   object pmBookmark: TPopupMenu

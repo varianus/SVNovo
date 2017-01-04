@@ -1,4 +1,4 @@
-{
+{///*/*/*/*/*
   This file is part of SVNovo
   Copyright (C) 2016 Marco Caselli <marcocas@gmail.com>
 
@@ -44,7 +44,7 @@ type
     actCleanup: TAction;
     actBookMarkAdd: TAction;
     actBookMarkDelete: TAction;
-    Action1: TAction;
+    actDiffHead: TAction;
     actLog: TAction;
     actRevert: TAction;
     actRefresh: TAction;
@@ -106,7 +106,7 @@ type
     procedure actCleanupExecute(Sender: TObject);
     procedure actCommitExecute(Sender: TObject);
     procedure actFlatModeExecute(Sender: TObject);
-    procedure Action1Execute(Sender: TObject);
+    procedure actDiffHeadExecute(Sender: TObject);
     procedure ActionListUpdate(AAction: TBasicAction; var Handled: Boolean);
     procedure actLogExecute(Sender: TObject);
     procedure actRefreshExecute(Sender: TObject);
@@ -138,6 +138,7 @@ type
     procedure LoadBookmarks;
     procedure LoadTree(Node: TTreeNode; BasePath: string);
     procedure Log(Sender: TObject; const SVNMessageKind: TSVNMessageKind; const Message: string);
+    procedure RunExternal(App: string; Args: array of string);
     procedure UpdateFilesListView;
   public
 
@@ -148,7 +149,7 @@ var
 
 implementation
 uses LazFileUtils, LCLProc, AsyncProcess, Config, FilesSupport, uabout,
-  formupdate, formcommit, formconfig, lclintf;
+  formupdate, formcommit, formconfig, strutils, lclintf;
 {$R *.lfm}
 
 { TfMain }
@@ -460,14 +461,20 @@ begin
   UpdateFilesListView;
 end;
 
-procedure TfMain.Action1Execute(Sender: TObject);
+procedure TfMain.actDiffHeadExecute(Sender: TObject);
 var
   Elements: TstringList;
+  TempName: string;
+  i: integer;
 begin
   Elements := TStringList.Create;
   GetSelectedElements(Elements);
   try
-   debugln(SVNClient.Export(SVNClient.FullFileName(Elements[0]), 'HEAD'));
+   For i := 0 to Elements.Count -1 do
+     begin
+       TempName := SVNClient.Export(SVNClient.FullFileName(Elements[i]), 'HEAD');
+       RunExternal(CFG_Diff,[SVNClient.FullFileName(Elements[i]), TempName]);
+     end;
   finally
     Elements.free;
   end;
@@ -632,6 +639,47 @@ begin
 
 end;
 
+
+procedure TfMain.RunExternal(App: string; Args: array of string);
+var
+  ToolExe, ToolArgs: string;
+  NumArgs: integer;
+  i: integer;
+begin
+  // Is a supported app?
+  Case App of
+    CFG_Editor: NumArgs := 1;
+    CFG_Diff: NumArgs := 2;
+  else
+    exit;
+  end;
+
+  if Length(Args) < NumArgs then
+    exit;
+
+  ToolExe := ConfigObj.ReadString(App+'/Executable', EmptyStr);
+
+  // Special case for editor. Try to use associated application if user do not specify an editor
+  If (ToolExe = EmptyStr) and (App = CFG_Editor) then
+    Begin
+      OpenDocument(Args[0]);
+      Exit;
+    end;
+
+  ToolArgs := ConfigObj.ReadString(App+'/Arguments', EmptyStr);
+  If (NumArgs > 0) and (ToolArgs = EmptyStr) then
+    For i:= 1 to NumArgs do
+      ToolArgs := ToolArgs +'%'+IntToStr(i)+' ';
+
+  ToolArgs:=Trim(ToolArgs);
+
+  for i := 0 to NumArgs -1 do
+    ToolArgs := StringReplace(ToolArgs,'%'+IntToStr(I+1), AnsiQuotedStr(Args[i], '"'), [rfReplaceAll]);
+
+  RunExternalApp(ToolExe, ToolArgs);
+
+end;
+
 procedure TfMain.SVNFileListViewDblClick(Sender: TObject);
 var
   Elements: TstringList;
@@ -644,12 +692,7 @@ begin
     if (Elements.Count = 1) and
        (FileExists(SVNClient.FullFileName(Elements[0]))) then
       begin
-        Editor := ConfigObj.ReadString('Editor/Executable',EmptyStr);
-        CurrentFile:= StringReplace(ConfigObj.ReadString('Editor/Arguments', '%1'), '%1', SVNClient.FullFileName(Elements[0]), [rfReplaceAll]);
-        if Editor <> EmptyStr then
-          RunExternalApp(Editor, CurrentFile)
-        else
-          OpenDocument(CurrentFile);
+        RunExternal(CFG_Editor, [SVNClient.FullFileName(Elements[0])]);
       end;
 
   finally
@@ -718,20 +761,21 @@ begin
       LoadTree(BookMark, BookMark.Text);
     end
   else
-   SVNClient.RepositoryPath := BookMark.FullPath;
+    SVNClient.RepositoryPath := BookMark.FullPath;
 
   UpdateFilesListView;
 
 end;
 
 procedure TfMain.tvBookMarkCreateNodeClass(Sender: TCustomTreeView;
-  var NodeClass: TTreeNodeClass);
+var NodeClass: TTreeNodeClass);
 begin
   NodeClass := TFileTreeNode;
 end;
 
 procedure TfMain.tvBookMarkExpanding(Sender: TObject; Node: TTreeNode;
-  var AllowExpansion: Boolean);
+var
+  AllowExpansion: Boolean);
 begin
   ExpandNode(Node);
 end;

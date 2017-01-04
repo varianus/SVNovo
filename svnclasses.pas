@@ -935,8 +935,10 @@ begin
   if (Revision = '') then
      Revision := 'HEAD';
 
-  if (Revision <> '') and (trim(Revision) <> 'HEAD') then
-    Commands.Add('-r ' + Revision);
+  if (Revision <> '')  then
+    begin
+      Commands.Add('--revision='+Revision);
+    end;
 
   Commands.Add(Element);
 

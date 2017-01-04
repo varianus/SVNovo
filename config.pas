@@ -55,6 +55,9 @@ type
 const
    CFG_BookMark = 'Repositories/Path';
 
+   CFG_Editor = 'Editor';
+   CFG_Diff = 'Diff';
+
 function ConfigObj: TConfig;
 
 implementation
