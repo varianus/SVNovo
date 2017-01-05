@@ -1018,6 +1018,7 @@ procedure TSVNClient.Commit(Elements: TStrings; Message: string;
   Recursive: boolean);
 var
   Commands: TStringList;
+  intMessage : string;
 begin
   Commands := TstringList.Create;
   Commands.AddStrings(['commit','--non-interactive', '--trust-server-cert']);
@@ -1031,8 +1032,11 @@ begin
   else
     Commands.AddStrings(Elements);
 
-  Commands.Add('-m');
-  Commands.Add(AnsiQuotedStr(Message, '"'));
+
+  IntMessage := AnsiQuotedStr(Message, '"');
+  if pos ('"', message) > 0 then
+    IntMessage := StringReplace(IntMessage, '""', '"""', [rfReplaceAll]);
+  Commands.Add('--message='+IntMessage);
 
   ExecuteSvn(Commands);
 
