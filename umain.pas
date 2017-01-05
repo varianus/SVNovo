@@ -140,6 +140,10 @@ type
     procedure Log(Sender: TObject; const SVNMessageKind: TSVNMessageKind; const Message: string);
     procedure RunExternal(App: string; Args: array of string);
     procedure UpdateFilesListView;
+    Procedure ConfigToMap;
+    Procedure MapToConfig;
+    procedure UpdateFilter(Reload: boolean= true);
+
   public
 
   end;
@@ -250,6 +254,30 @@ begin
   //   SVNFileListView.Items.Count:= SVNClient.List.Count;
 end;
 
+procedure TfMain.ConfigToMap;
+begin
+  actFlatMode.Checked := ConfigObj.ReadBoolean('Filter/FlatMode', false);
+
+  actShowUnversioned.Checked := ConfigObj.ReadBoolean('Filter/ShowUnversioned', True);
+  actShowUnmodified.Checked := ConfigObj.ReadBoolean('Filter/ShowUnmodified', True);
+  actShowModified.Checked := ConfigObj.ReadBoolean('Filter/ShowModified', True);
+  actShowConflict.Checked := ConfigObj.ReadBoolean('Filter/ShowConflict', True);
+
+  UpdateFilter(False);
+end;
+
+procedure TfMain.MapToConfig;
+begin
+  ConfigObj.WriteBoolean('Filter/FlatMode', actFlatMode.Checked);
+
+  ConfigObj.WriteBoolean('Filter/ShowUnversioned', actShowUnversioned.Checked);
+  ConfigObj.WriteBoolean('Filter/ShowUnmodified', actShowUnmodified.Checked);
+  ConfigObj.WriteBoolean('Filter/ShowModified', actShowModified.Checked);
+  ConfigObj.WriteBoolean('Filter/ShowConflict', actShowConflict.Checked);
+
+  ConfigObj.Flush;
+end;
+
 procedure TfMain.LoadBookmarks;
 var
   st: TStringList;
@@ -277,6 +305,23 @@ var
 begin
   LoadBookmarks;
 
+  Filter:=[sisAdded,
+           sisConflicted,
+           sisDeleted,
+           sisExternal,
+           sisIgnored,
+           sisIncomplete,
+           sisMerged,
+           sisMissing,
+           sisModified,
+           sisNone,
+           sisNormal,
+           sisObstructed,
+           sisReplaced,
+           sisUnversioned];
+
+  ConfigToMap;
+
   SVNClient := TSVNClient.Create();
   SVNClient.OnSVNMessage:=@log;
   SVNClient.SVNExecutable:= ConfigObj.ReadString('SVN/Executable', SVNClient.SVNExecutable);
@@ -292,20 +337,6 @@ begin
   SetColumn(SVNFileListView, 8, 100, rsFileStatus, True, taLeftJustify);
   SetColumn(SVNFileListView, 9, 125, rsPropertyStatus, True, taLeftJustify);
 
-  Filter:=[sisAdded,
-           sisConflicted,
-           sisDeleted,
-           sisExternal,
-           sisIgnored,
-           sisIncomplete,
-           sisMerged,
-           sisMissing,
-           sisModified,
-           sisNone,
-           sisNormal,
-           sisObstructed,
-           sisReplaced,
-           sisUnversioned];
   UpdateFilesListView;
 
   ConfigObj.Flush;
@@ -318,7 +349,7 @@ begin
   Memo1.Lines.Add(Message);
 end;
 
-Procedure TfMain.GetSelectedElements(Elements: Tstrings);
+procedure TfMain.GetSelectedElements(Elements: Tstrings);
 var
   i: integer;
 begin
@@ -549,49 +580,60 @@ begin
 
 end;
 
-procedure TfMain.actShowConflictExecute(Sender: TObject);
+Procedure TfMain.UpdateFilter(Reload: boolean= true);
 begin
-  actShowConflict.Checked := not actShowConflict.Checked;
   if actShowConflict.Checked then
     Filter:=Filter + [sisConflicted]
   else
     Filter:=Filter - [sisConflicted];
 
-  UpdateFilesListView;
+  if actShowModified.Checked then
+    Filter:=Filter + [sisAdded, sisDeleted, sisConflicted, sisModified]
+  else
+    Filter:=Filter - [sisAdded, sisDeleted, sisConflicted, sisModified];
+
+  if actShowUnmodified.Checked then
+    Filter:=Filter + [sisNormal]
+  else
+    Filter:=Filter - [sisNormal];
+
+  if actShowUnversioned.Checked then
+    Filter:=Filter + [sisUnversioned]
+  else
+    Filter:=Filter - [sisUnversioned];
+
+  if Reload then
+    UpdateFilesListView;
+
+end;
+
+procedure TfMain.actShowConflictExecute(Sender: TObject);
+begin
+  actShowConflict.Checked := not actShowConflict.Checked;
+  UpdateFilter;
 end;
 
 procedure TfMain.actShowModifiedExecute(Sender: TObject);
 begin
   actShowModified.Checked := not actShowModified.Checked;
-  if actShowModified.Checked then
-    Filter:=Filter + [sisAdded, sisDeleted, sisConflicted, sisModified]
-  else
-    Filter:=Filter - [sisAdded, sisDeleted, sisConflicted, sisModified];
-  UpdateFilesListView;
+  UpdateFilter;
 end;
 
 procedure TfMain.actShowUnmodifiedExecute(Sender: TObject);
 begin
   actShowUnmodified.Checked := not actShowUnmodified.Checked;
-  if actShowUnmodified.Checked then
-    Filter:=Filter + [sisNormal]
-  else
-    Filter:=Filter - [sisNormal];
-  UpdateFilesListView;
+  UpdateFilter;
 end;
 
 procedure TfMain.actShowUnversionedExecute(Sender: TObject);
 begin
   actShowUnversioned.Checked := not actShowUnversioned.Checked;
-  if actShowUnversioned.Checked then
-    Filter:=Filter + [sisUnversioned]
-  else
-    Filter:=Filter - [sisUnversioned];
-  UpdateFilesListView;
+  UpdateFilter;
 end;
 
 procedure TfMain.FormDestroy(Sender: TObject);
 begin
+  MapToConfig;
   SVNClient.Free;
 end;
 

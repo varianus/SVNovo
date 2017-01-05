@@ -45,6 +45,9 @@ type
     procedure WriteString(APath: string; Value: String);
     function ReadString(APath: string; ADefault: String): string;
     function GetResourcesPath: string;
+    procedure WriteBoolean(APath: string; Value: Boolean);
+    function ReadBoolean(APath: string; ADefault: Boolean): Boolean;
+
     procedure Flush;
     destructor Destroy; override;
     // -- //
@@ -187,12 +190,20 @@ begin
   fConfigHolder.SetValue(APath, Value);
 end;
 
-function TConfig.ReadString(APath: string; ADefault: String
-  ): string;
+function TConfig.ReadString(APath: string; ADefault: String): string;
 begin
   Result := fConfigHolder.GetValue(APath, ADefault);
 end;
 
+procedure TConfig.WriteBoolean(APath: string; Value: Boolean);
+begin
+  fConfigHolder.SetValue(APath, Value);
+end;
+
+function TConfig.ReadBoolean(APath: string; ADefault: Boolean): Boolean;
+begin
+  Result := fConfigHolder.GetValue(APath, ADefault);
+end;
 
 procedure TConfig.Flush;
 begin
