@@ -688,6 +688,9 @@ var
   NumArgs: integer;
   i: integer;
 begin
+
+  { TODO 1 -oMarco -cConfig : Handle missing config }
+
   // Is a supported app?
   Case App of
     CFG_Editor: NumArgs := 1;

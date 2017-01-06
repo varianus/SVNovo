@@ -148,7 +148,8 @@ begin
       Process.Environment.Add(GetEnvironmentString(I));
 
     Process.Executable := Executable;
-    Process.Parameters.AddText(Arguments);
+    SplitCmdLineParams(Arguments, Process.Parameters);
+//    Process.Parameters.AddText(Arguments);
     Process.Execute;
   finally
     Process.Free;
