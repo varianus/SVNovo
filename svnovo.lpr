@@ -39,10 +39,6 @@ begin
   RequireDerivedFormResource:=True;
   Application.Initialize;
   Application.CreateForm(TfMain, fMain);
-  Application.CreateForm(TfUpdate, fUpdate);
-  Application.CreateForm(TfCommit, fCommit);
-  Application.CreateForm(TfLog, fLog);
-  Application.CreateForm(TfConfig, fConfig);
   Application.Run;
 end.
 

@@ -130,7 +130,6 @@ type
     procedure tvBookMarkExpanding(Sender: TObject; Node: TTreeNode;
       var AllowExpansion: Boolean);
   private
-    SVNClient : TSVNClient;
     RepositoryPath: string;
     Filter: TSVNItemStatusSet;
     procedure ExpandNode(Node: TTreeNode);
@@ -138,14 +137,13 @@ type
     procedure LoadBookmarks;
     procedure LoadTree(Node: TTreeNode; BasePath: string);
     procedure Log(Sender: TObject; const SVNMessageKind: TSVNMessageKind; const Message: string);
-    procedure RunExternal(App: string; Args: array of string);
     procedure UpdateFilesListView;
     Procedure ConfigToMap;
     Procedure MapToConfig;
     procedure UpdateFilter(Reload: boolean= true);
 
   public
-
+    SVNClient : TSVNClient;
   end;
 
 var
@@ -153,7 +151,7 @@ var
 
 implementation
 uses LazFileUtils, LCLProc, AsyncProcess, Config, FilesSupport, uabout,
-  formupdate, formcommit, formconfig, strutils, lclintf;
+  formupdate, formcommit, formconfig, strutils;
 {$R *.lfm}
 
 { TfMain }
@@ -546,10 +544,12 @@ begin
   Elements := TStringList.Create;
   try
     GetSelectedElements(Elements);
+
     RList := SVNClient.log(SVNClient.FullFileName(Elements[0]));
     if RList.Count = 0 then
       exit;
     TheLog := TfLog.Create(self);
+    TheLog.CurrentFile := SVNClient.FullFileName(Elements[0]);
     TheLog.List := RList;
     TheLog.Show;
   finally
@@ -681,49 +681,6 @@ begin
 
 end;
 
-
-procedure TfMain.RunExternal(App: string; Args: array of string);
-var
-  ToolExe, ToolArgs: string;
-  NumArgs: integer;
-  i: integer;
-begin
-
-  { TODO 1 -oMarco -cConfig : Handle missing config }
-
-  // Is a supported app?
-  Case App of
-    CFG_Editor: NumArgs := 1;
-    CFG_Diff: NumArgs := 2;
-  else
-    exit;
-  end;
-
-  if Length(Args) < NumArgs then
-    exit;
-
-  ToolExe := ConfigObj.ReadString(App+'/Executable', EmptyStr);
-
-  // Special case for editor. Try to use associated application if user do not specify an editor
-  If (ToolExe = EmptyStr) and (App = CFG_Editor) then
-    Begin
-      OpenDocument(Args[0]);
-      Exit;
-    end;
-
-  ToolArgs := ConfigObj.ReadString(App+'/Arguments', EmptyStr);
-  If (NumArgs > 0) and (ToolArgs = EmptyStr) then
-    For i:= 1 to NumArgs do
-      ToolArgs := ToolArgs +'%'+IntToStr(i)+' ';
-
-  ToolArgs:=Trim(ToolArgs);
-
-  for i := 0 to NumArgs -1 do
-    ToolArgs := StringReplace(ToolArgs,'%'+IntToStr(I+1), AnsiQuotedStr(Args[i], '"'), [rfReplaceAll]);
-
-  RunExternalApp(ToolExe, ToolArgs);
-
-end;
 
 procedure TfMain.SVNFileListViewDblClick(Sender: TObject);
 var

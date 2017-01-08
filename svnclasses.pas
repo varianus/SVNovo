@@ -221,7 +221,8 @@ type
     // SVN Commands
     procedure LoadStatus;
     Procedure Update(Elements: TStrings; Revision:string = '');
-    function Export(Element: string; Revision:string = ''):string;
+    function Export(Element: string; Revision:string = ''):string; overload;
+    function Export(Element: string; Revision:Integer):string;  overload;
     procedure Add(Elements: TStrings; Recursive: boolean=false);
     procedure Revert(Elements: TStrings; Recursive: boolean=false);
     procedure Commit(Elements: TStrings; Message: string; Recursive: boolean=false);
@@ -951,6 +952,11 @@ begin
   finally
     Commands.Free;
   end;
+end;
+
+function TSVNClient.Export(Element: string; Revision: Integer): string;
+begin
+  Result := Export(Element, IntToStr(Revision));
 end;
 
 procedure TSVNClient.Add(Elements: TStrings; Recursive: boolean= false);

@@ -26,31 +26,40 @@ interface
 
 uses
   Classes, SysUtils, FileUtil, Forms, Controls, Graphics, Dialogs, ComCtrls,
-  StdCtrls, SVNClasses;
+  StdCtrls, ActnList, SVNClasses, FilesSupport, Config;
 
 type
 
   { TfLog }
 
   TfLog = class(TForm)
+    actClose: TAction;
+    actDiff: TAction;
+    ActionList1: TActionList;
+    actView: TAction;
     bClose: TButton;
+    bDiff: TButton;
     lvAffectedFiles: TListView;
     lstREvisions: TListView;
     mMessage: TMemo;
     pcInfo: TPageControl;
     tsMessage: TTabSheet;
     tsFiles: TTabSheet;
-    procedure bCloseClick(Sender: TObject);
+    procedure actCloseExecute(Sender: TObject);
+    procedure actDiffExecute(Sender: TObject);
+    procedure actViewExecute(Sender: TObject);
     procedure FormClose(Sender: TObject; var CloseAction: TCloseAction);
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure lstREvisionsSelectItem(Sender: TObject; Item: TListItem; Selected: boolean);
   private
+    FCurrentFile: String;
     FList: TSVNLogList;
+    procedure SetCurrentFile(AValue: String);
     procedure SetList(AValue: TSVNLogList);
     procedure UpdateList;
   public
-
+    Property CurrentFile: String read FCurrentFile write SetCurrentFile;
     property List: TSVNLogList read FList write SetList;
   end;
 
@@ -58,7 +67,7 @@ var
   fLog: TfLog;
 
 implementation
-uses strutils;
+uses strutils, uMain;
 {$R *.lfm}
 
 { TfLog }
@@ -96,9 +105,29 @@ begin
   FList := nil;
 end;
 
-procedure TfLog.bCloseClick(Sender: TObject);
+procedure TfLog.actCloseExecute(Sender: TObject);
 begin
   Close;
+end;
+
+procedure TfLog.actDiffExecute(Sender: TObject);
+var
+ svnItem: TSVNLogItem;
+ TempName1, TempName2: string;
+begin
+
+  if lstREvisions.SelCount = 1 then
+    begin
+      SvnItem := TSVNLogItem(lstREvisions.Selected.Data);
+      TempName1 := fMain.SVNClient.Export(CurrentFile, svnItem.Revision);
+      RunExternal(CFG_Diff,[CurrentFile, TempName1]);
+    end;
+
+end;
+
+procedure TfLog.actViewExecute(Sender: TObject);
+begin
+   //
 end;
 
 procedure TfLog.FormClose(Sender: TObject; var CloseAction: TCloseAction);
@@ -114,6 +143,12 @@ begin
 
   UpdateList;
 
+end;
+
+procedure TfLog.SetCurrentFile(AValue: String);
+begin
+  if FCurrentFile=AValue then Exit;
+  FCurrentFile:=AValue;
 end;
 
 procedure TfLog.UpdateList;

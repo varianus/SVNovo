@@ -2,41 +2,41 @@ object fLog: TfLog
   Left = 431
   Height = 433
   Top = 249
-  Width = 774
+  Width = 887
   Caption = 'Log'
   ClientHeight = 433
-  ClientWidth = 774
+  ClientWidth = 887
+  DesignTimePPI = 95
   OnClose = FormClose
   OnCreate = FormCreate
   OnDestroy = FormDestroy
   LCLVersion = '1.7'
-  Visible = False
   object lstREvisions: TListView
     Left = 8
     Height = 214
     Top = 24
-    Width = 650
+    Width = 763
     Anchors = [akTop, akLeft, akRight, akBottom]
     AutoWidthLastColumn = True
     Columns = <    
       item
         AutoSize = True
         Caption = 'Rev.'
-        Width = 37
+        Width = 31
       end    
       item
         AutoSize = True
         Caption = 'User'
-        Width = 38
+        Width = 35
       end    
       item
         AutoSize = True
         Caption = 'Date'
-        Width = 39
+        Width = 35
       end    
       item
         Caption = 'Message'
-        Width = 547
+        Width = 660
       end>
     RowSelect = True
     ScrollBars = ssAutoBoth
@@ -45,20 +45,19 @@ object fLog: TfLog
     OnSelectItem = lstREvisionsSelectItem
   end
   object bClose: TButton
-    Left = 668
+    Left = 781
     Height = 25
     Top = 24
     Width = 75
+    Action = actClose
     Anchors = [akTop, akRight]
-    Caption = 'Close'
-    OnClick = bCloseClick
     TabOrder = 1
   end
   object pcInfo: TPageControl
     Left = 0
     Height = 200
     Top = 233
-    Width = 774
+    Width = 887
     ActivePage = tsFiles
     Align = alBottom
     TabIndex = 1
@@ -66,7 +65,7 @@ object fLog: TfLog
     object tsMessage: TTabSheet
       Caption = 'Message'
       ClientHeight = 165
-      ClientWidth = 768
+      ClientWidth = 881
       object mMessage: TMemo
         Left = 0
         Height = 165
@@ -78,26 +77,52 @@ object fLog: TfLog
     end
     object tsFiles: TTabSheet
       Caption = 'Affected Files'
-      ClientHeight = 172
-      ClientWidth = 766
+      ClientHeight = 165
+      ClientWidth = 881
       object lvAffectedFiles: TListView
         Left = 0
-        Height = 172
+        Height = 165
         Top = 0
-        Width = 766
+        Width = 881
         Align = alClient
         Columns = <        
           item
             AutoSize = True
             Caption = 'Action'
+            Width = 43
           end        
           item
             Caption = 'File'
-            Width = 708
+            Width = 821
           end>
         TabOrder = 0
         ViewStyle = vsReport
       end
+    end
+  end
+  object bDiff: TButton
+    Left = 781
+    Height = 25
+    Top = 72
+    Width = 75
+    Action = actDiff
+    Anchors = [akTop, akRight]
+    TabOrder = 3
+  end
+  object ActionList1: TActionList
+    Left = 800
+    Top = 137
+    object actClose: TAction
+      Caption = 'Close'
+      OnExecute = actCloseExecute
+    end
+    object actDiff: TAction
+      Caption = 'Diff'
+      OnExecute = actDiffExecute
+    end
+    object actView: TAction
+      Caption = 'View'
+      OnExecute = actViewExecute
     end
   end
 end

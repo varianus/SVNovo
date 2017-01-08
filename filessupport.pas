@@ -45,12 +45,13 @@ function strByteSize(Value: Int64): String;
 function EncodeSafeFileName(const s: string): string;
 function DecodeSafeFileName(const s: string): string;
 
-Procedure RunExternalApp(Executable, Arguments: string);
+procedure RunExternal(App: string; Args: array of string);
+
 
 implementation
 
 uses
-  SysUtils, process, LazUTF8, LazFileUtils;
+  SysUtils, process, LazUTF8, LazFileUtils, Config,  lclintf;
 
 const
 { common computer sizes }
@@ -132,7 +133,7 @@ begin
   SetLength(Result, RealLength);
 end;
 
-procedure RunExternalApp(Executable, Arguments: string);
+procedure RunIndipendentApp(Executable, Arguments: string);
 var
   Process: TProcess;
   I: Integer;
@@ -154,6 +155,50 @@ begin
   finally
     Process.Free;
   end;
+end;
+
+
+procedure RunExternal(App: string; Args: array of string);
+var
+  ToolExe, ToolArgs: string;
+  NumArgs: integer;
+  i: integer;
+begin
+
+  { TODO 1 -oMarco -cConfig : Handle missing config }
+
+  // Is a supported app?
+  Case App of
+    CFG_Editor: NumArgs := 1;
+    CFG_Diff: NumArgs := 2;
+  else
+    exit;
+  end;
+
+  if Length(Args) < NumArgs then
+    exit;
+
+  ToolExe := ConfigObj.ReadString(App+'/Executable', EmptyStr);
+
+  // Special case for editor. Try to use associated application if user do not specify an editor
+  If (ToolExe = EmptyStr) and (App = CFG_Editor) then
+    Begin
+      OpenDocument(Args[0]);
+      Exit;
+    end;
+
+  ToolArgs := ConfigObj.ReadString(App+'/Arguments', EmptyStr);
+  If (NumArgs > 0) and (ToolArgs = EmptyStr) then
+    For i:= 1 to NumArgs do
+      ToolArgs := ToolArgs +'%'+IntToStr(i)+' ';
+
+  ToolArgs:=Trim(ToolArgs);
+
+  for i := 0 to NumArgs -1 do
+    ToolArgs := StringReplace(ToolArgs,'%'+IntToStr(I+1), AnsiQuotedStr(Args[i], '"'), [rfReplaceAll]);
+
+  RunIndipendentApp(ToolExe, ToolArgs);
+
 end;
 
 function strByteSize(Value: int64): String;
