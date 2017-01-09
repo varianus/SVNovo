@@ -29,7 +29,6 @@ uses
 type
   { TConfig }
 
-
   TConfig = class
   private
     FConfigFile: string;
@@ -53,6 +52,25 @@ type
     // -- //
     property ConfigDir: string read fConfigDir;
     property ConfigFile: string read FConfigFile;
+  end;
+
+  { TSimpleHistory }
+
+  TSimpleHistory = class
+  private
+    FMax: Integer;
+    IntList: TStringList;
+    function GetCount: integer;
+    procedure SetMax(AValue: Integer);
+  public
+    function Add(const S: string): Integer;
+    Constructor Create;
+    Destructor Destroy; override;
+    Procedure GetList(List: TStrings);
+    Procedure LoadFromConfig(Config: TConfig; APath: string);
+    Procedure WriteToConfig(Config: TConfig; APath: string);
+    Property Max: Integer read FMax write SetMax;
+    Property Count: integer read GetCount;
   end;
 
 const
@@ -132,6 +150,64 @@ begin
   Result := FConfigObj;
 end;
 
+{ TSimpleHistory }
+
+procedure TSimpleHistory.SetMax(AValue: Integer);
+begin
+  if FMax=AValue then Exit;
+  FMax:=AValue;
+
+  while IntList.Count > FMax do
+    IntList.Delete(IntList.Count-1);           // -1 since its 0 indexed
+
+end;
+
+function TSimpleHistory.GetCount: integer;
+begin
+  Result := IntList.count;
+end;
+
+function TSimpleHistory.Add(const S: string): Integer;
+var
+   i : integer;
+begin
+   i := IntList.IndexOf(S);
+   if i<>-1 then
+     IntList.Delete(i);
+
+   IntList.Insert(0, S);
+
+   // Trim the oldest files if more than NumFiles
+   while IntList.Count > FMax do
+     IntList.Delete(IntList.Count-1);           // -1 since its 0 indexed
+
+end;
+
+constructor TSimpleHistory.Create;
+begin
+  IntList := TStringList.Create;
+end;
+
+destructor TSimpleHistory.Destroy;
+begin
+  FreeAndNil(IntList);
+  inherited Destroy;
+end;
+
+procedure TSimpleHistory.GetList(List: TStrings);
+begin
+  List.Assign(IntList);
+end;
+
+procedure TSimpleHistory.LoadFromConfig(Config: TConfig; APath: string);
+begin
+  Config.ReadStrings(APath, IntList);
+end;
+
+procedure TSimpleHistory.WriteToConfig(Config: TConfig; APath: string);
+begin
+  Config.WriteStrings(APath, IntList);
+end;
 
 constructor TConfig.Create;
 begin

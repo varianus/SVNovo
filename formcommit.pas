@@ -24,8 +24,8 @@ unit formcommit;
 interface
 
 uses
-  Classes, SysUtils, FileUtil, Forms, Controls, Graphics, Dialogs, StdCtrls,
-  ButtonPanel, CheckLst;
+  Classes, SysUtils, FileUtil, Config, Forms, Controls, Graphics,
+  Dialogs, StdCtrls, ButtonPanel, CheckLst, ExtCtrls;
 
 type
 
@@ -34,11 +34,17 @@ type
   TfCommit = class(TForm)
     ButtonPanel1: TButtonPanel;
     CheckListBox1: TCheckListBox;
+    cbRecents: TComboBox;
     GroupBox1: TGroupBox;
     GroupBox2: TGroupBox;
+    Label1: TLabel;
     mLogMessage: TMemo;
+    Panel1: TPanel;
+    procedure cbRecentsSelect(Sender: TObject);
+    procedure FormCreate(Sender: TObject);
+    procedure OKButtonClick(Sender: TObject);
   private
-
+    History : TSimpleHistory;
   public
 
   end;
@@ -49,6 +55,28 @@ var
 implementation
 
 {$R *.lfm}
+
+{ TfCommit }
+
+procedure TfCommit.OKButtonClick(Sender: TObject);
+begin
+  History.Add(mLogMessage.Lines.Text);
+  History.WriteToConfig(ConfigObj, 'History/CommitMessages');
+end;
+
+procedure TfCommit.FormCreate(Sender: TObject);
+begin
+  History := TSimpleHistory.Create;
+  History.LoadFromConfig(ConfigObj, 'History/CommitMessages');
+  History.Max:= 50;
+  History.GetList(cbRecents.Items);
+  cbRecents.Items.Insert(0,'');
+end;
+
+procedure TfCommit.cbRecentsSelect(Sender: TObject);
+begin
+  mLogMessage.Lines.Text := cbRecents.Text;
+end;
 
 end.
 

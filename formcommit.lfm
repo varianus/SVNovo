@@ -7,6 +7,7 @@ object fCommit: TfCommit
   Caption = 'Commit'
   ClientHeight = 483
   ClientWidth = 510
+  OnCreate = FormCreate
   Position = poMainFormCenter
   Visible = False
   object GroupBox1: TGroupBox
@@ -30,17 +31,17 @@ object fCommit: TfCommit
   end
   object GroupBox2: TGroupBox
     Left = 0
-    Height = 268
-    Top = 169
+    Height = 218
+    Top = 219
     Width = 510
     Align = alClient
     Caption = 'Files to commit'
-    ClientHeight = 248
+    ClientHeight = 198
     ClientWidth = 506
     TabOrder = 1
     object CheckListBox1: TCheckListBox
       Left = 0
-      Height = 248
+      Height = 198
       Top = 0
       Width = 506
       Align = alClient
@@ -55,6 +56,7 @@ object fCommit: TfCommit
     Width = 498
     OKButton.Name = 'OKButton'
     OKButton.DefaultCaption = True
+    OKButton.OnClick = OKButtonClick
     HelpButton.Name = 'HelpButton'
     HelpButton.DefaultCaption = True
     CloseButton.Name = 'CloseButton'
@@ -63,5 +65,33 @@ object fCommit: TfCommit
     CancelButton.DefaultCaption = True
     TabOrder = 2
     ShowButtons = [pbOK, pbCancel]
+  end
+  object Panel1: TPanel
+    Left = 0
+    Height = 50
+    Top = 169
+    Width = 510
+    Align = alTop
+    ClientHeight = 50
+    ClientWidth = 510
+    TabOrder = 3
+    object Label1: TLabel
+      Left = 8
+      Height = 15
+      Top = 10
+      Width = 41
+      Caption = 'Recents'
+      ParentColor = False
+    end
+    object cbRecents: TComboBox
+      Left = 64
+      Height = 23
+      Top = 8
+      Width = 404
+      ItemHeight = 15
+      OnSelect = cbRecentsSelect
+      Style = csDropDownList
+      TabOrder = 0
+    end
   end
 end
