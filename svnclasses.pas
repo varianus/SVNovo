@@ -1040,8 +1040,12 @@ begin
 
 
   IntMessage := AnsiQuotedStr(Message, '"');
+
+  {$IFDEF WINDOWS}
   if pos ('"', message) > 0 then
     IntMessage := StringReplace(IntMessage, '""', '"""', [rfReplaceAll]);
+  {$ENDIF}
+
   Commands.Add('--message='+IntMessage);
 
   ExecuteSvn(Commands);
