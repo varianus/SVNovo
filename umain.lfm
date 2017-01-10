@@ -5,31 +5,31 @@ object fMain: TfMain
   Width = 1202
   ActiveControl = tvBookMark
   Caption = 'svnovo'
-  ClientHeight = 574
+  ClientHeight = 595
   ClientWidth = 1202
-  DesignTimePPI = 95
   Menu = MainMenu
   OnCreate = FormCreate
   OnDestroy = FormDestroy
   Position = poDefault
   ShowHint = True
-  LCLVersion = '1.7'
+  Visible = False
   object Panel1: TPanel
     Left = 0
-    Height = 444
+    Height = 463
     Top = 0
     Width = 255
     Align = alLeft
     Caption = 'Panel1'
-    ClientHeight = 444
+    ClientHeight = 463
     ClientWidth = 255
     TabOrder = 0
     object tvBookMark: TTreeView
       Left = 1
-      Height = 442
+      Height = 461
       Top = 1
       Width = 253
       Align = alClient
+      DefaultItemHeight = 18
       ExpandSignType = tvestPlusMinus
       Images = ImageList_22x22
       MultiSelect = True
@@ -51,19 +51,19 @@ object fMain: TfMain
   end
   object StatusBar1: TStatusBar
     Left = 0
-    Height = 21
-    Top = 553
+    Height = 23
+    Top = 572
     Width = 1202
     Panels = <>
   end
   object Panel2: TPanel
     Left = 260
-    Height = 444
+    Height = 463
     Top = 0
     Width = 942
     Align = alClient
     Caption = 'Panel2'
-    ClientHeight = 444
+    ClientHeight = 463
     ClientWidth = 942
     TabOrder = 2
     object ToolBar1: TToolBar
@@ -166,7 +166,7 @@ object fMain: TfMain
     end
     object SVNFileListView: TListView
       Left = 1
-      Height = 416
+      Height = 435
       Top = 27
       Width = 940
       Align = alClient
@@ -176,7 +176,7 @@ object fMain: TfMain
         end      
         item
           AutoSize = True
-          Width = 8
+          Width = 0
         end      
         item
           Width = 10
@@ -220,14 +220,14 @@ object fMain: TfMain
   object Memo1: TMemo
     Left = 0
     Height = 104
-    Top = 449
+    Top = 468
     Width = 1202
     Align = alBottom
     TabOrder = 3
   end
   object Splitter1: TSplitter
     Left = 255
-    Height = 444
+    Height = 463
     Top = 0
     Width = 5
   end
@@ -235,14 +235,14 @@ object fMain: TfMain
     Cursor = crVSplit
     Left = 0
     Height = 5
-    Top = 444
+    Top = 463
     Width = 1202
     Align = alBottom
     ResizeAnchor = akBottom
   end
   object MainMenu: TMainMenu
-    Left = 128
-    Top = 392
+    left = 128
+    top = 392
     object MenuItem1: TMenuItem
       Caption = 'File'
     end
@@ -269,8 +269,8 @@ object fMain: TfMain
   object ActionList: TActionList
     Images = ImageList_22x22
     OnUpdate = ActionListUpdate
-    Left = 128
-    Top = 328
+    left = 128
+    top = 328
     object actUpdate: TAction
       Category = 'FileAction'
       Caption = 'Update'
@@ -379,8 +379,8 @@ object fMain: TfMain
     end
   end
   object ImageList_22x22: TImageList
-    Left = 118
-    Top = 192
+    left = 118
+    top = 192
     Bitmap = {
       4C69540000001000000010000000FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
       FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
@@ -3075,8 +3075,8 @@ object fMain: TfMain
   end
   object ImageList_22x22_mask: TImageList
     BlendColor = clInactiveCaption
-    Left = 118
-    Top = 264
+    left = 118
+    top = 264
     Bitmap = {
       4C69540000001000000010000000FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
       FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
@@ -5771,8 +5771,8 @@ object fMain: TfMain
   end
   object pmElements: TPopupMenu
     Images = ImageList_22x22
-    Left = 411
-    Top = 164
+    left = 411
+    top = 164
     object MenuItem7: TMenuItem
       Action = actUpdate
     end
@@ -5797,8 +5797,8 @@ object fMain: TfMain
   end
   object pmBookmark: TPopupMenu
     Images = ImageList_22x22
-    Left = 136
-    Top = 96
+    left = 136
+    top = 96
     object MenuItem11: TMenuItem
       Action = actBookMarkAdd
     end
@@ -5808,7 +5808,7 @@ object fMain: TfMain
   end
   object SelectDirectoryDialog: TSelectDirectoryDialog
     Options = [ofPathMustExist, ofEnableSizing, ofViewDetail]
-    Left = 411
-    Top = 96
+    left = 411
+    top = 96
   end
 end

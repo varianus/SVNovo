@@ -132,6 +132,8 @@ type
   private
     RepositoryPath: string;
     Filter: TSVNItemStatusSet;
+    SavedSortItem: TStatusItemName;
+    SavedSortDirection: TSortDirection;
     procedure ExpandNode(Node: TTreeNode);
     procedure GetSelectedElements(Elements: Tstrings);
     procedure LoadBookmarks;
@@ -261,6 +263,9 @@ begin
   actShowModified.Checked := ConfigObj.ReadBoolean('Filter/ShowModified', True);
   actShowConflict.Checked := ConfigObj.ReadBoolean('Filter/ShowConflict', True);
 
+  SavedSortItem:= specialize TEnum<TStatusItemName>.FromString(ConfigObj.ReadString('Filter/SortItem',''), siPath);
+  SavedSortDirection:= specialize TEnum<TSortDirection>.FromString(ConfigObj.ReadString('Filter/SortDirection',''), sdAscending);
+
   UpdateFilter(False);
 end;
 
@@ -272,6 +277,10 @@ begin
   ConfigObj.WriteBoolean('Filter/ShowUnmodified', actShowUnmodified.Checked);
   ConfigObj.WriteBoolean('Filter/ShowModified', actShowModified.Checked);
   ConfigObj.WriteBoolean('Filter/ShowConflict', actShowConflict.Checked);
+
+  ConfigObj.WriteString('Filter/SortItem', specialize TEnum<TStatusItemName>.ToString(SVNClient.List.SortItem));
+  ConfigObj.WriteString('Filter/SortDirection', specialize TEnum<TSortDirection>.ToString(SVNClient.List.SortDirection));
+
 
   ConfigObj.Flush;
 end;
@@ -323,6 +332,8 @@ begin
   SVNClient := TSVNClient.Create();
   SVNClient.OnSVNMessage:=@log;
   SVNClient.SVNExecutable:= ConfigObj.ReadString('SVN/Executable', SVNClient.SVNExecutable);
+  SVNClient.List.SortItem:= SavedSortItem;
+  SVNClient.List.SortDirection:= SavedSortDirection;
 
   SetColumn(SVNFileListView, 0, 25, '', False, taLeftJustify);
   SetColumn(SVNFileListView, 1, 200, rsPath, true, taLeftJustify);

@@ -24,10 +24,18 @@ unit Config;
 interface
 
 uses
-  Classes, SysUtils, Graphics, jsonConf;
+  Classes, SysUtils, Graphics, jsonConf, typinfo;
 
 type
-  { TConfig }
+  { TEnum }
+
+ generic TEnum<T> = class(TObject)
+  public
+    class function ToString(const aEnumValue: T): string; reintroduce;
+    class function FromString(const aEnumString: string; const aDefault: T): T;
+  end;
+
+{ TConfig }
 
   TConfig = class
   private
@@ -46,6 +54,8 @@ type
     function GetResourcesPath: string;
     procedure WriteBoolean(APath: string; Value: Boolean);
     function ReadBoolean(APath: string; ADefault: Boolean): Boolean;
+    procedure WriteInteger(APath: string; Value: Integer);
+    function ReadInteger(APath: string; ADefault: Integer): Integer;
 
     procedure Flush;
     destructor Destroy; override;
@@ -85,7 +95,7 @@ implementation
 
 { TConfig }
 uses
-  Fileutil, lclproc, typinfo
+  Fileutil, lclproc
   // only for default font !
 {$ifdef Darwin}
   , MacOSAll
@@ -112,26 +122,26 @@ const
   SectionGeneral = 'General';
 
 
-  function NextToken(const S: string; var SeekPos: Integer;
-    const TokenDelim: Char): string;
-  var
-    TokStart: Integer;
-  begin
-    repeat
-      if SeekPos > Length(s) then begin Result := ''; Exit end;
-      if S[SeekPos] = TokenDelim then Inc(SeekPos) else Break;
-    until false;
-    TokStart := SeekPos; { TokStart := first character not in TokenDelims }
+function NextToken(const S: string; var SeekPos: Integer;
+  const TokenDelim: Char): string;
+var
+  TokStart: Integer;
+begin
+  repeat
+    if SeekPos > Length(s) then begin Result := ''; Exit end;
+    if S[SeekPos] = TokenDelim then Inc(SeekPos) else Break;
+  until false;
+  TokStart := SeekPos; { TokStart := first character not in TokenDelims }
 
-    while (SeekPos <= Length(s)) and not(S[SeekPos] = TokenDelim) do Inc(SeekPos);
+  while (SeekPos <= Length(s)) and not(S[SeekPos] = TokenDelim) do Inc(SeekPos);
 
-    { Calculate result := s[TokStart, ... , SeekPos-1] }
-    result := Copy(s, TokStart, SeekPos-TokStart);
+  { Calculate result := s[TokStart, ... , SeekPos-1] }
+  result := Copy(s, TokStart, SeekPos-TokStart);
 
-    { We don't have to do Inc(seekPos) below. But it's obvious that searching
-      for next token can skip SeekPos, since we know S[SeekPos] is TokenDelim. }
-    Inc(SeekPos);
-  end;
+  { We don't have to do Inc(seekPos) below. But it's obvious that searching
+    for next token can skip SeekPos, since we know S[SeekPos] is TokenDelim. }
+  Inc(SeekPos);
+end;
 
 function GetConfigDir: string;
 var
@@ -148,6 +158,24 @@ begin
   if not Assigned(FConfigObj) then
     FConfigObj := TConfig.Create;
   Result := FConfigObj;
+end;
+
+{ TEnum }
+
+class function TEnum.ToString(const aEnumValue: T): string;
+begin
+  WriteStr(Result, aEnumValue);
+end;
+
+class function TEnum.FromString(const aEnumString: string; const aDefault: T): T;
+var
+  OrdValue: Integer;
+begin
+  OrdValue := GetEnumValue(TypeInfo(T), aEnumString);
+  if OrdValue < 0 then
+    Result := aDefault
+  else
+    Result := T(OrdValue);
 end;
 
 { TSimpleHistory }
@@ -277,6 +305,16 @@ begin
 end;
 
 function TConfig.ReadBoolean(APath: string; ADefault: Boolean): Boolean;
+begin
+  Result := fConfigHolder.GetValue(APath, ADefault);
+end;
+
+procedure TConfig.WriteInteger(APath: string; Value: Integer);
+begin
+  fConfigHolder.SetValue(APath, Value);
+end;
+
+function TConfig.ReadInteger(APath: string; ADefault: Integer): Integer;
 begin
   Result := fConfigHolder.GetValue(APath, ADefault);
 end;
