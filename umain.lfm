@@ -262,7 +262,7 @@ object fMain: TfMain
     object mnuView: TMenuItem
       Caption = 'View'
       object mnuPreferences: TMenuItem
-        Caption = 'Preferences...'
+        Caption = 'Preferences…'
         OnClick = mnuPreferencesClick
       end
     end
@@ -294,7 +294,7 @@ object fMain: TfMain
     end
     object actCommit: TAction
       Category = 'FileAction'
-      Caption = 'Commit'
+      Caption = 'Commit…'
       DisableIfNoHandler = False
       Hint = 'Commit selected'
       ImageIndex = 7
@@ -347,7 +347,7 @@ object fMain: TfMain
     end
     object actRefresh: TAction
       Category = 'Filter'
-      Caption = 'actRefresh'
+      Caption = 'Refresh'
       DisableIfNoHandler = False
       Hint = 'Refresh view'
       ImageIndex = 58
@@ -363,7 +363,7 @@ object fMain: TfMain
     end
     object actAbout: TAction
       Category = 'Help'
-      Caption = 'About...'
+      Caption = 'About…'
       DisableIfNoHandler = False
       OnExecute = actAboutExecute
     end
@@ -382,15 +382,15 @@ object fMain: TfMain
     end
     object actBookMarkAdd: TAction
       Category = 'Bookmark'
-      Caption = 'Add existing working copy...'
+      Caption = 'Add existing working copy…'
       OnExecute = actBookMarkAddExecute
     end
     object actBookMarkDelete: TAction
       Category = 'Bookmark'
-      Caption = 'actBookMarkDelete'
+      Caption = 'Delete BookMark…'
     end
     object actLog: TAction
-      Caption = 'Log'
+      Caption = 'Log…'
       Enabled = False
       Hint = 'Log selected'
       ImageIndex = 41
@@ -402,6 +402,11 @@ object fMain: TfMain
       Hint = 'Diff to HEAD'
       OnExecute = actDiffHeadExecute
       ShortCut = 16456
+    end
+    object actBookMarkCheckout: TAction
+      Category = 'Bookmark'
+      Caption = 'Checkout from repository…'
+      OnExecute = actBookMarkCheckoutExecute
     end
   end
   object ImageList_22x22: TImageList
