@@ -39,7 +39,6 @@ begin
   RequireDerivedFormResource:=True;
   Application.Initialize;
   Application.CreateForm(TfMain, fMain);
-  Application.CreateForm(TfAddRepository, fAddRepository);
   Application.Run;
 end.
 
