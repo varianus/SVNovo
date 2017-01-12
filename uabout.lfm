@@ -879,7 +879,6 @@ object fAbout: TfAbout
     Top = 272
     Width = 88
     Anchors = [akLeft, akRight, akBottom]
-    Default = True
     DefaultCaption = True
     Kind = bkClose
     ModalResult = 11

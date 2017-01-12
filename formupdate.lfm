@@ -64,7 +64,8 @@ object fUpdate: TfUpdate
       Top = 41
       Width = 252
       OKButton.Name = 'OKButton'
-      OKButton.DefaultCaption = True
+      OKButton.Caption = 'Update'
+      OKButton.DefaultCaption = False
       HelpButton.Name = 'HelpButton'
       HelpButton.DefaultCaption = True
       CloseButton.Name = 'CloseButton'

@@ -3,10 +3,10 @@ object fAddRepository: TfAddRepository
   Height = 410
   Top = 0
   Width = 344
+  ActiveControl = leRepositoryURL
   Caption = 'Add Repository'
   ClientHeight = 410
   ClientWidth = 344
-  LCLVersion = '1.7'
   Visible = False
   object leRepositoryURL: TLabeledEdit
     Left = 16
@@ -60,7 +60,8 @@ object fAddRepository: TfAddRepository
     Top = 370
     Width = 332
     OKButton.Name = 'OKButton'
-    OKButton.DefaultCaption = True
+    OKButton.Caption = 'Add'
+    OKButton.DefaultCaption = False
     HelpButton.Name = 'HelpButton'
     HelpButton.DefaultCaption = True
     CloseButton.Name = 'CloseButton'
