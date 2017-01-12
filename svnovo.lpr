@@ -29,7 +29,7 @@ uses
   {$ENDIF}
   Interfaces, // this includes the LCL widgetset
   Forms, uMain, Config, SVNClasses, FilesSupport, formupdate, ulicense,
-formcommit, formlog, formconfig, AppConsts;
+formcommit, formlog, formconfig, AppConsts, formaddrepository;
 
 {$R *.res}
 
@@ -39,6 +39,7 @@ begin
   RequireDerivedFormResource:=True;
   Application.Initialize;
   Application.CreateForm(TfMain, fMain);
+  Application.CreateForm(TfAddRepository, fAddRepository);
   Application.Run;
 end.
 

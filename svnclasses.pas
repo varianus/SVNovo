@@ -221,6 +221,7 @@ type
     // SVN Commands
     procedure LoadStatus;
     Procedure Update(Elements: TStrings; Revision:string = '');
+    Procedure CheckOut(URL: string; LocalPath:TFileName; Revision:string = '');
     function Export(Element: string; Revision:string = ''):string; overload;
     function Export(Element: string; Revision:Integer):string;  overload;
     procedure Add(Elements: TStrings; Recursive: boolean=false);
@@ -916,6 +917,34 @@ begin
     Commands.Add(FRepositoryPath)
   else
     Commands.AddStrings(Elements);
+
+  ExecuteSvn(Commands);
+
+  finally
+    Commands.Free;
+  end;
+end;
+
+procedure TSVNClient.CheckOut(URL: string; LocalPath: TFileName;
+  Revision: string);
+var
+  Commands: TStringList;
+begin
+  Commands := TStringList.Create;
+  Commands.AddStrings(['checkout','--non-interactive', '--trust-server-cert']);
+
+  try
+
+  if (Revision = '') then
+     Revision := 'HEAD';
+
+  if (Revision <> '')  then
+    begin
+      Commands.Add('--revision='+Revision);
+    end;
+
+  Commands.Add(URL);
+  Commands.Add(LocalPath);
 
   ExecuteSvn(Commands);
 

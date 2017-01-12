@@ -1,0 +1,73 @@
+object fAddRepository: TfAddRepository
+  Left = 0
+  Height = 410
+  Top = 0
+  Width = 344
+  Caption = 'Add Repository'
+  ClientHeight = 410
+  ClientWidth = 344
+  LCLVersion = '1.7'
+  Visible = False
+  object leRepositoryURL: TLabeledEdit
+    Left = 16
+    Height = 23
+    Top = 28
+    Width = 310
+    Anchors = [akTop, akLeft, akRight]
+    EditLabel.AnchorSideLeft.Control = leRepositoryURL
+    EditLabel.AnchorSideRight.Control = leRepositoryURL
+    EditLabel.AnchorSideRight.Side = asrBottom
+    EditLabel.AnchorSideBottom.Control = leRepositoryURL
+    EditLabel.Left = 16
+    EditLabel.Height = 15
+    EditLabel.Top = 10
+    EditLabel.Width = 310
+    EditLabel.Caption = 'URL'
+    EditLabel.ParentColor = False
+    TabOrder = 0
+  end
+  object DirectoryEdit: TDirectoryEdit
+    Left = 16
+    Height = 23
+    Top = 80
+    Width = 310
+    ShowHidden = False
+    ButtonWidth = 23
+    NumGlyphs = 1
+    Anchors = [akTop, akLeft, akRight]
+    MaxLength = 0
+    TabOrder = 1
+  end
+  object Label1: TLabel
+    Left = 16
+    Height = 15
+    Top = 63
+    Width = 111
+    Caption = 'Destination Directory'
+    ParentColor = False
+  end
+  object Panel1: TPanel
+    Left = 16
+    Height = 210
+    Top = 136
+    Width = 298
+    Caption = 'Here goes specific revision chooser'
+    TabOrder = 2
+  end
+  object ButtonPanel1: TButtonPanel
+    Left = 6
+    Height = 34
+    Top = 370
+    Width = 332
+    OKButton.Name = 'OKButton'
+    OKButton.DefaultCaption = True
+    HelpButton.Name = 'HelpButton'
+    HelpButton.DefaultCaption = True
+    CloseButton.Name = 'CloseButton'
+    CloseButton.DefaultCaption = True
+    CancelButton.Name = 'CancelButton'
+    CancelButton.DefaultCaption = True
+    TabOrder = 3
+    ShowButtons = [pbOK, pbCancel]
+  end
+end

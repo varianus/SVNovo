@@ -92,7 +92,7 @@ object fMain: TfMain
         Style = tbsCheck
       end
       object ToolButton4: TToolButton
-        Left = 47
+        Left = 70
         Height = 22
         Top = 2
         Width = 8
@@ -145,7 +145,7 @@ object fMain: TfMain
         Action = actRefresh
       end
       object ToolButton12: TToolButton
-        Left = 55
+        Left = 78
         Top = 2
         Action = actAdd
         Enabled = False
@@ -159,9 +159,10 @@ object fMain: TfMain
         Style = tbsSeparator
       end
       object ToolButton14: TToolButton
-        Left = 78
+        Left = 47
         Top = 2
         Action = actRevert
+        Caption = 'Revert…'
       end
       object ToolButton15: TToolButton
         Left = 132
@@ -5832,6 +5833,12 @@ object fMain: TfMain
     top = 96
     object MenuItem11: TMenuItem
       Action = actBookMarkAdd
+    end
+    object MenuItem16: TMenuItem
+      Action = actBookMarkCheckout
+    end
+    object MenuItem15: TMenuItem
+      Caption = '-'
     end
     object MenuItem10: TMenuItem
       Action = actBookMarkDelete

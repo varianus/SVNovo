@@ -45,6 +45,7 @@ type
     actBookMarkAdd: TAction;
     actBookMarkDelete: TAction;
     actDiffHead: TAction;
+    actBookMarkCheckout: TAction;
     actLog: TAction;
     actRevert: TAction;
     actRefresh: TAction;
@@ -65,6 +66,8 @@ type
     MenuItem12: TMenuItem;
     MenuItem13: TMenuItem;
     MenuItem14: TMenuItem;
+    MenuItem15: TMenuItem;
+    MenuItem16: TMenuItem;
     mnuPreferences: TMenuItem;
     mnuView: TMenuItem;
     MenuItem2: TMenuItem;
@@ -105,6 +108,7 @@ type
     procedure actAboutExecute(Sender: TObject);
     procedure actAddExecute(Sender: TObject);
     procedure actBookMarkAddExecute(Sender: TObject);
+    procedure actBookMarkCheckoutExecute(Sender: TObject);
     procedure actCleanupExecute(Sender: TObject);
     procedure actCommitExecute(Sender: TObject);
     procedure actFlatModeExecute(Sender: TObject);
@@ -155,7 +159,7 @@ var
 
 implementation
 uses LazFileUtils, LCLProc, AsyncProcess, Config, FilesSupport, uabout,
-  formupdate, formcommit, formconfig, strutils;
+  formupdate, formcommit, formconfig, formaddrepository, strutils;
 {$R *.lfm}
 
 { TfMain }
@@ -481,6 +485,32 @@ begin
 
   LoadBookmarks;
 
+end;
+
+procedure TfMain.actBookMarkCheckoutExecute(Sender: TObject);
+var
+  theForm : TfAddRepository;
+  St: TstringList;
+begin
+  theForm:= TfAddRepository.create(application);
+  try
+  if theForm.ShowModal = mrOK then
+    begin
+      SVNClient.CheckOut(theForm.leRepositoryURL.Text, theForm.DirectoryEdit.Text, '');
+      st := TStringList.Create;
+      try
+        ConfigObj.ReadStrings(CFG_BookMark, St);
+        st.Add(theForm.DirectoryEdit.Text);
+        ConfigObj.WriteStrings(CFG_BookMark, St);
+      finally
+        st.free;
+      end;
+      LoadBookmarks;
+    end;
+
+  finally
+    theForm.Free;
+  end;
 end;
 
 procedure TfMain.actCleanupExecute(Sender: TObject);
