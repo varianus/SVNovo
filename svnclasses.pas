@@ -854,7 +854,7 @@ begin
       ListItem.Author := rsNoAuthor;
       //path
       ListItem.Path := Path;
-      ListItem.Name := ExtractFileNameOnly(Path);
+      ListItem.Name := ExtractFileName(Path);
       //Extension
       ListItem.Extension:=ExtractFileExt(Path);
       //get the wc-status attributes
