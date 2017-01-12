@@ -193,6 +193,7 @@ begin
          Path := SVNItem.Path;
          if pos(SVNClient.RepositoryPath, Path) = 1 then
            path := CreateRelativePath(path, SVNClient.RepositoryPath, false);
+         SubItems.Add(SVNItem.Name);
          SubItems.Add(Path);
 
          if (SVNItem.ItemStatus <> sisUnversioned) and
@@ -255,9 +256,17 @@ begin
   finally
     SVNFileListView.EndUpdate;
   end;
+
+  SVNFileListView.Column[2].Visible := actFlatMode.Checked;
+
+  // if I was sorting by path and now I hide path column, sort by name
+  if not SVNFileListView.Column[2].Visible and (SVNClient.List.SortItem = siPath) then
+    SVNClient.List.SortItem := siName;
+
+
   SVNFileListView.Sort;
-  //if Assigned(SVNClient) then
-  //   SVNFileListView.Items.Count:= SVNClient.List.Count;
+
+
 end;
 
 procedure TfMain.ConfigToMap;
@@ -342,15 +351,16 @@ begin
   SVNClient.List.SortDirection:= SavedSortDirection;
 
   SetColumn(SVNFileListView, 0, 25, '', False, taLeftJustify);
-  SetColumn(SVNFileListView, 1, 200, rsPath, true, taLeftJustify);
-  SetColumn(SVNFileListView, 2, 75, rsRevision, True, taRightJustify);
-  SetColumn(SVNFileListView, 3, 75, rsCommitRevision, True, taRightJustify);
-  SetColumn(SVNFileListView, 4, 75, rsAuthor, True, taLeftJustify);
-  SetColumn(SVNFileListView, 5, 75, rsDateModified, True, taRightJustify);
-  SetColumn(SVNFileListView, 6, 75, rsExtension, True, taLeftJustify);
-  SetColumn(SVNFileListView, 7, 75, rsDateSVN, True, taRightJustify);
-  SetColumn(SVNFileListView, 8, 100, rsFileStatus, True, taLeftJustify);
-  SetColumn(SVNFileListView, 9, 125, rsPropertyStatus, True, taLeftJustify);
+  SetColumn(SVNFileListView, 1, 100, rsName, true, taLeftJustify);
+  SetColumn(SVNFileListView, 2, 180, rsPath, true, taLeftJustify);
+  SetColumn(SVNFileListView, 3, 75, rsRevision, True, taRightJustify);
+  SetColumn(SVNFileListView, 4, 75, rsCommitRevision, True, taRightJustify);
+  SetColumn(SVNFileListView, 5, 75, rsAuthor, True, taLeftJustify);
+  SetColumn(SVNFileListView, 6, 75, rsDateModified, True, taRightJustify);
+  SetColumn(SVNFileListView, 7, 75, rsExtension, True, taLeftJustify);
+  SetColumn(SVNFileListView, 8, 75, rsDateSVN, True, taRightJustify);
+  SetColumn(SVNFileListView, 9, 100, rsFileStatus, True, taLeftJustify);
+  SetColumn(SVNFileListView, 10, 125, rsPropertyStatus, True, taLeftJustify);
 
   UpdateFilesListView;
 
@@ -700,15 +710,16 @@ procedure TfMain.SVNFileListViewColumnClick(Sender: TObject; Column: TListColumn
 begin
   case Column.Index of
     0: SVNClient.List.ReverseSort(siChecked);
-    1: SVNClient.List.ReverseSort(siPath);
-    2: SVNClient.List.ReverseSort(siRevision);
-    3: SVNClient.List.ReverseSort(siCommitRevision);
-    4: SVNClient.List.ReverseSort(siAuthor);
-    5: SVNClient.List.ReverseSort(siDateModified);
-    6: SVNClient.List.ReverseSort(siExtension);
-    7: SVNClient.List.ReverseSort(siDateSVN);
-    8: SVNClient.List.ReverseSort(siItemStatus);
-    9: SVNClient.List.ReverseSort(siPropStatus);
+    1: SVNClient.List.ReverseSort(siName);
+    2: SVNClient.List.ReverseSort(siPath);
+    3: SVNClient.List.ReverseSort(siRevision);
+    4: SVNClient.List.ReverseSort(siCommitRevision);
+    5: SVNClient.List.ReverseSort(siAuthor);
+    6: SVNClient.List.ReverseSort(siDateModified);
+    7: SVNClient.List.ReverseSort(siExtension);
+    8: SVNClient.List.ReverseSort(siDateSVN);
+    9: SVNClient.List.ReverseSort(siItemStatus);
+   10: SVNClient.List.ReverseSort(siPropStatus);
   end;
 
   UpdateFilesListView;

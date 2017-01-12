@@ -186,34 +186,48 @@ object fMain: TfMain
       Align = alClient
       Columns = <      
         item
+          Caption = 'C'
           Width = 10
         end      
         item
           AutoSize = True
-          Width = 0
+          Caption = 'Name'
+          Width = 47
         end      
         item
+          Caption = 'Path'
+          Visible = False
+        end      
+        item
+          Caption = 'Revision'
           Width = 10
         end      
         item
+          Caption = 'Commit Revision'
           Width = 10
         end      
         item
+          Caption = 'Author'
           Width = 10
         end      
         item
+          Caption = 'Last Changed'
           Width = 10
         end      
         item
+          Caption = 'Extension'
           Width = 10
         end      
         item
+          Caption = 'Date'
           Width = 10
         end      
         item
+          Caption = 'File Status'
           Width = 838
         end      
         item
+          Caption = 'Property Status'
           Width = 49
         end>
       HideSelection = False

@@ -61,7 +61,8 @@ resourcestring
   rsOpenPreviousRevisionInEditor = 'Open previous revision in editor';
   rsOnlyModifiedItemsCanBeDiffed = 'Only modified (M) Items can be diffed';
   rsPath = 'Path';
- rsProjectFilename = 'Project filename';
+  rsName= 'Name';
+  rsProjectFilename = 'Project filename';
   rsProjectIsActive = 'Project is active';
   rsProjectIsNotActiveInSVNSettingsPleaseActivateFirst = 'Project is not '
     +'active in SVN settings, please activate first.';
@@ -96,7 +97,7 @@ const
 type
   TSortDirection  = (sdAscending=1, sdDescending=-1);
 
-  TStatusItemName = (siChecked, siPath, siExtension, siPropStatus, siItemStatus,
+  TStatusItemName = (siChecked, siName, siPath, siExtension, siPropStatus, siItemStatus,
                      siRevision, siCommitRevision, siAuthor, siDateSVN, siDateModified);
 
   TSVNItemStatus = (
@@ -131,6 +132,7 @@ type
   public
     Checked: boolean;
     Path: string;
+    Name: string;
     Extension: string;
     PropStatus: string;
     ItemStatus: TSVNItemStatus;
@@ -179,6 +181,7 @@ type
     function SortExtension(constref Item1, Item2: TSVNItem): Integer;
     function SortItemStatus(constref Item1, Item2: TSVNItem): Integer;
     function SortPath(constref Item1, Item2: TSVNItem): Integer;
+    function SortName(constref Item1, Item2: TSVNItem): Integer;
     function SortPropertyAuthor(constref Item1, Item2: TSVNItem): Integer;
     function SortPropertyCommitRevision(constref Item1, Item2: TSVNItem): Integer;
     function SortPropertyDateSVN(constref Item1, Item2: TSVNItem): Integer;
@@ -395,6 +398,15 @@ begin
    if Result <> 0 then exit;
 
    Result := CompareText(Item1.Path, Item2.Path) * longint(SortDirection);
+end;
+
+function TSVNStatusList.SortName(constref Item1, Item2: TSVNItem): Integer;
+begin
+  Result := -CompareBoolean(Item1.IsFolder, Item2.IsFolder);
+  if Result <> 0 then exit;
+
+  Result := CompareText(Item1.Name, Item2.Name) * longint(SortDirection);
+
 end;
 
 function TSVNStatusList.SortSelected(constref Item1, Item2: TSVNItem): Integer;
@@ -842,6 +854,7 @@ begin
       ListItem.Author := rsNoAuthor;
       //path
       ListItem.Path := Path;
+      ListItem.Name := ExtractFileNameOnly(Path);
       //Extension
       ListItem.Extension:=ExtractFileExt(Path);
       //get the wc-status attributes
@@ -1195,6 +1208,7 @@ begin
 
   case ASortItem of
       siChecked:        Sort(specialize TComparer<TSVNItem>.Construct(@SortSelected));
+      siName:           Sort(specialize TComparer<TSVNItem>.Construct(@SortName));
       siPath:           Sort(specialize TComparer<TSVNItem>.Construct(@SortPath));
       siExtension:      Sort(specialize TComparer<TSVNItem>.Construct(@SortExtension));
       siItemStatus:     Sort(specialize TComparer<TSVNItem>.Construct(@SortItemStatus));
