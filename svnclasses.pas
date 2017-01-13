@@ -88,6 +88,7 @@ resourcestring
   rsSVNTools = 'SVN tools';
   rsUpdate = 'Update';
   rsUpdated = 'Updated';
+  rsNoCommitMessage = '(No commit message)';
 
 const
    READ_BYTES = 2048;
@@ -249,6 +250,7 @@ type
 procedure CmdLineToMemo(CmdLine: string; Memo: TMemo);
 procedure SetColumn(ListView: TListView; ColNo, DefaultWidth: integer; AName: string; AutoSize: boolean; Alignment: TAlignment);
 function ReplaceLineEndings(const s, NewLineEnds: string): string;
+function ReplaceLineEndings(const s:string; NewLineEnds: AnsiChar): string;
 function ISO8601ToDateTime(ADateTime: string): TDateTime;
 
 implementation
@@ -363,6 +365,38 @@ begin
       inc(p);
     end;
   end;
+end;
+
+
+function ReplaceLineEndings(const s:string; NewLineEnds: AnsiChar): string;
+var
+  p: Integer;
+  r: integer;
+  Max:integer;
+begin
+  Max:= Length(S);
+  SetLength(Result, Max);
+
+  p:=1;
+  r:=1;
+  while (p<=Max) do
+    begin
+      if S[p] in [#10,#13] then
+        begin
+          Result[r]:=NewLineEnds;
+          inc(r);
+          inc(p);
+          While (p<=Max) and (s[P] in [#10,#13])  do
+            inc(p);
+        end
+    else
+      begin
+        Result[r]:=S[p];
+        Inc(r);
+        Inc(p);
+      end;
+
+    end;
 end;
 
 function ISO8601ToDateTime(ADateTime: string): TDateTime;
@@ -770,7 +804,10 @@ begin
           if NodeName = 'date' then
             ListItem.DateSVN := ISO8601ToDateTime(ActNode.FirstChild.NodeValue);
           if NodeName = 'msg' then
-            ListItem.Message := ActNode.FirstChild.NodeValue;
+             if assigned(ActNode.FirstChild) then
+               ListItem.Message := ActNode.FirstChild.NodeValue
+             else
+               ListItem.Message := rsNoCommitMessage;
           if NodeName = 'paths' then
             for j:= 0 to ActNode.ChildNodes.Count -1 do
              begin
