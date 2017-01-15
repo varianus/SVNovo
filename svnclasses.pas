@@ -205,6 +205,8 @@ type
   TSVNClient = class(TObject)
   private
     FFlatMode: boolean;
+    FOnBeginProcess: TNotifyEvent;
+    FOnEndProcess: TNotifyEvent;
     FOnSVNMessage: TSvnMessage;
     FRepositoryPath: string;
     fSvnExecutable: string;
@@ -213,9 +215,14 @@ type
     function ExecuteSvnReturnXml(ACommand: TStrings): TXMLDocument;
     function GetSvnExecutable: string;
     procedure SetFlatMode(AValue: boolean);
+    procedure SetOnBeginProcess(AValue: TNotifyEvent);
+    procedure SetOnEndProcess(AValue: TNotifyEvent);
     procedure SetOnSVNMessage(AValue: TSvnMessage);
     procedure SetRepositoryPath(AValue: string);
     procedure ProcessSVNUpdateOutput(var MemStream: TMemoryStream; var BytesRead: LongInt);
+  Protected
+    procedure BeginProcess;
+    procedure EndProcess;
   public
     List: TSVNStatusList; // TFPList;
     //
@@ -241,10 +248,14 @@ type
     Function FullFileName(FileName: TFilename): TFilename; inline;
     //
     // Properties
-    property OnSVNMessage : TSvnMessage read FOnSVNMessage write SetOnSVNMessage;
     Property SVNExecutable: string read GetSvnExecutable write fSvnExecutable;
     property RepositoryPath: string read FRepositoryPath write SetRepositoryPath;
     Property FlatMode: boolean read FFlatMode write SetFlatMode;
+    //
+    //Events
+    property OnSVNMessage : TSvnMessage read FOnSVNMessage write SetOnSVNMessage;
+    Property OnBeginProcess: TNotifyEvent read FOnBeginProcess write SetOnBeginProcess;
+    Property OnEndProcess: TNotifyEvent read FOnEndProcess write SetOnEndProcess;
   end;
 
 procedure CmdLineToMemo(CmdLine: string; Memo: TMemo);
@@ -562,6 +573,19 @@ begin
 
 end;
 
+procedure TSVNClient.BeginProcess;
+begin
+  if Assigned(FOnBeginProcess) then
+     FOnBeginProcess(Self);
+end;
+
+procedure TSVNClient.EndProcess;
+begin
+  if Assigned(FOnEndProcess) then
+     FOnEndProcess(Self);
+
+end;
+
 procedure TSVNClient.ExecuteSvn(ACommand: TStrings);
 var
   AProcess: TProcessUTF8;
@@ -760,79 +784,81 @@ var
   PathNode: TDOMNode;
   Command : TStringList;
 begin
-  Result := TSVNLogList.Create();
+  BeginProcess;
+    Result := TSVNLogList.Create();
+  try
+    if FileName = EmptyStr then
+      exit;
 
-  if FileName = EmptyStr then
-    exit;
+    Command := TStringList.Create;
+    Command.AddStrings(['log','--xml','-v']);
+    Command.Add('--non-interactive');
+    Command.Add(FileName);
 
-  Command := TStringList.Create;
-  Command.AddStrings(['log','--xml','-v']);
-  Command.Add('--non-interactive');
-  Command.Add(FileName);
+    Doc := ExecuteSvnReturnXml(Command);
+    Node := Doc.DocumentElement.FirstChild;
+    if Node = nil then begin
+      // no <entry> node found, list is empty.
+      Doc.Free;
+      Exit();
+    end;
 
-  Doc := ExecuteSvnReturnXml(Command);
-  Node := Doc.DocumentElement.FirstChild;
-  if Node = nil then begin
-    // no <entry> node found, list is empty.
-    Doc.Free;
-    Exit();
-  end;
-
-  repeat
-    SubNode := Node;
-    begin
-      ListItem := TSVNLogItem.Create;
-      //initialize author (anonymous repositories)
-      ListItem.Author := rsNoAuthor;
-
-      for i := 0 to SubNode.Attributes.Length -1 do
+    repeat
+      SubNode := Node;
       begin
-        NodeName := SubNode.Attributes.Item[i].NodeName;
-        NodeValue := SubNode.Attributes.Item[i].NodeValue;
-        if NodeName = 'revision' then
-          //Revision
-          ListItem.Revision := StrToInt(NodeValue);
-      end;
-      for i := 0 to SubNode.ChildNodes.Count - 1 do
-      begin
-        ActNode := SubNode.ChildNodes.Item[i];
-        if Assigned(ActNode) then
+        ListItem := TSVNLogItem.Create;
+        //initialize author (anonymous repositories)
+        ListItem.Author := rsNoAuthor;
+
+        for i := 0 to SubNode.Attributes.Length -1 do
         begin
-          NodeName := ActNode.NodeName;
-          if NodeName = 'author' then
-            ListItem.Author := ActNode.FirstChild.NodeValue;
-          if NodeName = 'date' then
-            ListItem.DateSVN := ISO8601ToDateTime(ActNode.FirstChild.NodeValue);
-          if NodeName = 'msg' then
-             if assigned(ActNode.FirstChild) then
-               ListItem.Message := ActNode.FirstChild.NodeValue
-             else
-               ListItem.Message := rsNoCommitMessage;
-          if NodeName = 'paths' then
-            for j:= 0 to ActNode.ChildNodes.Count -1 do
-             begin
-               PathNode := ActNode.ChildNodes.Item[j];
-               PathItem := TAffectedFile.Create;
-               ListItem.AffectedFiles.Add(PathItem);
-               PathItem.FileName:=PathNode.FirstChild.NodeValue;
-               for k := 0 to PathNode.Attributes.Length -1 do
+          NodeName := SubNode.Attributes.Item[i].NodeName;
+          NodeValue := SubNode.Attributes.Item[i].NodeValue;
+          if NodeName = 'revision' then
+            //Revision
+            ListItem.Revision := StrToInt(NodeValue);
+        end;
+        for i := 0 to SubNode.ChildNodes.Count - 1 do
+        begin
+          ActNode := SubNode.ChildNodes.Item[i];
+          if Assigned(ActNode) then
+          begin
+            NodeName := ActNode.NodeName;
+            if NodeName = 'author' then
+              ListItem.Author := ActNode.FirstChild.NodeValue;
+            if NodeName = 'date' then
+              ListItem.DateSVN := ISO8601ToDateTime(ActNode.FirstChild.NodeValue);
+            if NodeName = 'msg' then
+              ListItem.Message := ActNode.FirstChild.NodeValue;
+            if NodeName = 'paths' then
+              for j:= 0 to ActNode.ChildNodes.Count -1 do
                begin
-                 NodeName := PathNode.Attributes.Item[k].NodeName;
-                 NodeValue := PathNode.Attributes.Item[k].NodeValue;
-                 if NodeName = 'action' then
-                   PathItem.Action := NodeValue;
+                 PathNode := ActNode.ChildNodes.Item[j];
+                 PathItem := TAffectedFile.Create;
+                 ListItem.AffectedFiles.Add(PathItem);
+                 PathItem.FileName:=PathNode.FirstChild.NodeValue;
+                 for k := 0 to PathNode.Attributes.Length -1 do
+                 begin
+                   NodeName := PathNode.Attributes.Item[k].NodeName;
+                   NodeValue := PathNode.Attributes.Item[k].NodeValue;
+                   if NodeName = 'action' then
+                     PathItem.Action := NodeValue;
+                 end;
+
                end;
 
-             end;
 
-
+          end;
         end;
+        Result.Add(ListItem);
       end;
-      Result.Add(ListItem);
-    end;
-    Node := Node.NextSibling;
-  until not Assigned(Node);
-  Doc.Free;
+      Node := Node.NextSibling;
+    until not Assigned(Node);
+    Doc.Free;
+
+  finally
+    EndProcess;
+  end;
 
 end;
 
@@ -851,6 +877,8 @@ var
   SubNode: TDOMNode;
   Command : TStringList;
 begin
+  BeginProcess;
+
   List.Clear;
 
   if FRepositoryPath = EmptyStr then
@@ -950,12 +978,14 @@ begin
   Doc.Free;
   Command.free;
   List.Sort;
+  EndProcess;
 end;
 
 procedure TSVNClient.Update(Elements: TStrings; Revision:string = '');
 var
   Commands: TStringList;
 begin
+  BeginProcess;
   Commands := TstringList.Create;
   Commands.AddStrings(['update','--non-interactive', '--trust-server-cert']);
 
@@ -973,6 +1003,7 @@ begin
   finally
     Commands.Free;
   end;
+  EndProcess;
 end;
 
 procedure TSVNClient.CheckOut(URL: string; LocalPath: TFileName;
@@ -980,6 +1011,7 @@ procedure TSVNClient.CheckOut(URL: string; LocalPath: TFileName;
 var
   Commands: TStringList;
 begin
+  BeginProcess;
   Commands := TStringList.Create;
   Commands.AddStrings(['checkout','--non-interactive', '--trust-server-cert']);
 
@@ -1001,12 +1033,14 @@ begin
   finally
     Commands.Free;
   end;
+  EndProcess;
 end;
 
 function TSVNClient.Export(Element: string; Revision: string): string;
 var
   Commands: TStringList;
 begin
+  BeginProcess;
   Commands := TstringList.Create;
   Commands.AddStrings(['export','--non-interactive', '--force', '--trust-server-cert']);
 
@@ -1031,6 +1065,7 @@ begin
   finally
     Commands.Free;
   end;
+  EndProcess;
 end;
 
 function TSVNClient.Export(Element: string; Revision: Integer): string;
@@ -1042,6 +1077,7 @@ procedure TSVNClient.Add(Elements: TStrings; Recursive: boolean= false);
 var
   Commands: TStringList;
 begin
+  BeginProcess;
   Commands := TstringList.Create;
   Commands.AddStrings(['add','--non-interactive', '--trust-server-cert']);
 
@@ -1059,12 +1095,14 @@ begin
   finally
     Commands.Free;
   end;
+  EndProcess;
 end;
 
 procedure TSVNClient.Revert(Elements: TStrings; Recursive: boolean= false);
 var
   Commands: TStringList;
 begin
+  BeginProcess;
   Commands := TstringList.Create;
   Commands.AddStrings(['revert','--non-interactive', '--trust-server-cert']);
 
@@ -1082,6 +1120,7 @@ begin
   finally
     Commands.Free;
   end;
+  EndProcess;
 end;
 
 
@@ -1089,6 +1128,7 @@ procedure TSVNClient.CleanUp;
 var
   Commands: TStringList;
 begin
+  BeginProcess;
   Commands := TstringList.Create;
   Commands.AddStrings(['cleanup','--non-interactive', '--trust-server-cert']);
 
@@ -1097,6 +1137,7 @@ begin
   finally
     Commands.Free;
   end;
+  EndProcess;
 end;
 
 procedure TSVNClient.Commit(Elements: TStrings; Message: string;
@@ -1105,6 +1146,7 @@ var
   Commands: TStringList;
   intMessage : string;
 begin
+  BeginProcess;
   Commands := TstringList.Create;
   Commands.AddStrings(['commit','--non-interactive', '--trust-server-cert']);
 
@@ -1132,6 +1174,7 @@ begin
   finally
     Commands.Free;
   end;
+  EndProcess;
 end;
 
 
@@ -1141,6 +1184,18 @@ begin
   if FFlatMode=AValue then Exit;
   FFlatMode:=AValue;
   LoadStatus;
+end;
+
+procedure TSVNClient.SetOnBeginProcess(AValue: TNotifyEvent);
+begin
+  if FOnBeginProcess=AValue then Exit;
+  FOnBeginProcess:=AValue;
+end;
+
+procedure TSVNClient.SetOnEndProcess(AValue: TNotifyEvent);
+begin
+  if FOnEndProcess=AValue then Exit;
+  FOnEndProcess:=AValue;
 end;
 
 procedure TSVNClient.SetOnSVNMessage(AValue: TSvnMessage);

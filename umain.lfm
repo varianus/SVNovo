@@ -5,31 +5,31 @@ object fMain: TfMain
   Width = 1202
   ActiveControl = tvBookMark
   Caption = 'svnovo'
-  ClientHeight = 595
+  ClientHeight = 574
   ClientWidth = 1202
+  DesignTimePPI = 95
   Menu = MainMenu
   OnCreate = FormCreate
   OnDestroy = FormDestroy
   Position = poDefault
   ShowHint = True
-  Visible = False
+  LCLVersion = '1.7'
   object Panel1: TPanel
     Left = 0
-    Height = 463
+    Height = 444
     Top = 0
     Width = 255
     Align = alLeft
     Caption = 'Panel1'
-    ClientHeight = 463
+    ClientHeight = 444
     ClientWidth = 255
     TabOrder = 0
     object tvBookMark: TTreeView
       Left = 1
-      Height = 461
+      Height = 442
       Top = 1
       Width = 253
       Align = alClient
-      DefaultItemHeight = 18
       ExpandSignType = tvestPlusMinus
       Images = ImageList_22x22
       MultiSelect = True
@@ -51,19 +51,19 @@ object fMain: TfMain
   end
   object StatusBar1: TStatusBar
     Left = 0
-    Height = 23
-    Top = 572
+    Height = 21
+    Top = 553
     Width = 1202
     Panels = <>
   end
   object Panel2: TPanel
     Left = 260
-    Height = 463
+    Height = 444
     Top = 0
     Width = 942
     Align = alClient
     Caption = 'Panel2'
-    ClientHeight = 463
+    ClientHeight = 444
     ClientWidth = 942
     TabOrder = 2
     object ToolBar1: TToolBar
@@ -180,7 +180,7 @@ object fMain: TfMain
     end
     object SVNFileListView: TListView
       Left = 1
-      Height = 435
+      Height = 416
       Top = 27
       Width = 940
       Align = alClient
@@ -192,11 +192,12 @@ object fMain: TfMain
         item
           AutoSize = True
           Caption = 'Name'
-          Width = 47
+          Width = 42
         end      
         item
           Caption = 'Path'
           Visible = False
+          Width = 0
         end      
         item
           Caption = 'Revision'
@@ -248,14 +249,14 @@ object fMain: TfMain
   object Memo1: TMemo
     Left = 0
     Height = 104
-    Top = 468
+    Top = 449
     Width = 1202
     Align = alBottom
     TabOrder = 3
   end
   object Splitter1: TSplitter
     Left = 255
-    Height = 463
+    Height = 444
     Top = 0
     Width = 5
   end
@@ -263,14 +264,14 @@ object fMain: TfMain
     Cursor = crVSplit
     Left = 0
     Height = 5
-    Top = 463
+    Top = 444
     Width = 1202
     Align = alBottom
     ResizeAnchor = akBottom
   end
   object MainMenu: TMainMenu
-    left = 128
-    top = 392
+    Left = 128
+    Top = 392
     object MenuItem1: TMenuItem
       Caption = 'File'
     end
@@ -297,8 +298,8 @@ object fMain: TfMain
   object ActionList: TActionList
     Images = ImageList_22x22
     OnUpdate = ActionListUpdate
-    left = 128
-    top = 328
+    Left = 128
+    Top = 328
     object actUpdate: TAction
       Category = 'FileAction'
       Caption = 'Update'
@@ -425,8 +426,8 @@ object fMain: TfMain
     end
   end
   object ImageList_22x22: TImageList
-    left = 118
-    top = 192
+    Left = 118
+    Top = 192
     Bitmap = {
       4C69540000001000000010000000FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
       FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
@@ -3121,8 +3122,8 @@ object fMain: TfMain
   end
   object ImageList_22x22_mask: TImageList
     BlendColor = clInactiveCaption
-    left = 118
-    top = 264
+    Left = 118
+    Top = 264
     Bitmap = {
       4C69540000001000000010000000FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
       FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
@@ -5817,8 +5818,8 @@ object fMain: TfMain
   end
   object pmElements: TPopupMenu
     Images = ImageList_22x22
-    left = 411
-    top = 164
+    Left = 411
+    Top = 164
     object MenuItem7: TMenuItem
       Action = actUpdate
     end
@@ -5843,8 +5844,8 @@ object fMain: TfMain
   end
   object pmBookmark: TPopupMenu
     Images = ImageList_22x22
-    left = 136
-    top = 96
+    Left = 136
+    Top = 96
     object MenuItem11: TMenuItem
       Action = actBookMarkAdd
     end
@@ -5860,7 +5861,7 @@ object fMain: TfMain
   end
   object SelectDirectoryDialog: TSelectDirectoryDialog
     Options = [ofPathMustExist, ofEnableSizing, ofViewDetail]
-    left = 411
-    top = 96
+    Left = 411
+    Top = 96
   end
 end

@@ -140,6 +140,8 @@ type
     Filter: TSVNItemStatusSet;
     SavedSortItem: TStatusItemName;
     SavedSortDirection: TSortDirection;
+    procedure BeginProcess(Sender: TObject);
+    procedure EndProcess(Sender: TObject);
     procedure ExpandNode(Node: TTreeNode);
     procedure GetSelectedElements(Elements: Tstrings);
     procedure LoadBookmarks;
@@ -171,8 +173,8 @@ var
   SVNItem: TSVNItem;
   Path: string;
   imgIdx: integer;
-
 begin
+
   SVNFileListView.BeginUpdate;
   try
   SVNFileListView.Clear;
@@ -345,10 +347,12 @@ begin
   ConfigToMap;
 
   SVNClient := TSVNClient.Create();
-  SVNClient.OnSVNMessage:=@log;
-  SVNClient.SVNExecutable:= ConfigObj.ReadString('SVN/Executable', SVNClient.SVNExecutable);
-  SVNClient.List.SortItem:= SavedSortItem;
-  SVNClient.List.SortDirection:= SavedSortDirection;
+  SVNClient.OnSVNMessage := @log;
+  SVNClient.SVNExecutable := ConfigObj.ReadString('SVN/Executable', SVNClient.SVNExecutable);
+  SVNClient.List.SortItem := SavedSortItem;
+  SVNClient.List.SortDirection := SavedSortDirection;
+  SVNClient.OnBeginProcess := @BeginProcess;
+  SVNClient.OnEndProcess := @endProcess;
 
   SetColumn(SVNFileListView, 0, 25, '', False, taLeftJustify);
   SetColumn(SVNFileListView, 1, 100, rsName, true, taLeftJustify);
@@ -834,6 +838,21 @@ var
   AllowExpansion: Boolean);
 begin
   ExpandNode(Node);
+
+end;
+
+procedure TfMain.BeginProcess(Sender: TObject);
+begin
+  Screen.Cursor:= crHourGlass;
+  Application.ProcessMessages;
+
+end;
+
+procedure TfMain.EndProcess(Sender: TObject);
+begin
+  Screen.Cursor:= crDefault;
+  Application.ProcessMessages;
+
 end;
 
 end.
