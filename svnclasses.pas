@@ -378,7 +378,6 @@ begin
   end;
 end;
 
-
 function ReplaceLineEndings(const s:string; NewLineEnds: AnsiChar): string;
 var
   p: Integer;
@@ -406,8 +405,8 @@ begin
         Inc(r);
         Inc(p);
       end;
-
     end;
+  SetLength(Result, R);
 end;
 
 function ISO8601ToDateTime(ADateTime: string): TDateTime;
