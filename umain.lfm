@@ -1,35 +1,35 @@
 object fMain: TfMain
   Left = 342
-  Height = 595
+  Height = 574
   Top = 184
   Width = 1202
   ActiveControl = tvBookMark
   Caption = 'svnovo'
   ClientHeight = 574
   ClientWidth = 1202
-  DesignTimePPI = 95
   Menu = MainMenu
   OnCreate = FormCreate
   OnDestroy = FormDestroy
   Position = poDefault
   ShowHint = True
-  LCLVersion = '1.7'
+  Visible = False
   object Panel1: TPanel
     Left = 0
-    Height = 444
+    Height = 442
     Top = 0
     Width = 255
     Align = alLeft
     Caption = 'Panel1'
-    ClientHeight = 444
+    ClientHeight = 442
     ClientWidth = 255
     TabOrder = 0
     object tvBookMark: TTreeView
       Left = 1
-      Height = 442
+      Height = 440
       Top = 1
       Width = 253
       Align = alClient
+      DefaultItemHeight = 18
       ExpandSignType = tvestPlusMinus
       Images = ImageList_22x22
       MultiSelect = True
@@ -51,19 +51,19 @@ object fMain: TfMain
   end
   object StatusBar1: TStatusBar
     Left = 0
-    Height = 21
-    Top = 553
+    Height = 23
+    Top = 551
     Width = 1202
     Panels = <>
   end
   object Panel2: TPanel
     Left = 260
-    Height = 444
+    Height = 442
     Top = 0
     Width = 942
     Align = alClient
     Caption = 'Panel2'
-    ClientHeight = 444
+    ClientHeight = 442
     ClientWidth = 942
     TabOrder = 2
     object ToolBar1: TToolBar
@@ -180,7 +180,7 @@ object fMain: TfMain
     end
     object SVNFileListView: TListView
       Left = 1
-      Height = 416
+      Height = 414
       Top = 27
       Width = 940
       Align = alClient
@@ -192,7 +192,7 @@ object fMain: TfMain
         item
           AutoSize = True
           Caption = 'Name'
-          Width = 42
+          Width = 47
         end      
         item
           Caption = 'Path'
@@ -249,14 +249,14 @@ object fMain: TfMain
   object Memo1: TMemo
     Left = 0
     Height = 104
-    Top = 449
+    Top = 447
     Width = 1202
     Align = alBottom
     TabOrder = 3
   end
   object Splitter1: TSplitter
     Left = 255
-    Height = 444
+    Height = 442
     Top = 0
     Width = 5
   end
@@ -264,14 +264,14 @@ object fMain: TfMain
     Cursor = crVSplit
     Left = 0
     Height = 5
-    Top = 444
+    Top = 442
     Width = 1202
     Align = alBottom
     ResizeAnchor = akBottom
   end
   object MainMenu: TMainMenu
-    Left = 128
-    Top = 392
+    left = 128
+    top = 392
     object MenuItem1: TMenuItem
       Caption = 'File'
     end
@@ -298,8 +298,8 @@ object fMain: TfMain
   object ActionList: TActionList
     Images = ImageList_22x22
     OnUpdate = ActionListUpdate
-    Left = 128
-    Top = 328
+    left = 128
+    top = 328
     object actUpdate: TAction
       Category = 'FileAction'
       Caption = 'Update'
@@ -416,6 +416,7 @@ object fMain: TfMain
       Category = 'FileAction'
       Caption = 'Diff to Head'
       Hint = 'Diff to HEAD'
+      ImageIndex = 84
       OnExecute = actDiffHeadExecute
       ShortCut = 16456
     end
@@ -424,12 +425,18 @@ object fMain: TfMain
       Caption = 'Checkout from repository…'
       OnExecute = actBookMarkCheckoutExecute
     end
+    object actMarkResolved: TAction
+      Category = 'FileAction'
+      Caption = 'Mark Resolved'
+      ImageIndex = 76
+      OnExecute = actMarkResolvedExecute
+    end
   end
   object ImageList_22x22: TImageList
-    Left = 118
-    Top = 192
+    left = 118
+    top = 192
     Bitmap = {
-      4C69540000001000000010000000FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+      4C69550000001000000010000000FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
       FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
       FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
       FF00C7B4A7FFC8B4A8FFC6B3A6FFC3AEA1FFC1AC9EFFBEA89AFFC0AB9EFFB6A0
@@ -3117,13 +3124,45 @@ object fMain: TfMain
       FF00B5C9D00A2286A9DE2D86A7D91A799CF4166E91B1007EA800007EA800FFFF
       FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
       FF00FFFFFF008499A00A4C595D06FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00C8B5A9FFC9B6AAFFC8B5
+      A8FFC6B1A4FFC4AFA2FFC2AC9FFFBFA99BFFBCA597FFBFAA9DFFB59F919FFFFF
+      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00C9B6AAFFFFFFFFFFFFFF
+      FFFFFEFEFEFFFEFDFCFFFEFCFBFFFEFBF9FFFEF9F8FFBEA89AFFC4B0A5FFAF98
+      89BF7C6F6610FFFFFF00FFFFFF00FFFFFF00FFFFFF00C8B5A8FFFFFFFEFFFEFD
+      FCFFFEFCFBFFFEFAF9FFFDF9F6FFFDF7F4FFFCF6F3FFBEA89AFFF9F3EEFFC9B7
+      ABFFA89283CFFFFFFF00FFFFFF00FFFFFF00FFFFFF00C5B1A4FFFEFEFDFFFEFB
+      FAFFFDFAF8FFFDF8F6FFFFFFFFFFFFFFFFFFFCF4F0FFBEA89AFFBEA89AFFBEA8
+      9AFFB39E91FFFFFFFF00FFFFFF00FFFFFF00FFFFFF00C3AEA1FFFEFCFBFFFDF9
+      F8FFFDF8F5FFFDF6F3FFFFFFFFFF0000FFFFFFFFFFFFFBF0EBFFFBEFEAFFFBF2
+      EEFFA68E7FFFFFFFFF00FFFFFF00FFFFFF00FFFFFF00C1AC9FFFFFFFFFFFFFFF
+      FFFFFFFFFFFFFFFFFFFFFFFFFFFF0000FFFF0000FFFFFFFFFFFFFFFFFFFFFBF1
+      EDFFA38C7DFFFFFFFF00FFFFFF00FFFFFF00FFFFFF00BFA99CFFFFFFFFFF0000
+      FFFF0000FFFF0000FFFF0000FFFF0000FFFF0000FFFF0000FFFFFFFFFFFFFFFF
+      FFFF9F887AFFFFFFFF00FFFFFF00FFFFFF00FFFFFF00BDA79AFFFFFFFFFFFFFF
+      FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFAEF
+      E9FF9C8577FFFFFFFF00FFFFFF00FFFFFF00FFFFFF00BBA597FFFDF7F4FFF318
+      09FFF31809FFF31809FFF31809FFF31809FFF31809FFF31809FFF8E7DFFFFAED
+      E8FF998374FFFFFFFF00FFFFFF00FFFFFF00FFFFFF00BAA395FFFCF6F2FFFBF0
+      EBFFF31809FFF31809FFF9EBE5FFF9EAE3FFF9E8E1FFF8E7DFFFF8E5DDFFF9EC
+      E6FF968071FFFFFFFF00FFFFFF00FFFFFF00FFFFFF00B7A091FFFCF4F1FFFBEE
+      E9FFFAEDE6FFF31809FFF9EAE3FFF9E8E1FFF8E7DFFFF8E5DDFFF7E4DBFFF9EB
+      E4FF937D6FFFFFFFFF00FFFFFF00FFFFFF00FFFFFF00B49D8EFFFBF3EFFFFAEC
+      E6FFF9EBE4FFF9E9E2FFF8E8E0FFF8E6DEFFF8E5DDFFF7E3DAFFF7E2D8FFF9E9
+      E2FF8D796AFFFFFFFF00FFFFFF00FFFFFF00FFFFFF00B19A8BFFFBF2EDFFFBF0
+      EBFFFBF0EBFFFAEEE9FFFAEDE8FFFAECE6FFF9EBE5FFF9EAE3FFF9E9E2FFF9E8
+      E1FF8B7668FFFFFFFF00FFFFFF00FFFFFF00FFFFFF00AE9788FFAA9484FFA790
+      81FFA38D7EFFA18A7BFF9D8678FF988274FF967F71FF927C6EFF8D776AFF8B75
+      68FF8C7669FFFFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
       FF00FFFFFF00FFFFFF00FFFFFF00
     }
   end
   object ImageList_22x22_mask: TImageList
     BlendColor = clInactiveCaption
-    Left = 118
-    Top = 264
+    left = 118
+    top = 264
     Bitmap = {
       4C69540000001000000010000000FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
       FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
@@ -5818,8 +5857,8 @@ object fMain: TfMain
   end
   object pmElements: TPopupMenu
     Images = ImageList_22x22
-    Left = 411
-    Top = 164
+    left = 411
+    top = 164
     object MenuItem7: TMenuItem
       Action = actUpdate
     end
@@ -5828,6 +5867,9 @@ object fMain: TfMain
     end
     object MenuItem8: TMenuItem
       Caption = '-'
+    end
+    object MenuItem17: TMenuItem
+      Action = actMarkResolved
     end
     object MenuItem9: TMenuItem
       Action = actAdd
@@ -5844,8 +5886,8 @@ object fMain: TfMain
   end
   object pmBookmark: TPopupMenu
     Images = ImageList_22x22
-    Left = 136
-    Top = 96
+    left = 136
+    top = 96
     object MenuItem11: TMenuItem
       Action = actBookMarkAdd
     end
@@ -5861,7 +5903,7 @@ object fMain: TfMain
   end
   object SelectDirectoryDialog: TSelectDirectoryDialog
     Options = [ofPathMustExist, ofEnableSizing, ofViewDetail]
-    Left = 411
-    Top = 96
+    left = 411
+    top = 96
   end
 end

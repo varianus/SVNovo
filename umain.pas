@@ -46,6 +46,7 @@ type
     actBookMarkDelete: TAction;
     actDiffHead: TAction;
     actBookMarkCheckout: TAction;
+    actMarkResolved: TAction;
     actLog: TAction;
     actRevert: TAction;
     actRefresh: TAction;
@@ -68,6 +69,7 @@ type
     MenuItem14: TMenuItem;
     MenuItem15: TMenuItem;
     MenuItem16: TMenuItem;
+    MenuItem17: TMenuItem;
     mnuPreferences: TMenuItem;
     mnuView: TMenuItem;
     MenuItem2: TMenuItem;
@@ -115,6 +117,7 @@ type
     procedure actDiffHeadExecute(Sender: TObject);
     procedure ActionListUpdate(AAction: TBasicAction; var Handled: Boolean);
     procedure actLogExecute(Sender: TObject);
+    procedure actMarkResolvedExecute(Sender: TObject);
     procedure actRefreshExecute(Sender: TObject);
     procedure actRevertExecute(Sender: TObject);
     procedure actShowConflictExecute(Sender: TObject);
@@ -612,6 +615,22 @@ begin
   finally
     Elements.free;
   end;
+
+end;
+
+procedure TfMain.actMarkResolvedExecute(Sender: TObject);
+var
+  Elements: TstringList;
+begin
+
+  Elements := TStringList.Create;
+  try
+    GetSelectedElements(Elements);
+    SVNClient.Resolve(Elements);
+  finally
+    Elements.free;
+  end;
+  actRefresh.Execute;
 
 end;
 

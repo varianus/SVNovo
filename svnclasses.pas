@@ -211,7 +211,7 @@ type
     FRepositoryPath: string;
     fSvnExecutable: string;
     Verbose: boolean;
-    procedure ExecuteSvn(ACommand: TStrings);
+    Function ExecuteSvn(ACommand: TStrings):Integer;
     function ExecuteSvnReturnXml(ACommand: TStrings): TXMLDocument;
     function GetSvnExecutable: string;
     procedure SetFlatMode(AValue: boolean);
@@ -237,6 +237,7 @@ type
     function Export(Element: string; Revision:Integer):string;  overload;
     procedure Add(Elements: TStrings; Recursive: boolean=false);
     procedure Revert(Elements: TStrings; Recursive: boolean=false);
+    procedure Resolve(Elements: TStrings);
     procedure Commit(Elements: TStrings; Message: string; Recursive: boolean=false);
     function Log(FileName: TFileName): TSVNLogList;
     procedure CleanUp;
@@ -562,8 +563,12 @@ begin
       end;
 
       if Assigned(FOnSVNMessage)   then
-         FOnSVNMessage(Self, ieInfo, format('%s %s',[ItemStatusToStatus(sts),Trim(Copy(S[n],i, Length(S[n])-i+1))]));
-
+        begin
+          if sts <> sisNone then
+            FOnSVNMessage(Self, ieInfo, format('%s %s',[ItemStatusToStatus(sts),Trim(Copy(S[n],i, Length(S[n])-i+1))]))
+          else
+            FOnSVNMessage(Self, ieInfo, format('%s %s',[ItemStatusToStatus(sts),S[n]]));
+        end;
     end;
 
   S.Free;
@@ -585,7 +590,7 @@ begin
 
 end;
 
-procedure TSVNClient.ExecuteSvn(ACommand: TStrings);
+function TSVNClient.ExecuteSvn(ACommand: TStrings): Integer;
 var
   AProcess: TProcessUTF8;
   MemStream: TMemoryStream;
@@ -596,8 +601,7 @@ begin
   AProcess.Parameters.Assign(ACommand);
   AProcess.CurrentDirectory:= RepositoryPath;
   AProcess.Options := AProcess.Options + [poUsePipes, poStdErrToOutput];
-//  AProcess.Options := AProcess.Options + [poRunSuspended];
-//  AProcess.ShowWindow := swoHIDE;
+  AProcess.ShowWindow := swoHIDE;
   if Assigned(FOnSVNMessage) then
      FOnSVNMessage(Self, ieCommand, Aprocess.Executable + ' '+ ReplaceLineEndings(AProcess.Parameters.text, ' '));
   AProcess.Execute;
@@ -633,7 +637,7 @@ begin
       ProcessSVNUpdateOutput(MemStream, BytesRead);
     end;
   until n <= 0;
-
+  Result := AProcess.ExitCode;
   AProcess.Free;
   MemStream.Free;
 end;
@@ -687,8 +691,11 @@ begin
   until n <= 0;
   M.SetSize(BytesRead);
 //  m.SaveToFile('/tmp/svn.xml');
-  ReadXMLFile(Result, M);
-
+  try
+    ReadXMLFile(Result, M);
+  Except
+    Result := nil;
+  end;
 
   M.Free;
   AProcess.Free;
@@ -795,12 +802,22 @@ begin
     Command.Add(FileName);
 
     Doc := ExecuteSvnReturnXml(Command);
+
+    if not Assigned(Doc) then
+       begin
+       // Doc is nil, a svn error occurred
+         Doc.Free;
+         Exit();
+       end;
+
+
     Node := Doc.DocumentElement.FirstChild;
-    if Node = nil then begin
+    if not Assigned(Node) then
+      begin
       // no <entry> node found, list is empty.
-      Doc.Free;
-      Exit();
-    end;
+        Doc.Free;
+        Exit();
+      end;
 
     repeat
       SubNode := Node;
@@ -1116,6 +1133,23 @@ begin
 
   ExecuteSvn(Commands);
 
+  finally
+    Commands.Free;
+  end;
+  EndProcess;
+end;
+
+procedure TSVNClient.Resolve(Elements: TStrings);
+var
+  Commands: TStringList;
+begin
+  BeginProcess;
+  Commands := TstringList.Create;
+  Commands.AddStrings(['resolve','--accept','working','--non-interactive','--trust-server-cert']);
+
+  try
+    Commands.AddStrings(Elements);
+    ExecuteSvn(Commands);
   finally
     Commands.Free;
   end;
