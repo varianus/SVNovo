@@ -10,6 +10,7 @@ object fMain: TfMain
   Menu = MainMenu
   OnCreate = FormCreate
   OnDestroy = FormDestroy
+  OnShow = FormShow
   Position = poDefault
   ShowHint = True
   Visible = False
@@ -192,43 +193,53 @@ object fMain: TfMain
         item
           AutoSize = True
           Caption = 'Name'
+          Tag = 1
           Width = 47
         end      
         item
           Caption = 'Path'
+          Tag = 2
           Visible = False
           Width = 0
         end      
         item
           Caption = 'Revision'
+          Tag = 3
           Width = 10
         end      
         item
           Caption = 'Commit Revision'
+          Tag = 4
           Width = 10
         end      
         item
           Caption = 'Author'
+          Tag = 5
           Width = 10
         end      
         item
           Caption = 'Last Changed'
+          Tag = 6
           Width = 10
         end      
         item
           Caption = 'Extension'
+          Tag = 7
           Width = 10
         end      
         item
           Caption = 'Date'
+          Tag = 8
           Width = 10
         end      
         item
           Caption = 'File Status'
+          Tag = 9
           Width = 838
         end      
         item
           Caption = 'Property Status'
+          Tag = 10
           Width = 49
         end>
       HideSelection = False

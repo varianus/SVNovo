@@ -34,6 +34,7 @@ type
 
   TFileTreeNode = class ( TTreeNode)
     public
+      BaseNode: TFileTreeNode;
       FullPath: string;
     end;
 
@@ -127,6 +128,7 @@ type
     procedure actUpdateExecute(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
+    procedure FormShow(Sender: TObject);
     procedure mnuPreferencesClick(Sender: TObject);
     procedure SVNFileListViewColumnClick(Sender: TObject; Column: TListColumn);
     procedure SVNFileListViewData(Sender: TObject; Item: TListItem);
@@ -143,6 +145,7 @@ type
     Filter: TSVNItemStatusSet;
     SavedSortItem: TStatusItemName;
     SavedSortDirection: TSortDirection;
+    Procedure SetColumn(ListView: TListView; ColNo, DefaultWidth: integer; AName: string; ColAutoSize: boolean; Alignment: TAlignment);
     procedure BeginProcess(Sender: TObject);
     procedure EndProcess(Sender: TObject);
     procedure ExpandNode(Node: TTreeNode);
@@ -276,6 +279,7 @@ end;
 
 procedure TfMain.ConfigToMap;
 begin
+
   actFlatMode.Checked := ConfigObj.ReadBoolean('Filter/FlatMode', false);
 
   actShowUnversioned.Checked := ConfigObj.ReadBoolean('Filter/ShowUnversioned', True);
@@ -290,9 +294,16 @@ begin
 end;
 
 procedure TfMain.MapToConfig;
+var
+   BookMark: TFileTreeNode;
 begin
-  ConfigObj.WriteBoolean('Filter/FlatMode', actFlatMode.Checked);
+// Save form state
+  ConfigObj.WriteInteger('FormState/Height', Height);
+  ConfigObj.WriteInteger('FormState/Width', Width);
+  ConfigObj.WriteInteger('FormState/Top', Top);
+  ConfigObj.WriteInteger('FormState/Left', Left);
 
+  ConfigObj.WriteBoolean('Filter/FlatMode', actFlatMode.Checked);
   ConfigObj.WriteBoolean('Filter/ShowUnversioned', actShowUnversioned.Checked);
   ConfigObj.WriteBoolean('Filter/ShowUnmodified', actShowUnmodified.Checked);
   ConfigObj.WriteBoolean('Filter/ShowModified', actShowModified.Checked);
@@ -300,6 +311,14 @@ begin
 
   ConfigObj.WriteString('Filter/SortItem', specialize TEnum<TStatusItemName>.ToString(SVNClient.List.SortItem));
   ConfigObj.WriteString('Filter/SortDirection', specialize TEnum<TSortDirection>.ToString(SVNClient.List.SortDirection));
+
+  BookMark := TFileTreeNode(tvBookMark.Selected);
+  if Assigned(BookMark) then
+    begin
+      ConfigObj.WriteString('LastSelected/BookMark', BookMark.BaseNode.FullPath);
+      ConfigObj.WriteString('LastSelected/Path', CreateRelativePath(SVNClient.RepositoryPath, BookMark.BaseNode.FullPath));
+    end;
+
 
 
   ConfigObj.Flush;
@@ -321,6 +340,7 @@ begin
       item.ImageIndex:= 5;
       item.StateIndex:= 5;
       item.HasChildren:=true;
+      item.BaseNode := item;
     end;
   tvBookMark.Items[0].Expand(False);
   st.free;
@@ -362,11 +382,11 @@ begin
   SetColumn(SVNFileListView, 2, 180, rsPath, true, taLeftJustify);
   SetColumn(SVNFileListView, 3, 75, rsRevision, True, taRightJustify);
   SetColumn(SVNFileListView, 4, 75, rsCommitRevision, True, taRightJustify);
+  SetColumn(SVNFileListView, 9, 100, rsFileStatus, True, taLeftJustify);
   SetColumn(SVNFileListView, 5, 75, rsAuthor, True, taLeftJustify);
   SetColumn(SVNFileListView, 6, 75, rsDateModified, True, taRightJustify);
   SetColumn(SVNFileListView, 7, 75, rsExtension, True, taLeftJustify);
   SetColumn(SVNFileListView, 8, 75, rsDateSVN, True, taRightJustify);
-  SetColumn(SVNFileListView, 9, 100, rsFileStatus, True, taLeftJustify);
   SetColumn(SVNFileListView, 10, 125, rsPropertyStatus, True, taLeftJustify);
 
   UpdateFilesListView;
@@ -656,7 +676,7 @@ begin
 
 end;
 
-Procedure TfMain.UpdateFilter(Reload: boolean= true);
+procedure TfMain.UpdateFilter(Reload: boolean);
 begin
   if actShowConflict.Checked then
     Filter:=Filter + [sisConflicted]
@@ -711,6 +731,16 @@ procedure TfMain.FormDestroy(Sender: TObject);
 begin
   MapToConfig;
   SVNClient.Free;
+end;
+
+procedure TfMain.FormShow(Sender: TObject);
+begin
+  Height := ConfigObj.ReadInteger('FormState/Height', Height);
+  Width := ConfigObj.ReadInteger('FormState/Width', Width);
+  Top := ConfigObj.ReadInteger('FormState/Top', Top);
+  Left := ConfigObj.ReadInteger('FormState/Left', Left);
+
+
 end;
 
 procedure TfMain.mnuPreferencesClick(Sender: TObject);
@@ -793,16 +823,17 @@ procedure TfMain.LoadTree(Node: TTreeNode; BasePath: string);
 var
   St:TstringList;
   i: integer;
-  NewNode: TTreeNode;
+  NewNode: TFileTreeNode;
 begin
   St:= TStringList.Create;
   BuildFolderList(IncludeTrailingPathDelimiter(BasePath) , St, false);
   For i := 0 to St.Count-1 do
     begin
-      NewNode := Node.Owner.AddChild(Node, CreateRelativePath(St[i], BasePath, false));
+      NewNode := TFileTreeNode(Node.Owner.AddChild(Node, CreateRelativePath(St[i], BasePath, false)));
       if NewNode.Text = '' then
         NewNode.Text:= '.';
-      TFileTreeNode(NewNode).FullPath:= St[i];
+      NewNode.BaseNode := TFileTreeNode(node).BaseNode;
+      NewNode.FullPath:= St[i];
       NewNode.ImageIndex:= 18;
       NewNode.StateIndex:= 18;
       NewNode.SelectedIndex:= 57;
@@ -858,6 +889,15 @@ var
 begin
   ExpandNode(Node);
 
+end;
+
+procedure TfMain.SetColumn(ListView: TListView; ColNo, DefaultWidth: integer;
+  AName: string; ColAutoSize: boolean; Alignment: TAlignment);
+begin
+  ListView.Column[ColNo].Caption:=AName;
+  ListView.Column[ColNo].AutoSize:=ColAutoSize;
+  ListView.Column[ColNo].Width:=DefaultWidth;
+  ListView.Column[ColNo].Alignment:=Alignment;
 end;
 
 procedure TfMain.BeginProcess(Sender: TObject);

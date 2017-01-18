@@ -260,7 +260,6 @@ type
   end;
 
 procedure CmdLineToMemo(CmdLine: string; Memo: TMemo);
-procedure SetColumn(ListView: TListView; ColNo, DefaultWidth: integer; AName: string; AutoSize: boolean; Alignment: TAlignment);
 function ReplaceLineEndings(const s, NewLineEnds: string): string;
 function ReplaceLineEndings(const s:string; NewLineEnds: AnsiChar): string;
 function ISO8601ToDateTime(ADateTime: string): TDateTime;
@@ -348,15 +347,6 @@ begin
 
   Memo.Cursor:=crDefault;
 end;
-
-procedure SetColumn(ListView: TListView; ColNo, DefaultWidth: integer; AName: string; AutoSize: boolean; Alignment: TAlignment);
-begin
-  ListView.Column[ColNo].Caption:=AName;
-  ListView.Column[ColNo].AutoSize:=AutoSize;
-  ListView.Column[ColNo].Width:=DefaultWidth;
-  ListView.Column[ColNo].Alignment:=Alignment;
-end;
-
 
 function ReplaceLineEndings(const s, NewLineEnds: string): string;
 var
@@ -694,6 +684,7 @@ begin
   try
     ReadXMLFile(Result, M);
   Except
+    Result.free;
     Result := nil;
   end;
 
@@ -916,8 +907,14 @@ begin
 
 
   Doc := ExecuteSvnReturnXml(Command);
+  if not assigned(Doc) then
+  begin
+    Exit();
+  end;
+
   Node := Doc.DocumentElement.FirstChild.FirstChild;
-  if Node = nil then begin
+  if not assigned(Node) then
+  begin
     // no <entry> node found, list is empty.
     Doc.Free;
     Exit();
