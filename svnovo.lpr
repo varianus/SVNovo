@@ -29,7 +29,8 @@ uses
   {$ENDIF}
   Interfaces, // this includes the LCL widgetset
   Forms, uMain, Config, SVNClasses, FilesSupport, formupdate, ulicense,
-formcommit, formlog, formconfig, AppConsts, formaddrepository;
+  formcommit, formlog, formconfig, AppConsts, formaddrepository, ProcessRunner,
+  SVNTypes;
 
 {$R *.res}
 

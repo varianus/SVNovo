@@ -7,10 +7,11 @@ object fLog: TfLog
   Caption = 'Log'
   ClientHeight = 433
   ClientWidth = 887
+  DesignTimePPI = 95
   OnClose = FormClose
   OnCreate = FormCreate
   OnDestroy = FormDestroy
-  Visible = False
+  LCLVersion = '1.7'
   object lstREvisions: TListView
     Left = 8
     Height = 214
@@ -22,21 +23,21 @@ object fLog: TfLog
       item
         AutoSize = True
         Caption = 'Rev.'
-        Width = 37
+        Width = 31
       end    
       item
         AutoSize = True
         Caption = 'User'
-        Width = 38
+        Width = 35
       end    
       item
         AutoSize = True
         Caption = 'Date'
-        Width = 39
+        Width = 35
       end    
       item
         Caption = 'Message'
-        Width = 645
+        Width = 660
       end>
     RowSelect = True
     ScrollBars = ssAutoBoth
@@ -78,18 +79,19 @@ object fLog: TfLog
     end
     object tsFiles: TTabSheet
       Caption = 'Affected Files'
-      ClientHeight = 172
-      ClientWidth = 879
+      ClientHeight = 165
+      ClientWidth = 881
       object lvAffectedFiles: TListView
         Left = 0
-        Height = 172
+        Height = 165
         Top = 0
-        Width = 879
+        Width = 881
         Align = alClient
         Columns = <        
           item
             AutoSize = True
             Caption = 'Action'
+            Width = 43
           end        
           item
             Caption = 'File'
@@ -110,8 +112,8 @@ object fLog: TfLog
     TabOrder = 3
   end
   object ActionList1: TActionList
-    left = 800
-    top = 137
+    Left = 800
+    Top = 137
     object actClose: TAction
       Caption = 'Close'
       Enabled = False

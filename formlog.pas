@@ -26,7 +26,7 @@ interface
 
 uses
   Classes, SysUtils, FileUtil, Forms, Controls, Graphics, Dialogs, ComCtrls,
-  StdCtrls, ActnList, SVNClasses, FilesSupport, Config;
+  StdCtrls, ActnList, SVNClasses, FilesSupport, Config, ProcessRunner, SVNTypes;
 
 type
 

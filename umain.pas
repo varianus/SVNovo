@@ -26,7 +26,7 @@ interface
 
 uses
   Classes, SysUtils, FileUtil, Forms, Controls, Graphics, Dialogs, StdCtrls,
-  ComCtrls, Menus, ExtCtrls, ActnList, ShellCtrls, SVNClasses, formlog;
+  ComCtrls, Menus, ExtCtrls, ActnList, ShellCtrls, SVNClasses, SVNTypes, formlog, ProcessRunner;
 
 type
 
@@ -152,7 +152,7 @@ type
     procedure GetSelectedElements(Elements: Tstrings);
     procedure LoadBookmarks;
     procedure LoadTree(Node: TTreeNode; BasePath: string);
-    procedure Log(Sender: TObject; const SVNMessageKind: TSVNMessageKind; const Message: string);
+    procedure Log(Sender: TObject; const SVNMessageKind: TRunnerMessageKind; const Message: string);
     procedure UpdateFilesListView;
     Procedure ConfigToMap;
     Procedure MapToConfig;
@@ -376,6 +376,7 @@ begin
   SVNClient.List.SortDirection := SavedSortDirection;
   SVNClient.OnBeginProcess := @BeginProcess;
   SVNClient.OnEndProcess := @endProcess;
+  SVNClient.FlatMode := actFlatMode.Checked;
 
   SetColumn(SVNFileListView, 0, 25, '', False, taLeftJustify);
   SetColumn(SVNFileListView, 1, 100, rsName, true, taLeftJustify);
@@ -395,10 +396,14 @@ begin
 
 end;
 
-procedure TfMain.Log (Sender: TObject; const SVNMessageKind: TSVNMessageKind; const Message: string);
+procedure TfMain.Log (Sender: TObject; const SVNMessageKind: TRunnerMessageKind; const Message: string);
 begin
 
-  Memo1.Lines.Add(Message);
+  if SVNMessageKind = ieCommand then
+    DebugLn(Message)
+  else
+    Memo1.Lines.Add(Message);
+
 end;
 
 procedure TfMain.GetSelectedElements(Elements: Tstrings);
