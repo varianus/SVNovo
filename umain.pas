@@ -611,7 +611,8 @@ begin
         inc(cnt[TSVNItem(Elements.Objects[i]).ItemStatus]);
 
     actAdd.Enabled:= cnt[sisUnversioned] = Elements.Count;
-    actLog.Enabled:= Elements.Count = 1;
+    actLog.Enabled:= (Elements.Count = 1) and (cnt[sisUnversioned] = 0);
+    actDiffHead.Enabled:= cnt[sisUnversioned] = 0;
 
   finally
     Elements.free;
