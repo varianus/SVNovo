@@ -42,6 +42,7 @@ type
     Panel1: TPanel;
     procedure cbRecentsSelect(Sender: TObject);
     procedure FormCreate(Sender: TObject);
+    procedure FormDestroy(Sender: TObject);
     procedure OKButtonClick(Sender: TObject);
   private
     History : TSimpleHistory;
@@ -71,6 +72,11 @@ begin
   History.Max:= 50;
   History.GetList(cbRecents.Items);
   cbRecents.Items.Insert(0,'');
+end;
+
+procedure TfCommit.FormDestroy(Sender: TObject);
+begin
+  History.Free;
 end;
 
 procedure TfCommit.cbRecentsSelect(Sender: TObject);
