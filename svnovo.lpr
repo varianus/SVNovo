@@ -27,7 +27,7 @@ uses
   {$ENDIF}
   clocale,
   {$ENDIF}
-  Interfaces, // this includes the LCL widgetset
+  Interfaces, sysutils, // this includes the LCL widgetset
   Forms, uMain, Config, SVNClasses, FilesSupport, formupdate, ulicense,
   formcommit, formlog, formconfig, AppConsts, formaddrepository, ProcessRunner,
   SVNTypes;
@@ -36,6 +36,15 @@ uses
 
 
 begin
+  {$IFDEF DEBUG}
+  // Assuming your build mode sets -dDEBUG in Project Options/Other when defining -gh
+  // This avoids interference when running a production/default build without -gh
+
+  // Set up -gh output for the Leakview package:
+  if FileExists('heap.trc') then
+    DeleteFile('heap.trc');
+  SetHeapTraceOutput('heap.trc');
+  {$ENDIF DEBUG}
 
   RequireDerivedFormResource:=True;
   Application.Initialize;
