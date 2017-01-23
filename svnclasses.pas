@@ -161,6 +161,8 @@ function ISO8601ToDateTime(ADateTime: string): TDateTime;
 
 implementation
 
+uses RegExpr;
+
 function ISO8601ToDateTime(ADateTime: string): TDateTime;
 var
   y, m, d, h, n, s: word;
@@ -390,6 +392,9 @@ end;
 function TSVNClient.Annotate(FileName: TFileName): TSVNAnnotateList;
 var
   Res: TStringList;
+  RegExp: TRegExpr;
+  Item: TSVNAnnotateItem;
+  i: integer;
 begin
   BeginProcess;
   Result := TSVNAnnotateList.Create(True);
@@ -402,9 +407,23 @@ begin
     Runner.Params.Add('--non-interactive');
     Runner.Params.Add(FileName);
 
+    RegExp := TRegExpr.Create('\s*(\d+)\s+([^\s]+) (\d+-\d+-\d+ \d+:\d+:\d+ [-+]\d+ \(\w+, \d+ \w+ \d+\)) (.*)');
     Res := Runner.ExecuteReturnTxt;
-
-    Res.Free;
+    try
+      for i := 0 to res.Count -1 do
+        begin
+          RegExp.Exec(Res[i]);
+          Item:= TSVNAnnotateItem.Create;
+          item.LineNo:= i;
+          item.Revision:= StrToInt64Def(RegExp.Match[1], 0);
+          item.Author:= RegExp.Match[2];
+          item.DateSVN:=ISO8601ToDateTime(RegExp.Match[3]);
+          item.Line:= RegExp.Match[4];
+          Result.Add(Item);
+        end;
+    finally
+      Res.Free;
+    end;
 
   finally
     EndProcess;

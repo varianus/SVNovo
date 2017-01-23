@@ -1,4 +1,4 @@
-{///*/*/*/*/*
+{
   This file is part of SVNovo
   Copyright (C) 2016 Marco Caselli <marcocas@gmail.com>
 
@@ -47,6 +47,7 @@ type
     actBookMarkDelete: TAction;
     actDiffHead: TAction;
     actBookMarkCheckout: TAction;
+    actAnnotate: TAction;
     actMarkResolved: TAction;
     actLog: TAction;
     actRevert: TAction;
@@ -71,6 +72,7 @@ type
     MenuItem15: TMenuItem;
     MenuItem16: TMenuItem;
     MenuItem17: TMenuItem;
+    MenuItem19: TMenuItem;
     mnuPreferences: TMenuItem;
     mnuView: TMenuItem;
     MenuItem2: TMenuItem;
@@ -110,6 +112,7 @@ type
     tvBookMark: TTreeView;
     procedure actAboutExecute(Sender: TObject);
     procedure actAddExecute(Sender: TObject);
+    procedure actAnnotateExecute(Sender: TObject);
     procedure actBookMarkAddExecute(Sender: TObject);
     procedure actBookMarkCheckoutExecute(Sender: TObject);
     procedure actCleanupExecute(Sender: TObject);
@@ -167,7 +170,7 @@ var
 
 implementation
 uses LazFileUtils, LCLProc, AsyncProcess, Config, FilesSupport, uabout,
-  formupdate, formcommit, formconfig, formaddrepository, strutils;
+  formupdate, formcommit, formconfig, formaddrepository, formannotate, strutils;
 {$R *.lfm}
 
 { TfMain }
@@ -318,8 +321,6 @@ begin
       ConfigObj.WriteString('LastSelected/BookMark', BookMark.BaseNode.FullPath);
       ConfigObj.WriteString('LastSelected/Path', CreateRelativePath(SVNClient.RepositoryPath, BookMark.BaseNode.FullPath));
     end;
-
-
 
   ConfigObj.Flush;
 end;
@@ -501,6 +502,32 @@ begin
 
   actRefresh.Execute;
 
+
+end;
+
+procedure TfMain.actAnnotateExecute(Sender: TObject);
+var
+  RList: TSVNAnnotateList;
+  Elements: TstringList;
+  Theform: TfAnnotate;
+begin
+  Elements := TStringList.Create;
+  try
+    GetSelectedElements(Elements);
+
+    RList := SVNClient.Annotate(SVNClient.FullFileName(Elements[0]));
+    if RList.Count = 0 then
+      begin
+        RList.Free;
+        exit;
+      end;
+    Theform := TfAnnotate.Create(Self);
+    Theform.List := RList;
+    Theform.Show;
+    RList.Free;
+  finally
+    Elements.free;
+  end;
 
 end;
 

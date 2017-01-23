@@ -94,7 +94,7 @@
         <PackageName Value="LCL"/>
       </Item1>
     </RequiredPackages>
-    <Units Count="15">
+    <Units Count="16">
       <Unit0>
         <Filename Value="svnovo.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -189,6 +189,12 @@
         <IsPartOfProject Value="True"/>
         <UnitName Value="SVNTypes"/>
       </Unit14>
+      <Unit15>
+        <Filename Value="formannotate.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="fAnnotate"/>
+        <ResourceBaseClass Value="Form"/>
+      </Unit15>
     </Units>
   </ProjectOptions>
   <CompilerOptions>
@@ -220,11 +226,6 @@
         <UseHeaptrc Value="True"/>
         <UseExternalDbgSyms Value="True"/>
       </Debugging>
-      <Options>
-        <Win32>
-          <GraphicApplication Value="True"/>
-        </Win32>
-      </Options>
     </Linking>
     <Other>
       <CustomOptions Value="-dDEBUG"/>

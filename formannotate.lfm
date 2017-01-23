@@ -1,0 +1,79 @@
+object fAnnotate: TfAnnotate
+  Left = 0
+  Height = 491
+  Top = 0
+  Width = 897
+  Caption = 'Blame / Annotate'
+  ClientHeight = 491
+  ClientWidth = 897
+  Visible = False
+  object ButtonPanel1: TButtonPanel
+    Left = 6
+    Height = 34
+    Top = 451
+    Width = 885
+    OKButton.Name = 'OKButton'
+    OKButton.DefaultCaption = True
+    HelpButton.Name = 'HelpButton'
+    HelpButton.DefaultCaption = True
+    CloseButton.Name = 'CloseButton'
+    CloseButton.DefaultCaption = True
+    CancelButton.Name = 'CancelButton'
+    CancelButton.DefaultCaption = True
+    TabOrder = 0
+    ShowButtons = [pbClose]
+  end
+  object StringGrid1: TStringGrid
+    Left = 0
+    Height = 445
+    Top = 0
+    Width = 897
+    Align = alClient
+    AutoEdit = False
+    AutoFillColumns = True
+    Columns = <    
+      item
+        SizePriority = 0
+        Title.Caption = 'Line'
+        Width = 60
+      end    
+      item
+        Alignment = taRightJustify
+        ReadOnly = True
+        SizePriority = 0
+        Title.Alignment = taRightJustify
+        Title.Caption = 'Revision'
+        Width = 60
+      end    
+      item
+        ReadOnly = True
+        SizePriority = 0
+        Title.Caption = 'Author'
+        Width = 100
+      end    
+      item
+        ReadOnly = True
+        SizePriority = 0
+        Title.Caption = 'Date'
+        Width = 100
+      end    
+      item
+        ReadOnly = True
+        Title.Caption = 'Code'
+        Width = 573
+      end>
+    DefaultColWidth = 40
+    FixedCols = 0
+    Font.Pitch = fpFixed
+    ParentFont = False
+    TabOrder = 1
+    TitleFont.Pitch = fpFixed
+    ColWidths = (
+      60
+      60
+      100
+      100
+      573
+    )
+  end
+end

@@ -81,6 +81,7 @@ Type
 
 
   TSVNAnnotateItem = class (TSVNSimpleItem)
+    LineNo: integer;
     Line: string;
   end;
 
