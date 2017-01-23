@@ -632,11 +632,15 @@ begin
 
     RList := SVNClient.log(SVNClient.FullFileName(Elements[0]));
     if RList.Count = 0 then
-      exit;
+      begin
+        RList.Free;
+        exit;
+      end;
     TheLog := TfLog.Create(self);
     TheLog.CurrentFile := SVNClient.FullFileName(Elements[0]);
     TheLog.List := RList;
-    TheLog.Show;
+    TheLog.ShowModal;
+    RList.Free;
   finally
     Elements.free;
   end;

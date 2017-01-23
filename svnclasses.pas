@@ -278,7 +278,7 @@ begin
   Runner.OnRunnerMessage := @RunnerMessage;
   Verbose := true;
   FFlatMode:= false;
-  List := TSVNStatusList.Create;
+  List := TSVNStatusList.Create(True);
   if ARepoPath <> EmptyStr then
      begin
        FRepositoryPath:=ARepoPath;
@@ -303,7 +303,7 @@ var
   Command : TStringList;
 begin
   BeginProcess;
-
+  Result := TSVNLogList.Create(true);
   try
     if FileName = EmptyStr then
       exit;
@@ -323,7 +323,6 @@ begin
          Exit();
        end;
 
-
     Node := Doc.DocumentElement.FirstChild;
     if not Assigned(Node) then
       begin
@@ -332,7 +331,6 @@ begin
         Exit();
       end;
 
-    Result := TSVNLogList.Create();
     repeat
       SubNode := Node;
       begin
@@ -374,10 +372,7 @@ begin
                    if NodeName = 'action' then
                      PathItem.Action := NodeValue;
                  end;
-
                end;
-
-
           end;
         end;
         Result.Add(ListItem);
@@ -397,7 +392,7 @@ var
   Res: TStringList;
 begin
   BeginProcess;
-  Result := TSVNAnnotateList.Create();
+  Result := TSVNAnnotateList.Create(True);
   try
     if FileName = EmptyStr then
       exit;
@@ -823,6 +818,7 @@ end;
 destructor TSVNClient.Destroy;
 begin
   List.Free;
+  Runner.free;
   inherited Destroy;
 end;
 

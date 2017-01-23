@@ -48,9 +48,7 @@ type
     procedure actCloseExecute(Sender: TObject);
     procedure actDiffExecute(Sender: TObject);
     procedure actViewExecute(Sender: TObject);
-    procedure FormClose(Sender: TObject; var CloseAction: TCloseAction);
     procedure FormCreate(Sender: TObject);
-    procedure FormDestroy(Sender: TObject);
     procedure lstREvisionsSelectItem(Sender: TObject; Item: TListItem; Selected: boolean);
   private
     FCurrentFile: String;
@@ -71,12 +69,6 @@ uses strutils, uMain;
 {$R *.lfm}
 
 { TfLog }
-
-procedure TfLog.FormDestroy(Sender: TObject);
-begin
-  if Assigned(FList) then
-    FList.Free;
-end;
 
 procedure TfLog.lstREvisionsSelectItem(Sender: TObject; Item: TListItem; Selected: boolean);
 var
@@ -128,11 +120,6 @@ end;
 procedure TfLog.actViewExecute(Sender: TObject);
 begin
    //
-end;
-
-procedure TfLog.FormClose(Sender: TObject; var CloseAction: TCloseAction);
-begin
-  CloseAction := caFree;
 end;
 
 procedure TfLog.SetList(AValue: TSVNLogList);
