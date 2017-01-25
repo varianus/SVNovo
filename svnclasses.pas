@@ -167,14 +167,17 @@ function ISO8601ToDateTime(ADateTime: string): TDateTime;
 var
   y, m, d, h, n, s: word;
 begin
-  y := StrToInt(Copy(ADateTime, 1, 4));
-  m := StrToInt(Copy(ADateTime, 6, 2));
-  d := StrToInt(Copy(ADateTime, 9, 2));
-  h := StrToInt(Copy(ADateTime, 12, 2));
-  n := StrToInt(Copy(ADateTime, 15, 2));
-  s := StrToInt(Copy(ADateTime, 18, 2));
-
-  Result := ComposeDateTime( EncodeDate(y,m,d), EncodeTime(h,n,s,0));
+  try
+    y := StrToInt(Copy(ADateTime, 1, 4));
+    m := StrToInt(Copy(ADateTime, 6, 2));
+    d := StrToInt(Copy(ADateTime, 9, 2));
+    h := StrToInt(Copy(ADateTime, 12, 2));
+    n := StrToInt(Copy(ADateTime, 15, 2));
+    s := StrToInt(Copy(ADateTime, 18, 2));
+    Result := ComposeDateTime( EncodeDate(y,m,d), EncodeTime(h,n,s,0));
+  Except
+    Result := 0;
+  end;
 end;
 
 
@@ -407,7 +410,7 @@ begin
     Runner.Params.Add('--non-interactive');
     Runner.Params.Add(FileName);
 
-    RegExp := TRegExpr.Create('\s*(\d+)\s+([^\s]+) (\d+-\d+-\d+ \d+:\d+:\d+ [-+]\d+ \(\w+, \d+ \w+ \d+\)) (.*)');
+    RegExp := TRegExpr.Create('\s*(\d+|-)\s+([^\s]+) (.{44}) (.*)');
     Res := Runner.ExecuteReturnTxt;
     try
       for i := 0 to res.Count -1 do
@@ -417,7 +420,8 @@ begin
           item.LineNo:= i;
           item.Revision:= StrToInt64Def(RegExp.Match[1], 0);
           item.Author:= RegExp.Match[2];
-          item.DateSVN:=ISO8601ToDateTime(RegExp.Match[3]);
+
+          item.DateSVN:= ISO8601ToDateTime(RegExp.Match[3]);
           item.Line:= RegExp.Match[4];
           Result.Add(Item);
         end;
