@@ -3,6 +3,7 @@ object fAnnotate: TfAnnotate
   Height = 491
   Top = 0
   Width = 897
+  ActiveControl = ButtonPanel1.CloseButton
   Caption = 'Blame / Annotate'
   ClientHeight = 491
   ClientWidth = 897
@@ -23,7 +24,7 @@ object fAnnotate: TfAnnotate
     TabOrder = 0
     ShowButtons = [pbClose]
   end
-  object StringGrid1: TStringGrid
+  object sgAnnotate: TStringGrid
     Left = 0
     Height = 445
     Top = 0
@@ -33,12 +34,19 @@ object fAnnotate: TfAnnotate
     AutoFillColumns = True
     Columns = <    
       item
+        Alignment = taRightJustify
+        Font.Name = 'monospace'
+        Font.Pitch = fpFixed
         SizePriority = 0
+        Title.Alignment = taRightJustify
         Title.Caption = 'Line'
         Width = 60
       end    
       item
         Alignment = taRightJustify
+        Font.Name = 'monospace'
+        Font.Pitch = fpFixed
+        Font.Style = [fsUnderline]
         ReadOnly = True
         SizePriority = 0
         Title.Alignment = taRightJustify
@@ -46,18 +54,24 @@ object fAnnotate: TfAnnotate
         Width = 60
       end    
       item
+        Font.Name = 'monospace'
+        Font.Pitch = fpFixed
         ReadOnly = True
         SizePriority = 0
         Title.Caption = 'Author'
         Width = 100
       end    
       item
+        Font.Name = 'monospace'
+        Font.Pitch = fpFixed
         ReadOnly = True
         SizePriority = 0
         Title.Caption = 'Date'
         Width = 100
       end    
       item
+        Font.Name = 'monospace'
+        Font.Pitch = fpFixed
         ReadOnly = True
         Title.Caption = 'Code'
         Width = 573
@@ -65,6 +79,8 @@ object fAnnotate: TfAnnotate
     DefaultColWidth = 40
     FixedCols = 0
     Font.Pitch = fpFixed
+    MouseWheelOption = mwGrid
+    Options = [goFixedVertLine, goFixedHorzLine, goVertLine, goRangeSelect, goColSizing, goSmoothScroll]
     ParentFont = False
     TabOrder = 1
     TitleFont.Pitch = fpFixed
