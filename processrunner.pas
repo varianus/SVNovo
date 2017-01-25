@@ -99,7 +99,7 @@ begin
         Inc(p);
       end;
     end;
-  SetLength(Result, R);
+  SetLength(Result, R-1);
 end;
 
 
