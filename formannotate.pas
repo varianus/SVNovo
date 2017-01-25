@@ -14,7 +14,7 @@ type
 
   TfAnnotate = class(TForm)
     ButtonPanel1: TButtonPanel;
-    StringGrid1: TStringGrid;
+    sgAnnotate: TStringGrid;
   private
     FList: TSVNAnnotateList;
     procedure SetList(AValue: TSVNAnnotateList);
@@ -27,7 +27,7 @@ var
   fAnnotate: TfAnnotate;
 
 implementation
-
+uses strutils;
 
 {$R *.lfm}
 
@@ -41,7 +41,6 @@ begin
 
   UpdateList;
 
-
 end;
 
 procedure TfAnnotate.UpdateList;
@@ -49,15 +48,15 @@ var
   i: integer;
   Item: TSVNAnnotateItem;
 begin
-  StringGrid1.RowCount:= FList.Count +1;
+  sgAnnotate.RowCount:= FList.Count +1;
   for i := 0 to FList.Count -1 do
     begin
       item := FList[i];
-      StringGrid1.Cells[0,i] := Inttostr(Item.LineNo);
-      StringGrid1.Cells[1,i] := Inttostr(Item.Revision);
-      StringGrid1.Cells[2,i] := Item.Author;
-      StringGrid1.Cells[3,i] := datetostr(item.DateSVN);
-      StringGrid1.Cells[4,i] := Item.Line;
+      sgAnnotate.Cells[0,i] := Inttostr(Item.LineNo);
+      sgAnnotate.Cells[1,i] := ifthen(Item.revision > 0, Inttostr(Item.Revision), ' - ');
+      sgAnnotate.Cells[2,i] := Item.Author;
+      sgAnnotate.Cells[3,i] := ifthen(item.DateSVN > 0, datetostr(item.DateSVN), ' - ');
+      sgAnnotate.Cells[4,i] := Item.Line;
     end;
 end;
 
