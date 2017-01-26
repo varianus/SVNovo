@@ -8,6 +8,7 @@ object fCommit: TfCommit
   ClientHeight = 483
   ClientWidth = 510
   OnCreate = FormCreate
+  OnDestroy = FormDestroy
   Position = poMainFormCenter
   Visible = False
   object GroupBox1: TGroupBox

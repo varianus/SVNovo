@@ -2,17 +2,17 @@ object fAddRepository: TfAddRepository
   Left = 0
   Height = 410
   Top = 0
-  Width = 344
+  Width = 387
   ActiveControl = leRepositoryURL
   Caption = 'Add Repository'
   ClientHeight = 410
-  ClientWidth = 344
+  ClientWidth = 387
   Visible = False
   object leRepositoryURL: TLabeledEdit
     Left = 16
     Height = 23
     Top = 28
-    Width = 310
+    Width = 364
     Anchors = [akTop, akLeft, akRight]
     EditLabel.AnchorSideLeft.Control = leRepositoryURL
     EditLabel.AnchorSideRight.Control = leRepositoryURL
@@ -21,7 +21,7 @@ object fAddRepository: TfAddRepository
     EditLabel.Left = 16
     EditLabel.Height = 15
     EditLabel.Top = 10
-    EditLabel.Width = 310
+    EditLabel.Width = 364
     EditLabel.Caption = 'URL'
     EditLabel.ParentColor = False
     TabOrder = 0
@@ -30,7 +30,7 @@ object fAddRepository: TfAddRepository
     Left = 16
     Height = 23
     Top = 80
-    Width = 310
+    Width = 364
     ShowHidden = False
     ButtonWidth = 23
     NumGlyphs = 1
@@ -58,7 +58,7 @@ object fAddRepository: TfAddRepository
     Left = 6
     Height = 34
     Top = 370
-    Width = 332
+    Width = 375
     OKButton.Name = 'OKButton'
     OKButton.Caption = 'Add'
     OKButton.DefaultCaption = False

@@ -1,0 +1,57 @@
+object fDiff: TfDiff
+  Left = 0
+  Height = 313
+  Top = 0
+  Width = 291
+  ActiveControl = frmRevision1.edtRevision
+  Caption = 'Diff'
+  ClientHeight = 313
+  ClientWidth = 291
+  OnCreate = FormCreate
+  LCLVersion = '1.7'
+  Visible = False
+  inline frmRevision1: TfrmRevision
+    Left = 8
+    Top = 44
+  end
+  inline frmRevision2: TfrmRevision
+    Left = 8
+    Top = 150
+    TabOrder = 2
+  end
+  object cbDiffKind: TComboBox
+    Left = 8
+    Height = 23
+    Top = 9
+    Width = 184
+    ItemHeight = 15
+    ItemIndex = 2
+    Items.Strings = (
+      'Diff to BASE'
+      'Diff to HEAD'
+      'Diff to another revision/date'
+      'Diff between  two revisions/dates'
+    )
+    OnChange = cbDiffKindChange
+    Style = csDropDownList
+    TabOrder = 3
+    Text = 'Diff to another revision/date'
+  end
+  object ButtonPanel1: TButtonPanel
+    Left = 6
+    Height = 34
+    Top = 273
+    Width = 279
+    OKButton.Name = 'OKButton'
+    OKButton.Caption = '&Compare'
+    OKButton.DefaultCaption = False
+    HelpButton.Name = 'HelpButton'
+    HelpButton.DefaultCaption = True
+    CloseButton.Name = 'CloseButton'
+    CloseButton.DefaultCaption = True
+    CancelButton.Name = 'CancelButton'
+    CancelButton.DefaultCaption = True
+    TabOrder = 1
+    ShowButtons = [pbOK, pbCancel]
+  end
+end

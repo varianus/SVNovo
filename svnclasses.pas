@@ -161,7 +161,7 @@ function ISO8601ToDateTime(ADateTime: string): TDateTime;
 
 implementation
 
-uses RegExpr;
+uses RegExpr, FilesSupport;
 
 function ISO8601ToDateTime(ADateTime: string): TDateTime;
 var
@@ -563,7 +563,7 @@ begin
   Runner.Params.Clear;
   Runner.Params.AddStrings(['update','--non-interactive', '--trust-server-cert']);
 
-  if (Revision <> '') and (trim(Revision) <> 'HEAD') then
+  if (Revision <> '') and (trim(Revision) <> REV_HEAD) then
     Runner.Params.Add('-r ' + Revision);
 
   if not Assigned(Elements) or (Elements.Count = 0) then
@@ -585,7 +585,7 @@ begin
   Runner.Params.AddStrings(['checkout','--non-interactive', '--trust-server-cert']);
 
   if (Revision = '') then
-     Revision := 'HEAD';
+     Revision := REV_HEAD;
 
   if (Revision <> '')  then
     begin
@@ -608,7 +608,7 @@ begin
   Runner.Params.AddStrings(['export','--non-interactive', '--force', '--trust-server-cert']);
 
   if (Revision = '') then
-     Revision := 'HEAD';
+     Revision := REV_HEAD;
 
   if (Revision <> '')  then
     begin
@@ -617,7 +617,10 @@ begin
 
   Runner.Params.Add(Element);
 
-  Result := IncludeTrailingPathDelimiter(GetTempDir) + ChangeFileExt(ExtractFileNameOnly(Element),'')+'_'+Revision+ExtractFileExt(Element);
+  Result := IncludeTrailingPathDelimiter(GetTempDir) +
+                                         ChangeFileExt(ExtractFileNameOnly(Element),'')+'_'+
+                                         EncodeSafeFileName(Revision)+
+                                         ExtractFileExt(Element);
 
   Runner.Params.Add(Result);
 

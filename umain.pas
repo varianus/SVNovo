@@ -45,9 +45,11 @@ type
     actCleanup: TAction;
     actBookMarkAdd: TAction;
     actBookMarkDelete: TAction;
-    actDiffHead: TAction;
+    actDiffHEAD: TAction;
     actBookMarkCheckout: TAction;
     actAnnotate: TAction;
+    actDiff: TAction;
+    actDiffBASE: TAction;
     actMarkResolved: TAction;
     actLog: TAction;
     actRevert: TAction;
@@ -72,7 +74,9 @@ type
     MenuItem15: TMenuItem;
     MenuItem16: TMenuItem;
     MenuItem17: TMenuItem;
+    MenuItem18: TMenuItem;
     MenuItem19: TMenuItem;
+    MenuItem20: TMenuItem;
     mnuPreferences: TMenuItem;
     mnuView: TMenuItem;
     MenuItem2: TMenuItem;
@@ -117,8 +121,10 @@ type
     procedure actBookMarkCheckoutExecute(Sender: TObject);
     procedure actCleanupExecute(Sender: TObject);
     procedure actCommitExecute(Sender: TObject);
+    procedure actDiffBASEExecute(Sender: TObject);
+    procedure actDiffExecute(Sender: TObject);
     procedure actFlatModeExecute(Sender: TObject);
-    procedure actDiffHeadExecute(Sender: TObject);
+    procedure actDiffHEADExecute(Sender: TObject);
     procedure ActionListUpdate(AAction: TBasicAction; var Handled: Boolean);
     procedure actLogExecute(Sender: TObject);
     procedure actMarkResolvedExecute(Sender: TObject);
@@ -148,6 +154,7 @@ type
     Filter: TSVNItemStatusSet;
     SavedSortItem: TStatusItemName;
     SavedSortDirection: TSortDirection;
+    procedure Rundiff(const Rev1, Rev2: string);
     Procedure SetColumn(ListView: TListView; ColNo, DefaultWidth: integer; AName: string; ColAutoSize: boolean; Alignment: TAlignment);
     procedure BeginProcess(Sender: TObject);
     procedure EndProcess(Sender: TObject);
@@ -170,7 +177,8 @@ var
 
 implementation
 uses LazFileUtils, LCLProc, AsyncProcess, Config, FilesSupport, uabout,
-  formupdate, formcommit, formconfig, formaddrepository, formannotate, strutils;
+  formupdate, formcommit, formconfig, formaddrepository, formannotate, formdiff,
+  strutils;
 {$R *.lfm}
 
 { TfMain }
@@ -487,6 +495,24 @@ begin
   actRefresh.Execute;
 end;
 
+procedure TfMain.actDiffBASEExecute(Sender: TObject);
+begin
+  Rundiff('', REV_BASE);
+end;
+
+procedure TfMain.actDiffExecute(Sender: TObject);
+var
+  theForm: TfDiff;
+begin
+  theForm := TfDiff.Create(Self);
+  Theform.ShowModal;
+  if theForm.ModalResult = mrOK then
+    Rundiff(theForm.GetselectedRevision(1),theForm.GetselectedRevision(2));
+
+  theForm.Free;
+
+end;
+
 procedure TfMain.actAddExecute(Sender: TObject);
 var
   Elements: TstringList;
@@ -602,10 +628,11 @@ begin
   UpdateFilesListView;
 end;
 
-procedure TfMain.actDiffHeadExecute(Sender: TObject);
+
+procedure TfMain.Rundiff(const Rev1, Rev2:string);
 var
   Elements: TstringList;
-  TempName: string;
+  TempName1, TempName2: string;
   i: integer;
 begin
   Elements := TStringList.Create;
@@ -613,13 +640,27 @@ begin
   try
    For i := 0 to Elements.Count -1 do
      begin
-       TempName := SVNClient.Export(SVNClient.FullFileName(Elements[i]), 'HEAD');
-       RunExternal(CFG_Diff,[SVNClient.FullFileName(Elements[i]), TempName]);
+       if Rev1 = EmptyStr then
+         TempName1:= SVNClient.FullFileName(Elements[i])
+       else
+         TempName1 := SVNClient.Export(SVNClient.FullFileName(Elements[i]), Rev1);
+
+       if Rev2 = EmptyStr then
+         TempName2:= SVNClient.FullFileName(Elements[i])
+       else
+         TempName2:= SVNClient.Export(SVNClient.FullFileName(Elements[i]), Rev2);
+
+       RunExternal(CFG_Diff,[TempName1, TempName2]);
      end;
   finally
     Elements.free;
   end;
 
+end;
+
+procedure TfMain.actDiffHEADExecute(Sender: TObject);
+begin
+  Rundiff(EmptyStr, REV_HEAD);
 end;
 
 procedure TfMain.ActionListUpdate(AAction: TBasicAction; var Handled: Boolean);
@@ -639,7 +680,7 @@ begin
 
     actAdd.Enabled:= cnt[sisUnversioned] = Elements.Count;
     actLog.Enabled:= (Elements.Count = 1) and (cnt[sisUnversioned] = 0);
-    actDiffHead.Enabled:= cnt[sisUnversioned] = 0;
+    actDiffHEAD.Enabled:= cnt[sisUnversioned] = 0;
 
   finally
     Elements.free;

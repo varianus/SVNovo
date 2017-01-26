@@ -30,7 +30,7 @@ uses
   Interfaces, sysutils, // this includes the LCL widgetset
   Forms, uMain, Config, SVNClasses, FilesSupport, formupdate, ulicense,
   formcommit, formlog, formconfig, AppConsts, formaddrepository, ProcessRunner,
-  SVNTypes, formannotate;
+  SVNTypes, formannotate, framerevision, formdiff;
 
 {$R *.res}
 

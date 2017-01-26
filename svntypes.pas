@@ -7,6 +7,10 @@ interface
 uses
   Classes, SysUtils, Generics.Defaults,  Generics.Collections;
 
+Const
+   REV_BASE = 'BASE';
+   REV_HEAD = 'HEAD';
+
 Type
   TSortDirection  = (sdAscending=1, sdDescending=-1);
 

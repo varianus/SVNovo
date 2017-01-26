@@ -1,0 +1,68 @@
+object frmRevision: TfrmRevision
+  Left = 0
+  Height = 103
+  Top = 0
+  Width = 268
+  ClientHeight = 103
+  ClientWidth = 268
+  TabOrder = 0
+  object gbRevision: TGroupBox
+    Left = 0
+    Height = 103
+    Top = 0
+    Width = 268
+    Align = alClient
+    Caption = 'gbRevision'
+    ClientHeight = 83
+    ClientWidth = 264
+    TabOrder = 0
+    object rbRevision: TRadioButton
+      Left = 8
+      Height = 19
+      Top = 25
+      Width = 64
+      Caption = 'Revision'
+      Checked = True
+      TabOrder = 0
+      TabStop = True
+    end
+    object edtRevision: TEdit
+      Left = 107
+      Height = 23
+      Top = 21
+      Width = 133
+      Alignment = taRightJustify
+      NumbersOnly = True
+      TabOrder = 1
+    end
+    object rbDate: TRadioButton
+      Left = 8
+      Height = 19
+      Top = 50
+      Width = 44
+      Caption = 'Date'
+      TabOrder = 2
+    end
+    object dteRevDate: TDateEdit
+      Left = 107
+      Height = 23
+      Top = 46
+      Width = 135
+      CalendarDisplaySettings = [dsShowHeadings, dsShowDayNames]
+      DefaultToday = True
+      DateOrder = doNone
+      ButtonWidth = 23
+      NumGlyphs = 1
+      MaxLength = 0
+      TabOrder = 3
+    end
+    object rbHead: TRadioButton
+      Left = 8
+      Height = 19
+      Top = 0
+      Width = 98
+      Caption = 'HEAD Revision'
+      TabOrder = 4
+    end
+  end
+end

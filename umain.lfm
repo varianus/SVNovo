@@ -417,18 +417,19 @@ object fMain: TfMain
       Caption = 'Delete BookMark…'
     end
     object actLog: TAction
+      Category = 'Query'
       Caption = 'Log…'
       Enabled = False
       Hint = 'Log selected'
       ImageIndex = 41
       OnExecute = actLogExecute
     end
-    object actDiffHead: TAction
-      Category = 'FileAction'
-      Caption = 'Diff to Head'
+    object actDiffHEAD: TAction
+      Category = 'Query'
+      Caption = 'Diff to HEAD'
       Hint = 'Diff to HEAD'
       ImageIndex = 84
-      OnExecute = actDiffHeadExecute
+      OnExecute = actDiffHEADExecute
       ShortCut = 16456
     end
     object actBookMarkCheckout: TAction
@@ -443,9 +444,22 @@ object fMain: TfMain
       OnExecute = actMarkResolvedExecute
     end
     object actAnnotate: TAction
-      Category = 'FileAction'
+      Category = 'Query'
       Caption = 'Blame/Annotate'
       OnExecute = actAnnotateExecute
+    end
+    object actDiff: TAction
+      Category = 'Query'
+      Caption = 'Diff…'
+      OnExecute = actDiffExecute
+      ShortCut = 16452
+    end
+    object actDiffBASE: TAction
+      Category = 'Query'
+      Caption = 'Diff to BASE'
+      Hint = 'Diff to BASE'
+      OnExecute = actDiffBASEExecute
+      ShortCut = 16450
     end
   end
   object ImageList_22x22: TImageList
@@ -5899,8 +5913,14 @@ object fMain: TfMain
     object MenuItem19: TMenuItem
       Action = actAnnotate
     end
+    object MenuItem18: TMenuItem
+      Action = actDiff
+    end
+    object MenuItem20: TMenuItem
+      Action = actDiffBASE
+    end
     object MenuItem14: TMenuItem
-      Action = actDiffHead
+      Action = actDiffHEAD
     end
   end
   object pmBookmark: TPopupMenu
