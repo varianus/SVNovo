@@ -204,8 +204,8 @@ end;
 
 function TSVNStatusList.SortItemStatus(constref Item1, Item2: TSVNItem): Integer;
 begin
-  Result:=0;
-// Result := CompareValue(Item1.ItemStatus, Item2.ItemStatus);
+
+ Result := CompareValue(ord(Item1.ItemStatus), ord(Item2.ItemStatus));
 end;
 
 function TSVNStatusList.SortPropStatus(constref Item1, Item2: TSVNItem): Integer;
