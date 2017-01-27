@@ -450,183 +450,188 @@ var
   SubNode: TDOMNode;
 begin
   BeginProcess;
+  try
+    List.Clear;
 
-  List.Clear;
+    if FRepositoryPath = EmptyStr then
+      exit;
 
-  if FRepositoryPath = EmptyStr then
-    exit;
+    Runner.Params.Clear;
+    Runner.Params.AddStrings(['stat','--xml', '--non-interactive']);
 
-  Runner.Params.Clear;
-  Runner.Params.AddStrings(['stat','--xml', '--non-interactive']);
+    if Verbose then
+      Runner.Params.Add('--verbose');
 
-  if Verbose then
-    Runner.Params.Add('--verbose');
+    if fFlatMode then
+      Runner.Params.Add('--depth=infinity')
+    else
+      Runner.Params.Add('--depth=immediates');
 
-  if fFlatMode then
-    Runner.Params.Add('--depth=infinity')
-  else
-    Runner.Params.Add('--depth=immediates');
+    Runner.Params.Add(FRepositoryPath);
 
-  Runner.Params.Add(FRepositoryPath);
-
-  Doc := Runner.ExecuteReturnXml;
-  if not assigned(Doc) then
-  begin
-    Exit();
-  end;
-
-  Node := Doc.DocumentElement.FirstChild.FirstChild;
-  if not assigned(Node) then
-  begin
-    // no <entry> node found, list is empty.
-    Doc.Free;
-    Exit();
-  end;
-
-  repeat
-    SubNode := Node;
-    Path := UTF8Encode(SubNode.Attributes.Item[0].NodeValue);
-//    debugln('TSVNStatus.Create ' + Path);
-    F:=FileGetAttr(Path);
-    If (F<>-1) {and ((F and faDirectory)=0)} then
+    Doc := Runner.ExecuteReturnXml;
+    if not assigned(Doc) then
     begin
-      ListItem := TSVNItem.Create;
-      //initialize author (anonymous repositories)
-      ListItem.Author := rsNoAuthor;
-      //path
-      ListItem.Path := Path;
-      ListItem.Name := ExtractFileName(Path);
-      //Extension
-      ListItem.Extension:=ExtractFileExt(Path);
-      //get the wc-status attributes
-      ListItem.ItemStatus:=sisNone;
-      FileAge(Path, ListItem.DateModified);
-      ListItem.Checked:=False;
-      ListItem.PropStatus:='';
-      if (F and faDirectory)=faDirectory then
-        ListItem.Kind:= 2
-      else
-        ListItem.Kind:= 1;
+      Exit();
+    end;
 
-      for i := 0 to SubNode.ChildNodes.Item[0].Attributes.Length -1 do
+    Node := Doc.DocumentElement.FirstChild.FirstChild;
+    if not assigned(Node) then
+    begin
+      // no <entry> node found, list is empty.
+      Doc.Free;
+      Exit();
+    end;
+
+    repeat
+      SubNode := Node;
+      Path := UTF8Encode(SubNode.Attributes.Item[0].NodeValue);
+  //    debugln('TSVNStatus.Create ' + Path);
+      F:=FileGetAttr(Path);
+      If (F<>-1) {and ((F and faDirectory)=0)} then
       begin
-        NodeName := SubNode.ChildNodes.Item[0].Attributes.Item[i].NodeName;
-        NodeValue := SubNode.ChildNodes.Item[0].Attributes.Item[i].NodeValue;
-        if NodeName = 'item' then
+        ListItem := TSVNItem.Create;
+        //initialize author (anonymous repositories)
+        ListItem.Author := rsNoAuthor;
+        //path
+        ListItem.Path := Path;
+        ListItem.Name := ExtractFileName(Path);
+        //Extension
+        ListItem.Extension:=ExtractFileExt(Path);
+        //get the wc-status attributes
+        ListItem.ItemStatus:=sisNone;
+        FileAge(Path, ListItem.DateModified);
+        ListItem.Checked:=False;
+        ListItem.PropStatus:='';
+        if (F and faDirectory)=faDirectory then
+          ListItem.Kind:= 2
+        else
+          ListItem.Kind:= 1;
+
+        for i := 0 to SubNode.ChildNodes.Item[0].Attributes.Length -1 do
         begin
-          //ItemStatus
-          ListItem.ItemStatus := StatusToItemStatus(NodeValue);
-          //Checked
-          ListItem.Checked:=(NodeValue<>'unversioned') and (NodeValue<>'normal');
-        end;
-        if NodeName = 'props' then
-          //PropStatus
-          ListItem.PropStatus := NodeValue;
-        if NodeName = 'revision' then
-          //Revision
-          ListItem.Revision := StrToInt(NodeValue);
-      end;
-      //get the commit attributes
-      SubNode := SubNode.ChildNodes.Item[0].ChildNodes.Item[0];
-      if Assigned(SubNode) then
-      begin
-        //CommitRevision
-        ListItem.CommitRevision:=StrToInt(SubNode.Attributes.Item[0].NodeValue);
-        for i := 0 to SubNode.ChildNodes.Count - 1 do
-        begin
-          ActNode := SubNode.ChildNodes.Item[i];
-          if Assigned(ActNode) then
+          NodeName := SubNode.ChildNodes.Item[0].Attributes.Item[i].NodeName;
+          NodeValue := SubNode.ChildNodes.Item[0].Attributes.Item[i].NodeValue;
+          if NodeName = 'item' then
           begin
-            NodeName := ActNode.NodeName;
-            //Author
-            if NodeName = 'author' then
-              ListItem.Author := ActNode.FirstChild.NodeValue;
-            //Date
-            if NodeName = 'date' then
-              ListItem.DateSVN := ISO8601ToDateTime(ActNode.FirstChild.NodeValue);
+            //ItemStatus
+            ListItem.ItemStatus := StatusToItemStatus(NodeValue);
+            //Checked
+            ListItem.Checked:=(NodeValue<>'unversioned') and (NodeValue<>'normal');
+          end;
+          if NodeName = 'props' then
+            //PropStatus
+            ListItem.PropStatus := NodeValue;
+          if NodeName = 'revision' then
+            //Revision
+            ListItem.Revision := StrToInt(NodeValue);
+        end;
+        //get the commit attributes
+        SubNode := SubNode.ChildNodes.Item[0].ChildNodes.Item[0];
+        if Assigned(SubNode) then
+        begin
+          //CommitRevision
+          ListItem.CommitRevision:=StrToInt(SubNode.Attributes.Item[0].NodeValue);
+          for i := 0 to SubNode.ChildNodes.Count - 1 do
+          begin
+            ActNode := SubNode.ChildNodes.Item[i];
+            if Assigned(ActNode) then
+            begin
+              NodeName := ActNode.NodeName;
+              //Author
+              if NodeName = 'author' then
+                ListItem.Author := ActNode.FirstChild.NodeValue;
+              //Date
+              if NodeName = 'date' then
+                ListItem.DateSVN := ISO8601ToDateTime(ActNode.FirstChild.NodeValue);
+            end;
           end;
         end;
+        List.Add(ListItem);
       end;
-      List.Add(ListItem);
-    end;
-    Node := Node.NextSibling;
-  until not Assigned(Node);
-  Doc.Free;
-  List.Sort;
-  EndProcess;
+      Node := Node.NextSibling;
+    until not Assigned(Node);
+    Doc.Free;
+    List.Sort;
+
+  finally
+    EndProcess;
+  end;
+
 end;
 
 procedure TSVNClient.Update(Elements: TStrings; Revision:string = '');
 begin
   BeginProcess;
+  try
+    Runner.Params.Clear;
+    Runner.Params.AddStrings(['update','--non-interactive', '--trust-server-cert']);
 
-  Runner.Params.Clear;
-  Runner.Params.AddStrings(['update','--non-interactive', '--trust-server-cert']);
+    if (Revision <> '') and (trim(Revision) <> REV_HEAD) then
+      Runner.Params.Add('-r ' + Revision);
 
-  if (Revision <> '') and (trim(Revision) <> REV_HEAD) then
-    Runner.Params.Add('-r ' + Revision);
+    if not Assigned(Elements) or (Elements.Count = 0) then
+      Runner.Params.Add(FRepositoryPath)
+    else
+      Runner.Params.AddStrings(Elements);
 
-  if not Assigned(Elements) or (Elements.Count = 0) then
-    Runner.Params.Add(FRepositoryPath)
-  else
-    Runner.Params.AddStrings(Elements);
-
-  Runner.Execute;
-
-  EndProcess;
+    Runner.Execute;
+  finally
+    EndProcess;
+  end;
 end;
 
 procedure TSVNClient.CheckOut(URL: string; LocalPath: TFileName;
   Revision: string);
 begin
   BeginProcess;
+  try
+    Runner.Params.Clear;
+    Runner.Params.AddStrings(['checkout','--non-interactive', '--trust-server-cert']);
 
-  Runner.Params.Clear;
-  Runner.Params.AddStrings(['checkout','--non-interactive', '--trust-server-cert']);
+    if (Revision = '') then
+       Revision := REV_HEAD;
 
-  if (Revision = '') then
-     Revision := REV_HEAD;
+    if (Revision <> '')  then
+      begin
+        Runner.Params.Add('--revision='+Revision);
+      end;
 
-  if (Revision <> '')  then
-    begin
-      Runner.Params.Add('--revision='+Revision);
-    end;
+    Runner.Params.Add(URL);
+    Runner.Params.Add(LocalPath);
+    Runner.Execute;
+  finally
+    EndProcess;
+  end;
 
-  Runner.Params.Add(URL);
-  Runner.Params.Add(LocalPath);
-
-  Runner.Execute;
-
-  EndProcess;
 end;
 
 function TSVNClient.Export(Element: string; Revision: string): string;
 begin
   BeginProcess;
+  try
+    Runner.params.Clear;
+    Runner.Params.AddStrings(['export','--non-interactive', '--force', '--trust-server-cert']);
 
-  Runner.params.Clear;
-  Runner.Params.AddStrings(['export','--non-interactive', '--force', '--trust-server-cert']);
+    if (Revision = '') then
+       Revision := REV_HEAD;
 
-  if (Revision = '') then
-     Revision := REV_HEAD;
+    if (Revision <> '')  then
+      begin
+        Runner.Params.Add('--revision='+Revision);
+      end;
 
-  if (Revision <> '')  then
-    begin
-      Runner.Params.Add('--revision='+Revision);
-    end;
+    Runner.Params.Add(Element);
+    Result := IncludeTrailingPathDelimiter(GetTempDir) +
+                                           ChangeFileExt(ExtractFileNameOnly(Element),'')+'_'+
+                                           EncodeSafeFileName(Revision)+
+                                           ExtractFileExt(Element);
 
-  Runner.Params.Add(Element);
-
-  Result := IncludeTrailingPathDelimiter(GetTempDir) +
-                                         ChangeFileExt(ExtractFileNameOnly(Element),'')+'_'+
-                                         EncodeSafeFileName(Revision)+
-                                         ExtractFileExt(Element);
-
-  Runner.Params.Add(Result);
-
-  Runner.Execute;
-
-  EndProcess;
+    Runner.Params.Add(Result);
+    Runner.Execute;
+  finally
+    EndProcess;
+  end;
 end;
 
 function TSVNClient.Export(Element: string; Revision: Integer): string;
@@ -637,67 +642,74 @@ end;
 procedure TSVNClient.Add(Elements: TStrings; Recursive: boolean= false);
 begin
   BeginProcess;
+  try
+    Runner.Params.Clear;
+    Runner.Params.AddStrings(['add','--non-interactive', '--trust-server-cert']);
 
-  Runner.Params.Clear;
-  Runner.Params.AddStrings(['add','--non-interactive', '--trust-server-cert']);
+    if Recursive  then
+      Runner.Params.Add('--depth=infinity');
 
-  if Recursive  then
-    Runner.Params.Add('--depth=infinity');
+    if not Assigned(Elements) or (Elements.Count = 0) then
+      Runner.Params.Add(FRepositoryPath)
+    else
+      Runner.Params.AddStrings(Elements);
 
-  if not Assigned(Elements) or (Elements.Count = 0) then
-    Runner.Params.Add(FRepositoryPath)
-  else
-    Runner.Params.AddStrings(Elements);
+    Runner.Execute;
 
-  Runner.Execute;
-
-  EndProcess;
+  finally
+    EndProcess;
+  end;
 end;
 
 procedure TSVNClient.Revert(Elements: TStrings; Recursive: boolean= false);
 begin
   BeginProcess;
+  try
+    Runner.Params.Clear;
+    Runner.Params.AddStrings(['revert','--non-interactive', '--trust-server-cert']);
 
-  Runner.Params.Clear;
-  Runner.Params.AddStrings(['revert','--non-interactive', '--trust-server-cert']);
+    if Recursive  then
+      Runner.Params.Add('--depth=infinity');
 
-  if Recursive  then
-    Runner.Params.Add('--depth=infinity');
+    if not Assigned(Elements) or (Elements.Count = 0) then
+      Runner.Params.Add(FRepositoryPath)
+    else
+      Runner.Params.AddStrings(Elements);
 
-  if not Assigned(Elements) or (Elements.Count = 0) then
-    Runner.Params.Add(FRepositoryPath)
-  else
-    Runner.Params.AddStrings(Elements);
-
-  Runner.Execute;
-
-  EndProcess;
+    Runner.Execute;
+  finally
+    EndProcess;
+  end;
 end;
 
 procedure TSVNClient.Resolve(Elements: TStrings);
 begin
   BeginProcess;
+  try
+    Runner.Params.Clear;
+    Runner.Params.AddStrings(['resolve','--accept','working','--non-interactive','--trust-server-cert']);
+    Runner.Params.AddStrings(Elements);
+    Runner.Execute;
 
-  Runner.Params.Clear;
-  Runner.Params.AddStrings(['resolve','--accept','working','--non-interactive','--trust-server-cert']);
+  finally
+    EndProcess;
+  end;
 
-  Runner.Params.AddStrings(Elements);
-  Runner.Execute;
 
-  EndProcess;
 end;
 
 
 procedure TSVNClient.CleanUp;
 begin
   BeginProcess;
+  try
+    Runner.Params.Clear;
+    Runner.Params.AddStrings(['cleanup','--non-interactive', '--trust-server-cert']);
+    Runner.Execute;
 
-  Runner.Params.Clear;
-  Runner.Params.AddStrings(['cleanup','--non-interactive', '--trust-server-cert']);
-
-  Runner.Execute;
-
-  EndProcess;
+  finally
+    EndProcess;
+  end;
 end;
 
 procedure TSVNClient.Commit(Elements: TStrings; Message: string;
@@ -706,32 +718,31 @@ var
   intMessage : string;
 begin
   BeginProcess;
+  try
+    Runner.Params.Clear;
+    Runner.Params.AddStrings(['commit','--non-interactive', '--trust-server-cert']);
 
-  Runner.Params.Clear;
-  Runner.Params.AddStrings(['commit','--non-interactive', '--trust-server-cert']);
+    if Recursive  then
+      Runner.Params.Add('--depth=infinity');
 
-  if Recursive  then
-    Runner.Params.Add('--depth=infinity');
+    if not Assigned(Elements) or (Elements.Count = 0) then
+      Runner.Params.Add(FRepositoryPath)
+    else
+      Runner.Params.AddStrings(Elements);
 
-  if not Assigned(Elements) or (Elements.Count = 0) then
-    Runner.Params.Add(FRepositoryPath)
-  else
-    Runner.Params.AddStrings(Elements);
+    {$IFDEF WINDOWS}
+    IntMessage := AnsiQuotedStr(Message, '"');
+    if pos ('"', message) > 0 then
+      IntMessage := StringReplace(IntMessage, '""', '"""', [rfReplaceAll]);
+    {$ELSE}
+      IntMessage := Message;
+    {$ENDIF}
 
-
-  {$IFDEF WINDOWS}
-  IntMessage := AnsiQuotedStr(Message, '"');
-  if pos ('"', message) > 0 then
-    IntMessage := StringReplace(IntMessage, '""', '"""', [rfReplaceAll]);
-  {$ELSE}
-    IntMessage := Message;
-  {$ENDIF}
-
-  Runner.Params.Add('--message='+IntMessage);
-
-  Runner.Execute;
-
-  EndProcess;
+    Runner.Params.Add('--message='+IntMessage);
+    Runner.Execute;
+  finally
+    EndProcess;
+  end;
 end;
 
 
