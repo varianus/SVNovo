@@ -751,7 +751,8 @@ procedure TSVNClient.SetFlatMode(AValue: boolean);
 begin
   if FFlatMode=AValue then Exit;
   FFlatMode:=AValue;
-  LoadStatus;
+  if FRepositoryPath <> EmptyStr then
+    LoadStatus;
 end;
 
 procedure TSVNClient.SetOnBeginProcess(AValue: TNotifyEvent);
