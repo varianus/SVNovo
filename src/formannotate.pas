@@ -6,7 +6,7 @@ interface
 
 uses
   Classes, SysUtils, FileUtil, Forms, Controls, Graphics, Dialogs, ButtonPanel,
-  Grids, SVNTypes;
+  Grids, Menus, SVNTypes;
 
 type
 
@@ -14,7 +14,15 @@ type
 
   TfAnnotate = class(TForm)
     ButtonPanel1: TButtonPanel;
+    FindDialog1: TFindDialog;
+    MainMenu1: TMainMenu;
+    MenuItem1: TMenuItem;
+    MenuItem2: TMenuItem;
+    MenuItem3: TMenuItem;
     sgAnnotate: TStringGrid;
+    procedure FindDialog1Find(Sender: TObject);
+    procedure MenuItem2Click(Sender: TObject);
+    procedure MenuItem3Click(Sender: TObject);
   private
     FList: TSVNAnnotateList;
     procedure SetList(AValue: TSVNAnnotateList);
@@ -32,6 +40,81 @@ uses strutils;
 {$R *.lfm}
 
 { TfAnnotate }
+
+procedure TfAnnotate.MenuItem2Click(Sender: TObject);
+begin
+  //
+  FindDialog1.Execute;
+end;
+
+procedure TfAnnotate.FindDialog1Find(Sender: TObject);
+var
+  i,startindex: integer;
+  Options: TStringSearchOptions;
+
+  Function FindInLine(Line:Integer): boolean;
+  Var
+    FoundPos: integer;
+  begin
+    if SearchBuf(pchar(sgAnnotate.Cols[4][line]), Length(sgAnnotate.Cols[4][line]), 0, 0, finddialog1.FindText, Options) <> nil then
+      begin
+        sgAnnotate.Row:=Line;
+        sgAnnotate.TopRow:=Line;
+        Result:= true;
+      end
+    else
+      Result:= false;
+  end;
+
+begin
+
+  Options:=[soDown];
+  if frMatchCase in FindDialog1.Options then
+    Options:=Options+[soMatchCase];
+
+  if frWholeWord in FindDialog1.Options then
+    Options:=Options+[soWholeWord];
+
+  startindex:=sgAnnotate.Row;
+  if startindex=-1 then startindex:=0;
+
+  if frFindNext in finddialog1.Options then //start from next index
+    inc(startindex);
+
+  if (frDown in FindDialog1.Options)  then
+    begin
+      for i:=startindex to sgAnnotate.Cols[4].Count-1 do
+        if FindInLine(i) then
+          exit;
+      if (frEntireScope in FindDialog1.Options)  then
+        for i:=1 to startindex -1 do
+          if FindInLine(i) then
+            exit;
+    end;
+
+  if not (frDown in FindDialog1.Options) then
+    begin
+      for i:=startindex -2 downto 1 do
+        if FindInLine(i) then
+          exit;
+
+      if (frEntireScope in FindDialog1.Options)  then
+        for i:=sgAnnotate.Cols[4].Count-1 downto startindex -1 do
+          if FindInLine(i) then
+            exit;
+    end;
+
+
+
+end;
+
+procedure TfAnnotate.MenuItem3Click(Sender: TObject);
+begin
+  if finddialog1.FindText='' then
+    finddialog1.Execute
+  else
+    FindDialog1Find(finddialog1); //next scan
+end;
 
 procedure TfAnnotate.SetList(AValue: TSVNAnnotateList);
 begin

@@ -7,11 +7,13 @@ object fAnnotate: TfAnnotate
   Caption = 'Blame / Annotate'
   ClientHeight = 491
   ClientWidth = 897
+  Menu = MainMenu1
+  LCLVersion = '1.7'
   Visible = False
   object ButtonPanel1: TButtonPanel
     Left = 6
     Height = 34
-    Top = 451
+    Top = 431
     Width = 885
     OKButton.Name = 'OKButton'
     OKButton.DefaultCaption = True
@@ -26,7 +28,7 @@ object fAnnotate: TfAnnotate
   end
   object sgAnnotate: TStringGrid
     Left = 0
-    Height = 445
+    Height = 425
     Top = 0
     Width = 897
     Align = alClient
@@ -91,5 +93,29 @@ object fAnnotate: TfAnnotate
       100
       573
     )
+  end
+  object MainMenu1: TMainMenu
+    left = 326
+    top = 129
+    object MenuItem1: TMenuItem
+      Caption = 'Search'
+      object MenuItem2: TMenuItem
+        Caption = 'Find'
+        ShortCut = 16454
+        OnClick = MenuItem2Click
+      end
+      object MenuItem3: TMenuItem
+        Caption = 'Find Next'
+        ShortCut = 114
+        OnClick = MenuItem3Click
+      end
+    end
+  end
+  object FindDialog1: TFindDialog
+    Width = 480
+    Height = 136
+    OnFind = FindDialog1Find
+    left = 561
+    top = 140
   end
 end
