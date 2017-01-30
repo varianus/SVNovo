@@ -155,6 +155,7 @@ type
     SavedSortItem: TStatusItemName;
     SavedSortDirection: TSortDirection;
     procedure Rundiff(const Rev1, Rev2: string);
+    procedure SelectSubDir(Subdir: string);
     Procedure SetColumn(ListView: TListView; ColNo, DefaultWidth: integer; AName: string; ColAutoSize: boolean; Alignment: TAlignment);
     procedure BeginProcess(Sender: TObject);
     procedure EndProcess(Sender: TObject);
@@ -870,16 +871,20 @@ end;
 procedure TfMain.SVNFileListViewDblClick(Sender: TObject);
 var
   Elements: TstringList;
-  Editor, CurrentFile: string;
+  CurrentFile: string;
 
 begin
   Elements := TStringList.Create;
   try
     GetSelectedElements(Elements);
-    if (Elements.Count = 1) and
-       (FileExists(SVNClient.FullFileName(Elements[0]))) then
+    CurrentFile:= SVNClient.FullFileName(Elements[0]);
+    if (Elements.Count = 1) then
       begin
-        RunExternal(CFG_Editor, [SVNClient.FullFileName(Elements[0])]);
+        if DirectoryExists(CurrentFile) then
+          SelectSubDir(CurrentFile)
+        else
+          if FileExists(CurrentFile) then
+            RunExternal(CFG_Editor, [CurrentFile]);
       end;
 
   finally
@@ -923,13 +928,25 @@ begin
 end;
 
 procedure TfMain.tvBookMarkClick(Sender: TObject);
-Var
-  BookMark: TFileTreeNode;
-  i: integer;
 begin
   ExpandNode(tvBookMark.Selected);
+end;
+
+procedure TfMain.SelectSubDir(Subdir: string);
+var
+  i: integer;
+begin
+  for i := 0  to tvBookMark.Selected.Count -1 do
+    begin
+      if TFileTreeNode(tvBookMark.Selected.Items[i]).FullPath = Subdir then
+        begin
+          tvBookMark.Select(tvBookMark.Selected.Items[i]);
+          ExpandNode(tvBookMark.Selected);
+        end;
+    end;
 
 end;
+
 
 procedure TfMain.ExpandNode(Node: TTreeNode);
 Var
@@ -962,9 +979,9 @@ begin
 end;
 
 procedure TfMain.tvBookMarkExpanding(Sender: TObject; Node: TTreeNode;
-var
-  AllowExpansion: Boolean);
+  var AllowExpansion: Boolean);
 begin
+  tvBookMark.Select(Node);
   ExpandNode(Node);
 
 end;

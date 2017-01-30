@@ -33,7 +33,6 @@ object fMain: TfMain
       DefaultItemHeight = 18
       ExpandSignType = tvestPlusMinus
       Images = ImageList_22x22
-      MultiSelect = True
       PopupMenu = pmBookmark
       ReadOnly = True
       RightClickSelect = True
@@ -43,7 +42,7 @@ object fMain: TfMain
       OnClick = tvBookMarkClick
       OnCreateNodeClass = tvBookMarkCreateNodeClass
       OnExpanding = tvBookMarkExpanding
-      Options = [tvoAllowMultiselect, tvoAutoItemHeight, tvoHideSelection, tvoKeepCollapsedNodes, tvoReadOnly, tvoRightClickSelect, tvoRowSelect, tvoShowButtons, tvoShowLines, tvoShowRoot, tvoToolTips, tvoThemedDraw]
+      Options = [tvoAutoItemHeight, tvoHideSelection, tvoKeepCollapsedNodes, tvoReadOnly, tvoRightClickSelect, tvoRowSelect, tvoShowButtons, tvoShowLines, tvoShowRoot, tvoToolTips, tvoThemedDraw]
       Items.Data = {
         F9FFFFFF020001000000080000000800000008000000FFFFFFFF000000000000
         00000009000000426F6F6B4D61726B73
@@ -379,6 +378,7 @@ object fMain: TfMain
       Hint = 'Refresh view'
       ImageIndex = 58
       OnExecute = actRefreshExecute
+      ShortCut = 116
     end
     object actAdd: TAction
       Category = 'FileAction'
