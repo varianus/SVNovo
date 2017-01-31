@@ -50,6 +50,7 @@ type
     actAnnotate: TAction;
     actDiff: TAction;
     actDiffBASE: TAction;
+    actUpgrade: TAction;
     actMarkResolved: TAction;
     actLog: TAction;
     actRevert: TAction;
@@ -77,6 +78,7 @@ type
     MenuItem18: TMenuItem;
     MenuItem19: TMenuItem;
     MenuItem20: TMenuItem;
+    MenuItem21: TMenuItem;
     mnuPreferences: TMenuItem;
     mnuView: TMenuItem;
     MenuItem2: TMenuItem;
@@ -135,6 +137,7 @@ type
     procedure actShowUnmodifiedExecute(Sender: TObject);
     procedure actShowUnversionedExecute(Sender: TObject);
     procedure actUpdateExecute(Sender: TObject);
+    procedure actUpgradeExecute(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure FormShow(Sender: TObject);
@@ -462,6 +465,12 @@ begin
 
 end;
 
+procedure TfMain.actUpgradeExecute(Sender: TObject);
+begin
+  SVNClient.Upgrade;
+  actRefresh.Execute;
+end;
+
 procedure TfMain.actCommitExecute(Sender: TObject);
 var
   Cmt: TfCommit;
@@ -612,6 +621,7 @@ end;
 procedure TfMain.actCleanupExecute(Sender: TObject);
 begin
   SVNClient.CleanUp;
+  actRefresh.Execute;
 end;
 
 

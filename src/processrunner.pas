@@ -291,13 +291,17 @@ end;
 function TProcessRunner.ExecuteReturnXml: TXMLDocument;
 var
   AProcess: TProcessUTF8;
-  M: TMemoryStream;
-  n, BytesRead: Integer;
+  MemOut, MemErr: TMemoryStream;
+  no, ne: integer;
+  BytesReadOut, BytesReadErr: Integer;
+  st: TStringList;
+
 begin
+  Result := nil;
   AProcess := TProcessUTF8.Create(nil);
   AProcess.Executable := FExecutable;
   AProcess.Parameters.Assign(FParams);
-  AProcess.Options := AProcess.Options + [poUsePipes, poStdErrToOutput];
+  AProcess.Options := AProcess.Options + [poUsePipes];
   AProcess.ShowWindow := swoHIDE;
   AProcess.ShowWindow := swoHIDE;
   if Assigned(FOnRunnerMessage) then
@@ -305,47 +309,56 @@ begin
 
   AProcess.Execute;
 
-  M := TMemoryStream.Create;
-  BytesRead := 0;
+  MemOut := TMemoryStream.Create;
+  BytesReadOut := 0;
+
+  MemErr := TMemoryStream.Create;
+  BytesReadErr := 0;
 
   while AProcess.Running do
   begin
-    // make sure we have room
-    M.SetSize(BytesRead + READ_BYTES);
-
-    // try reading it
-    n := AProcess.Output.Read((M.Memory + BytesRead)^, READ_BYTES);
-    if n > 0
-    then begin
-      Inc(BytesRead, n);
-    end
-    else begin
-      // no data, wait 100 ms
-      Sleep(100);
-    end;
+    MemOut.SetSize(BytesReadOut + READ_BYTES);     // make sure we have room
+    no := AProcess.Output.Read((MemOut.Memory + BytesReadOut)^, READ_BYTES);     // try reading it
+    if no > 0  then
+      Inc(BytesReadOut, no)
+    else
+      Sleep(100);       // no data, wait 100 ms
   end;
 
   // read last part
   repeat
-    // make sure we have room
-    M.SetSize(BytesRead + READ_BYTES);
+    MemOut.SetSize(BytesReadOut + READ_BYTES);
+    no := AProcess.Output.Read((MemOut.Memory + BytesReadOut)^, READ_BYTES);
+    if no > 0 then
+      Inc(BytesReadOut, no);
 
-    // try reading it
-    n := AProcess.Output.Read((M.Memory + BytesRead)^, READ_BYTES);
-    if n > 0
-    then begin
-      Inc(BytesRead, n);
+    MemErr.SetSize(BytesReadOut + READ_BYTES);
+    ne := AProcess.Stderr.Read((MemErr.Memory + BytesReadErr)^, READ_BYTES);
+    if ne > 0 then
+      Inc(BytesReadErr, ne);
+  until (no <= 0) and (ne <= 0);
+
+  MemOut.SetSize(BytesReadOut);
+  MemErr.SetSize(BytesReadErr);
+
+  if BytesReadErr > 0 then
+    begin
+      st:= TstringList.Create;
+      st.LoadFromStream(MemErr);
+      for ne:= 0 to st.Count -1 do
+        if Assigned(FOnRunnerMessage) then
+          FOnRunnerMessage(Self, ieError, St[ne]);
+      st.free;
+    end
+  else
+    try
+      ReadXMLFile(Result, MemOut);
+    Except
+      Result.free;
     end;
-  until n <= 0;
-  M.SetSize(BytesRead);
-  try
-    ReadXMLFile(Result, M);
-  Except
-    Result.free;
-    Result := nil;
-  end;
 
-  M.Free;
+  MemOut.Free;
+  MemErr.Free;
   AProcess.Free;
 
 

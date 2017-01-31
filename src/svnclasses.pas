@@ -138,6 +138,7 @@ type
     function Log(FileName: TFileName): TSVNLogList;
     function Annotate(FileName: TFileName): TSVNAnnotateList;
     procedure CleanUp;
+    procedure Upgrade;
 
     //
     // Support funcs
@@ -398,6 +399,7 @@ var
   RegExp: TRegExpr;
   Item: TSVNAnnotateItem;
   i: integer;
+  nItem: Integer;
 begin
   BeginProcess;
   Result := TSVNAnnotateList.Create(True);
@@ -417,13 +419,19 @@ begin
         begin
           RegExp.Exec(Res[i]);
           Item:= TSVNAnnotateItem.Create;
-          item.LineNo:= i;
+          item.LineNo:= i + 1;
           item.Revision:= StrToInt64Def(RegExp.Match[1], 0);
           item.Author:= RegExp.Match[2];
-
           item.DateSVN:= ISO8601ToDateTime(RegExp.Match[3]);
           item.Line:= RegExp.Match[4];
-          Result.Add(Item);
+          nItem := Result.Add(Item);
+          If nItem = 0 then
+             Item.Group:= 1
+          else
+             if Result.Items[nItem-1].Revision = Item.Revision then
+               Item.Group:= Result.Items[nItem-1].Group
+             else
+               Item.Group:= Result.Items[nItem-1].Group xor 1;
         end;
     finally
       Res.Free;
@@ -705,6 +713,19 @@ begin
   try
     Runner.Params.Clear;
     Runner.Params.AddStrings(['cleanup','--non-interactive', '--trust-server-cert']);
+    Runner.Execute;
+
+  finally
+    EndProcess;
+  end;
+end;
+
+procedure TSVNClient.Upgrade;
+begin
+  BeginProcess;
+  try
+    Runner.Params.Clear;
+    Runner.Params.AddStrings(['upgrade','--non-interactive']);
     Runner.Execute;
 
   finally

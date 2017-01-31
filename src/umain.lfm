@@ -297,6 +297,9 @@ object fMain: TfMain
       object MenuItem5: TMenuItem
         Action = actCleanup
       end
+      object MenuItem21: TMenuItem
+        Action = actUpgrade
+      end
     end
     object MenuItem2: TMenuItem
       Caption = 'Help'
@@ -460,6 +463,11 @@ object fMain: TfMain
       Hint = 'Diff to BASE'
       OnExecute = actDiffBASEExecute
       ShortCut = 16450
+    end
+    object actUpgrade: TAction
+      Category = 'Tools'
+      Caption = 'Upgrade'
+      OnExecute = actUpgradeExecute
     end
   end
   object ImageList_22x22: TImageList

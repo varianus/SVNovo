@@ -106,6 +106,7 @@ Type
   TSVNAnnotateItem = class (TSVNSimpleItem)
     LineNo: integer;
     Line: string;
+    Group: integer;
   end;
 
   TSVNAnnotateList = class (specialize TObjectList<TSVNAnnotateItem>)
