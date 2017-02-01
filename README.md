@@ -1,4 +1,5 @@
-# [SVNovo](http://https://github.com/varianus/SVNovo) 
+# [SVNovo](http://https://github.com/varianus/SVNovo) <img src="https://github.com/varianus/SVNovo/raw/master/images/logo_svnovo.png" width="64">
+
 [![Development 0.0.1](https://img.shields.io/badge/development-0.0.1-red.svg?style=flat)](https://github.com/varianus/SVNovo)
 
 **ATTENTION: Very alpha source code!**
