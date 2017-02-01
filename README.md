@@ -30,6 +30,7 @@ When ready it will be available at least for Windows and Linux. Sorry but I don'
  - lock/unlock
  - branch/tags
  - copy/move
+ - create patch
  - ... and other cool features
 
 ### License
