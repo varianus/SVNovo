@@ -2,6 +2,7 @@
 [![Development 0.0.1](https://img.shields.io/badge/development-0.0.1-red.svg?style=flat)](https://github.com/varianus/SVNovo)
 
 **ATTENTION: Very alpha source code!**
+
 ## SVNovo is a free multiplatform GUI for SVN client 
 
 SVNovo aims to a simple but complete SVN GUI client. It's based on the user experience of [RapidSVN](http://rapidsvn.org/).
@@ -10,6 +11,7 @@ It's developed in [FreePascal](http://freepascal.org/) using [Lazarus](http://ww
 When ready it will be available at least for Windows and Linux. Sorry but I don't own a Mac, although a porting should be very easy...
 
 ### Feature Status
+
 #### Already implemented:
  - status
  - update
