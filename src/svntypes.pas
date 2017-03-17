@@ -31,7 +31,8 @@ Const
    REV_HEAD = 'HEAD';
 
 Type
-  TSortDirection  = (sdAscending=1, sdDescending=-1);
+//  TSortDirection  = (sdAscending=1, sdDescending=-1);
+  TSortDirection  = (sdAscending, sdDescending);
 
   TStatusItemName = (siChecked, siName, siPath, siExtension, siPropStatus, siItemStatus,
                      siRevision, siCommitRevision, siAuthor, siDateSVN, siDateModified);
@@ -130,6 +131,7 @@ Type
     function SortPropStatus(constref Item1, Item2: TSVNItem): Integer;
     function SortSelected(constref Item1, Item2: TSVNItem): Integer;
   public
+    constructor Create(AOwnsObjects: Boolean = True); overload;
     function LocateByPath(FullPath: string): TSVNItem;
     procedure Sort(ASortItem: TStatusItemName; ADirection: TSortDirection);  overload;
     procedure Sort;  overload;
@@ -169,7 +171,9 @@ begin
    Result := -CompareBoolean(Item1.IsFolder, Item2.IsFolder);
    if Result <> 0 then exit;
 
-   Result := CompareText(Item1.Path, Item2.Path) * longint(SortDirection);
+   Result := CompareText(Item1.Path, Item2.Path);
+   if SortDirection = sdDescending then
+     Result *= -1;
 end;
 
 function TSVNStatusList.SortName(constref Item1, Item2: TSVNItem): Integer;
@@ -177,7 +181,9 @@ begin
   Result := -CompareBoolean(Item1.IsFolder, Item2.IsFolder);
   if Result <> 0 then exit;
 
-  Result := CompareText(Item1.Name, Item2.Name) * longint(SortDirection);
+  Result := CompareText(Item1.Name, Item2.Name);
+  if SortDirection = sdDescending then
+    Result *= -1;
 
 end;
 
@@ -195,12 +201,21 @@ begin
       Result := -1;
 end;
 
+constructor TSVNStatusList.Create(AOwnsObjects: Boolean);
+begin
+  inherited Create(AOwnsObjects);
+  SortDirection:=sdAscending;
+end;
+
 function TSVNStatusList.SortExtension(constref Item1, Item2: TSVNItem): Integer;
 begin
   Result := -CompareBoolean(Item1.IsFolder, Item2.IsFolder);
   if Result <> 0 then exit;
 
-  Result := CompareText(Item1.Extension, Item2.Extension) * longint(SortDirection);
+  Result := CompareText(Item1.Extension, Item2.Extension);
+  if SortDirection = sdDescending then
+    Result *= -1;
+
 end;
 
 function TSVNStatusList.SortItemStatus(constref Item1, Item2: TSVNItem): Integer;
@@ -214,7 +229,10 @@ begin
   Result := -CompareBoolean(Item1.IsFolder, Item2.IsFolder);
   if Result <> 0 then exit;
 
-  Result := CompareText(Item1.PropStatus, Item2.PropStatus) * longint(SortDirection);
+  Result := CompareText(Item1.PropStatus, Item2.PropStatus);
+  if SortDirection = sdDescending then
+    Result *= -1;
+
 end;
 
 
@@ -223,7 +241,10 @@ begin
   Result := -CompareBoolean(Item1.IsFolder, Item2.IsFolder);
   if Result <> 0 then exit;
 
-  Result := CompareText(Item1.Author, Item2.Author) * longint(SortDirection);
+  Result := CompareText(Item1.Author, Item2.Author);
+  if SortDirection = sdDescending then
+    Result *= -1;
+
 end;
 
 function TSVNStatusList.SortPropertyRevision(constref Item1, Item2: TSVNItem): Integer;
@@ -231,7 +252,10 @@ begin
   Result := -CompareBoolean(Item1.IsFolder, Item2.IsFolder);
   if Result <> 0 then exit;
 
-  Result := CompareValue(Item1.Revision, Item2.Revision) * longint(SortDirection);
+  Result := CompareValue(Item1.Revision, Item2.Revision);
+  if SortDirection = sdDescending then
+    Result *= -1;
+
 end;
 
 function TSVNStatusList.SortPropertyCommitRevision(constref Item1, Item2: TSVNItem): Integer;
@@ -239,7 +263,10 @@ begin
   Result := -CompareBoolean(Item1.IsFolder, Item2.IsFolder);
   if Result <> 0 then exit;
 
-  Result := CompareValue(Item1.CommitRevision, Item2.CommitRevision) * longint(SortDirection);
+  Result := CompareValue(Item1.CommitRevision, Item2.CommitRevision);
+  if SortDirection = sdDescending then
+    Result *= -1;
+
 end;
 
 function TSVNStatusList.SortPropertyDateSVN(constref Item1, Item2: TSVNItem): Integer;
@@ -247,7 +274,10 @@ begin
   Result := -CompareBoolean(Item1.IsFolder, Item2.IsFolder);
   if Result <> 0 then exit;
 
-  Result := CompareValue(Item1.DateSVN, Item2.DateSVN)  * longint(SortDirection);
+  Result := CompareValue(Item1.DateSVN, Item2.DateSVN);
+  if SortDirection = sdDescending then
+    Result *= -1;
+
 end;
 
 function TSVNStatusList.SortPropertyDateModified(constref Item1,
@@ -256,15 +286,18 @@ begin
   Result := -CompareBoolean(Item1.IsFolder, Item2.IsFolder);
   if Result <> 0 then exit;
 
-  Result := CompareValue(Item1.DateModified, Item2.DateModified)  * longint(SortDirection);
+  Result := CompareValue(Item1.DateModified, Item2.DateModified);
+  if SortDirection = sdDescending then
+    Result *= -1;
+
 
 end;
 
 function TSVNStatusList.LocateByPath(FullPath: string): TSVNItem;
 begin
-  for result in self do
+  for  result in self do
     begin
-       if Result.Path = FullPath then
+       if SameText(Result.Path,FullPath) then
          exit;
     end;
   Result:= nil;
