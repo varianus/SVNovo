@@ -184,6 +184,9 @@ uses LazFileUtils, LCLProc, AsyncProcess, Config, FilesSupport, uabout,
   formupdate, formcommit, formconfig, formaddrepository, formannotate, formdiff,
   strutils;
 {$R *.lfm}
+type
+  TEnumStatus =  specialize TEnum<TStatusItemName>;
+  TEnumSort =  specialize TEnum<TSortDirection>;
 
 { TfMain }
 
@@ -302,8 +305,8 @@ begin
   actShowModified.Checked := ConfigObj.ReadBoolean('Filter/ShowModified', True);
   actShowConflict.Checked := ConfigObj.ReadBoolean('Filter/ShowConflict', True);
 
-  SavedSortItem:= specialize TEnum<TStatusItemName>.FromString(ConfigObj.ReadString('Filter/SortItem',''), siPath);
-  SavedSortDirection:= specialize TEnum<TSortDirection>.FromString(ConfigObj.ReadString('Filter/SortDirection',''), sdAscending);
+  SavedSortItem:= TEnumStatus.FromString(ConfigObj.ReadString('Filter/SortItem',''), siPath);
+  SavedSortDirection:= TEnumSort.FromString(ConfigObj.ReadString('Filter/SortDirection',''), sdAscending);
 
   UpdateFilter(False);
 end;
@@ -324,8 +327,8 @@ begin
   ConfigObj.WriteBoolean('Filter/ShowModified', actShowModified.Checked);
   ConfigObj.WriteBoolean('Filter/ShowConflict', actShowConflict.Checked);
 
-  ConfigObj.WriteString('Filter/SortItem', specialize TEnum<TStatusItemName>.ToString(SVNClient.List.SortItem));
-  ConfigObj.WriteString('Filter/SortDirection', specialize TEnum<TSortDirection>.ToString(SVNClient.List.SortDirection));
+  ConfigObj.WriteString('Filter/SortItem', TEnumStatus.ToString(SVNClient.List.SortItem));
+  ConfigObj.WriteString('Filter/SortDirection', TEnumSort.ToString(SVNClient.List.SortDirection));
 
   BookMark := TFileTreeNode(tvBookMark.Selected);
   if Assigned(BookMark) then
