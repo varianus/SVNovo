@@ -203,6 +203,7 @@ var
   i: integer;
   Str: string;
   sts: TSVNItemStatus;
+  FName: string;
 begin
 
   if not Assigned(FOnSVNMessage)   then
@@ -225,7 +226,11 @@ begin
 
     begin
       if sts <> sisNone then
-        FOnSVNMessage(Self, MessageKind, format('%s %s',[ItemStatusToStatus(sts),str]))
+        begin
+           FName:=Copy(Message, 6, Length(message));
+           FOnSVNMessage(Self, MessageKind, format('%s %s',[ItemStatusToStatus(sts),fname]))
+
+        end
       else
         FOnSVNMessage(Self, MessageKind, format('%s %s',[ItemStatusToStatus(sts),Message]));
     end;
@@ -494,7 +499,7 @@ begin
     repeat
       SubNode := Node;
       Path := UTF8Encode(SubNode.Attributes.Item[0].NodeValue);
-  //    debugln('TSVNStatus.Create ' + Path);
+//      debugln('TSVNStatus.Create ' + Path);
       F:=FileGetAttr(Path);
       If (F<>-1) {and ((F and faDirectory)=0)} then
       begin
