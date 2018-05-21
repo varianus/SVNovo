@@ -19,13 +19,12 @@
 }
 unit SVNTypes;
 
-{$mode objfpc}{$H+}
+{$mode delphi}{$H+}
 
 interface
 
 uses
   Classes, SysUtils, Generics.Defaults,  Generics.Collections;
-
 Const
    REV_BASE = 'BASE';
    REV_HEAD = 'HEAD';
@@ -87,7 +86,7 @@ Type
     FileName: String;
   end;
 
-  TAffectedFiles = class(specialize TObjectList<TAffectedFile>)
+  TAffectedFiles = class(TObjectList<TAffectedFile>)
   end;
 
   { TSVNLogItem }
@@ -100,7 +99,7 @@ Type
   end;
 
 
-  TSVNLogList = class (specialize TObjectList<TSVNLogItem>)
+  TSVNLogList = class (TObjectList<TSVNLogItem>)
   end;
 
 
@@ -110,12 +109,12 @@ Type
     Group: integer;
   end;
 
-  TSVNAnnotateList = class (specialize TObjectList<TSVNAnnotateItem>)
+  TSVNAnnotateList = class (TObjectList<TSVNAnnotateItem>)
   end;
 
   { TSVNStatusList }
 
-  TSVNStatusList = class (specialize TObjectList<TSVNItem>)
+  TSVNStatusList = class (TObjectList<TSVNItem>)
   private
     FSortDirection: TSortDirection;
     FSortItem: TStatusItemName;
@@ -309,17 +308,17 @@ begin
   SortItem := ASortItem;
 
   case ASortItem of
-      siChecked:        Sort(specialize TComparer<TSVNItem>.Construct(@SortSelected));
-      siName:           Sort(specialize TComparer<TSVNItem>.Construct(@SortName));
-      siPath:           Sort(specialize TComparer<TSVNItem>.Construct(@SortPath));
-      siExtension:      Sort(specialize TComparer<TSVNItem>.Construct(@SortExtension));
-      siItemStatus:     Sort(specialize TComparer<TSVNItem>.Construct(@SortItemStatus));
-      siPropStatus:     Sort(specialize TComparer<TSVNItem>.Construct(@SortPropStatus));
-      siAuthor:         Sort(specialize TComparer<TSVNItem>.Construct(@SortPropertyAuthor));
-      siRevision:       Sort(specialize TComparer<TSVNItem>.Construct(@SortPropertyRevision));
-      siCommitRevision: Sort(specialize TComparer<TSVNItem>.Construct(@SortPropertyCommitRevision));
-      siDateSVN:        Sort(specialize TComparer<TSVNItem>.Construct(@SortPropertyDateSVN));
-      siDateModified:   Sort(specialize TComparer<TSVNItem>.Construct(@SortPropertyDateModified));
+      siChecked:        Sort(TComparer<TSVNItem>.Construct(SortSelected));
+      siName:           Sort(TComparer<TSVNItem>.Construct(SortName));
+      siPath:           Sort(TComparer<TSVNItem>.Construct(SortPath));
+      siExtension:      Sort(TComparer<TSVNItem>.Construct(SortExtension));
+      siItemStatus:     Sort(TComparer<TSVNItem>.Construct(SortItemStatus));
+      siPropStatus:     Sort(TComparer<TSVNItem>.Construct(SortPropStatus));
+      siAuthor:         Sort(TComparer<TSVNItem>.Construct(SortPropertyAuthor));
+      siRevision:       Sort(TComparer<TSVNItem>.Construct(SortPropertyRevision));
+      siCommitRevision: Sort(TComparer<TSVNItem>.Construct(SortPropertyCommitRevision));
+      siDateSVN:        Sort(TComparer<TSVNItem>.Construct(SortPropertyDateSVN));
+      siDateModified:   Sort(TComparer<TSVNItem>.Construct(SortPropertyDateModified));
     end;
 end;
 
