@@ -8,12 +8,10 @@ object fAnnotate: TfAnnotate
   ClientHeight = 491
   ClientWidth = 897
   Menu = MainMenu1
-  LCLVersion = '1.7'
-  Visible = False
   object ButtonPanel1: TButtonPanel
     Left = 6
-    Height = 34
-    Top = 431
+    Height = 33
+    Top = 452
     Width = 885
     OKButton.Name = 'OKButton'
     OKButton.DefaultCaption = True
@@ -28,12 +26,13 @@ object fAnnotate: TfAnnotate
   end
   object sgAnnotate: TStringGrid
     Left = 0
-    Height = 425
+    Height = 446
     Top = 0
     Width = 897
     Align = alClient
     AutoEdit = False
     AutoFillColumns = True
+    ColCount = 6
     Columns = <    
       item
         Alignment = taRightJustify
@@ -76,22 +75,29 @@ object fAnnotate: TfAnnotate
         Font.Pitch = fpFixed
         ReadOnly = True
         Title.Caption = 'Code'
-        Width = 573
+        Width = 556
+      end    
+      item
+        Title.Caption = 'Title'
+        Width = 0
+        Visible = False
       end>
     DefaultColWidth = 40
     FixedCols = 0
     Font.Pitch = fpFixed
     MouseWheelOption = mwGrid
-    Options = [goFixedVertLine, goFixedHorzLine, goVertLine, goRangeSelect, goColSizing, goSmoothScroll]
+    Options = [goFixedVertLine, goFixedHorzLine, goVertLine, goRangeSelect, goColSizing, goSmoothScroll, goRowHighlight]
     ParentFont = False
     TabOrder = 1
     TitleFont.Pitch = fpFixed
+    OnPrepareCanvas = sgAnnotatePrepareCanvas
     ColWidths = (
       60
       60
       100
       100
-      573
+      556
+      0
     )
   end
   object MainMenu1: TMainMenu

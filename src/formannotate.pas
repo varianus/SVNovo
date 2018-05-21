@@ -6,7 +6,7 @@ interface
 
 uses
   Classes, SysUtils, FileUtil, Forms, Controls, Graphics, Dialogs, ButtonPanel,
-  Grids, Menus, SVNTypes;
+  Grids, Menus, SVNTypes, Types;
 
 type
 
@@ -23,6 +23,8 @@ type
     procedure FindDialog1Find(Sender: TObject);
     procedure MenuItem2Click(Sender: TObject);
     procedure MenuItem3Click(Sender: TObject);
+    procedure sgAnnotatePrepareCanvas(sender: TObject; aCol, aRow: Integer;
+      aState: TGridDrawState);
   private
     FList: TSVNAnnotateList;
     procedure SetList(AValue: TSVNAnnotateList);
@@ -103,9 +105,6 @@ begin
           if FindInLine(i) then
             exit;
     end;
-
-
-
 end;
 
 procedure TfAnnotate.MenuItem3Click(Sender: TObject);
@@ -114,6 +113,18 @@ begin
     finddialog1.Execute
   else
     FindDialog1Find(finddialog1); //next scan
+end;
+
+procedure TfAnnotate.sgAnnotatePrepareCanvas(sender: TObject; aCol,
+  aRow: Integer; aState: TGridDrawState);
+begin
+  if aRow = 0 then exit;
+
+  if sgAnnotate.Cells[5,aRow] = '1' then
+    sgAnnotate.Canvas.Brush.Color:= clwhite
+  else
+    sgAnnotate.Canvas.Brush.Color:= clLtGray;
+
 end;
 
 procedure TfAnnotate.SetList(AValue: TSVNAnnotateList);
@@ -135,11 +146,12 @@ begin
   for i := 0 to FList.Count -1 do
     begin
       item := FList[i];
-      sgAnnotate.Cells[0,i] := Inttostr(Item.LineNo);
-      sgAnnotate.Cells[1,i] := ifthen(Item.revision > 0, Inttostr(Item.Revision), ' - ');
-      sgAnnotate.Cells[2,i] := Item.Author;
-      sgAnnotate.Cells[3,i] := ifthen(item.DateSVN > 0, datetostr(item.DateSVN), ' - ');
-      sgAnnotate.Cells[4,i] := Item.Line;
+      sgAnnotate.Cells[0,i+1] := Inttostr(Item.LineNo);
+      sgAnnotate.Cells[1,i+1] := ifthen(Item.revision > 0, Inttostr(Item.Revision), ' - ');
+      sgAnnotate.Cells[2,i+1] := Item.Author;
+      sgAnnotate.Cells[3,i+1] := ifthen(item.DateSVN > 0, datetostr(item.DateSVN), ' - ');
+      sgAnnotate.Cells[4,i+1] := Item.Line;
+      sgAnnotate.Cells[5,i+1] := IntToStr(Item.Group);
     end;
 end;
 
